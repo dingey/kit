@@ -17,12 +17,12 @@ public class FilterUtil {
 	public static <T> List<T> andSetTogether(List<T> list1, List<T> list2, String key) {
 		List<T> tmps = new ArrayList<>();
 		for (T t1 : list1) {
+			Object v1 = ClassUtil.getFieldValueByGetMethod(key, t1);
 			for (T t2 : list2) {
-				Object v1 = ClassUtil.getFieldValueByGetMethod(key, t1);
 				Object v2 = ClassUtil.getFieldValueByGetMethod(key, t2);
 				if (v1.equals(v2)) {
 					tmps.add(t1);
-					continue;
+					break;
 				}
 			}
 		}
@@ -39,12 +39,12 @@ public class FilterUtil {
 		List<T> tmps = new ArrayList<>();
 		for (T t1 : list1) {
 			boolean b=false;
+			Object v1 = ClassUtil.getFieldValueByGetMethod(key, t1);
 			for (T t2 : list2) {
-				Object v1 = ClassUtil.getFieldValueByGetMethod(key, t1);
 				Object v2 = ClassUtil.getFieldValueByGetMethod(key, t2);
 				b=v1.equals(v2);
 				if (b) {
-					continue;
+					break;
 				}
 			}
 			if(b){
