@@ -1,5 +1,8 @@
 package com.kit.test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 import com.di.kit.JsonUtil;
@@ -20,5 +23,9 @@ public class JsonTest {
 		XmlUtil.createFromXml(xml, "com.kit.test");
 		Root rx = XmlUtil.toObject(xml, Root.class);
 		System.out.println(rx.getAnimals().getCat().getName());
+		List<Root> roots=new ArrayList<>();
+		roots.add(rx);
+		roots.add(rx);
+		System.out.println(JsonUtil.toJson(roots));
 	}
 }

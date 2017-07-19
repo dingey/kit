@@ -5,6 +5,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -202,6 +203,20 @@ public class JsonUtil {
 				}
 				s = new StringBuilder(s.toString().substring(0, s.length() - 1));
 				s.append("}");
+				return s.toString();
+			}else if(o.getClass() == java.util.Collection.class || o.getClass() == java.util.List.class
+					|| o.getClass() == java.util.ArrayList.class){
+				Collection<?> con=(Collection<?>) o; 
+				s=new StringBuilder("[");
+				if(con.size()>1){
+					for(int i=0;i<con.size()-1;i++){
+						s.append(toJson(con.toArray()[i])).append(",");
+					}
+					s.append(toJson(con.toArray()[con.size()-1]));
+				}else if(con.size()==1){
+					s.append(toJson(con.toArray()[0]));
+				}
+				s.append("]");
 				return s.toString();
 			}
 			Field[] fs = o.getClass().getDeclaredFields();
