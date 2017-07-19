@@ -31,12 +31,12 @@ public class ClassCreate {
 			name = m.get("element name").toString();
 		}
 		s.add("@Alias(\"").add(name).add("\")").newLine();
-		name = StringUtil.trimUnderlinedFirstCharUpper(name);
+		name = StringUtil.underlineToLowerCamelCase(name);
 		s.add("public static class ").add(StringUtil.firstCharUpper(name)).line(" {");
 		Str innerClass = new Str();
 		Str getset = new Str();
 		for (Object k : m.keySet()) {
-			String k0 = StringUtil.trimUnderlinedFirstCharUpper(k.toString());
+			String k0 = StringUtil.underlineToLowerCamelCase(k.toString());
 			Object v = m.get(k);
 			if (v == null || "element name".equals(k) || v.toString().isEmpty() || k0.isEmpty()) {
 				continue;

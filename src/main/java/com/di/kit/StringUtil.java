@@ -20,7 +20,7 @@ public class StringUtil {
 		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
 
-	public static String trimUnderlinedFirstCharUpper(String s) {
+	public static String underlineToLowerCamelCase(String s) {
 		if (s.indexOf("_") != -1) {
 			String[] ss = s.split("_");
 			StringBuilder sb = new StringBuilder(ss[0]);
@@ -33,6 +33,25 @@ public class StringUtil {
 		} else {
 			return s;
 		}
+	}
+
+	public static String underlineToUpperCamelCase(String s) {
+		return firstCharUpper(underlineToLowerCamelCase(s));
+	}
+
+	public static String camelCaseToUnderline(String s) {
+		StringBuilder sb = new StringBuilder();
+		if (s.toCharArray().length > 1) {
+			sb.append(Character.toLowerCase(s.toCharArray()[0]));
+			for (int i = 1; i < s.toCharArray().length; i++) {
+				if (Character.isUpperCase(s.toCharArray()[i])) {
+					sb.append("_").append(Character.toLowerCase(s.toCharArray()[i]));
+				} else {
+					sb.append(s.toCharArray()[i]);
+				}
+			}
+		}
+		return sb.toString();
 	}
 
 	public static boolean isBlank(Object... objects) {

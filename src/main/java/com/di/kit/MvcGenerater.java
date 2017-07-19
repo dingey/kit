@@ -183,7 +183,7 @@ public class MvcGenerater {
 		this.entityPackage = entityPackage;
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.trimUnderlinedFirstCharUpper(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(t.getName());
 			className = StringUtil.firstCharUpper(className);
 			s.add("package ").add(entityPackage).line(";").newLine();
 			if (entityBaseClass == null) {
@@ -197,7 +197,7 @@ public class MvcGenerater {
 						s.line("    /**").add("	 * ").line(c1.getRemark()).line("	 */");
 					}
 					s.add("    private ").add(c1.getType().getJava()).add(" ");
-					s.add(StringUtil.firstCharLower(StringUtil.trimUnderlinedFirstCharUpper(c1.getName()))).line(";");
+					s.add(StringUtil.firstCharLower(StringUtil.underlineToLowerCamelCase(c1.getName()))).line(";");
 				}
 			} else {
 				s.add("import ").add(entityBaseClass.getName()).line(";");
@@ -207,7 +207,7 @@ public class MvcGenerater {
 				s.add("public class ").add(className).add(" extends ").add(entityBaseClass.getSimpleName()).line(" {");
 				s.add("	private static final long serialVersionUID = ").add(IdWorker.nextId()).line("L;");
 				for (Column c1 : t.getAllColumns()) {
-					String fn = StringUtil.firstCharLower(StringUtil.trimUnderlinedFirstCharUpper(c1.getName()));
+					String fn = StringUtil.firstCharLower(StringUtil.underlineToLowerCamelCase(c1.getName()));
 					if (!contain(entityBaseClass, fn)) {
 						if (!c1.getRemark().isEmpty()) {
 							s.line("    /**").add("	 * ").line(c1.getRemark()).line("	 */");
@@ -240,7 +240,7 @@ public class MvcGenerater {
 	public MvcGenerater createXml(String xmlPath) {
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.trimUnderlinedFirstCharUpper(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(t.getName());
 			className = StringUtil.firstCharUpper(className);
 			s.line("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 			s.line("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\" >");
@@ -248,7 +248,7 @@ public class MvcGenerater {
 			s.add("	<insert id=\"insert\"");
 			if(persistence.isUseGeneratedKeys()){
 				s.add(" useGeneratedKeys=\"true\" keyProperty=\"").
-				add(StringUtil.firstCharLower(StringUtil.trimUnderlinedFirstCharUpper(t.getPrimaryKeys().get(0).getName()))).add("\"");
+				add(StringUtil.firstCharLower(StringUtil.underlineToLowerCamelCase(t.getPrimaryKeys().get(0).getName()))).add("\"");
 			}
 			s.line(">");
 			s.add("		insert into `").add(t.getName()).line("` (");
@@ -258,7 +258,7 @@ public class MvcGenerater {
 			s.deleteLastChar();
 			s.line("		)values (");
 			for (Column c : t.getAllColumns()) {
-				String s0 = StringUtil.firstCharLower(StringUtil.trimUnderlinedFirstCharUpper(c.getName()));
+				String s0 = StringUtil.firstCharLower(StringUtil.underlineToLowerCamelCase(c.getName()));
 				s.add("		#{").add(s0).add("},").newLine();
 			}
 			s.deleteLastChar();
@@ -266,7 +266,7 @@ public class MvcGenerater {
 			s.line("    <update id=\"update\">");
 			s.add("		update `").add(t.getName()).line("` set ");
 			for (Column c : t.getColumns()) {
-				String s0 = StringUtil.firstCharLower(StringUtil.trimUnderlinedFirstCharUpper(c.getName()));
+				String s0 = StringUtil.firstCharLower(StringUtil.underlineToLowerCamelCase(c.getName()));
 				s.add("		`").add(c.getName()).add("` = #{").add(s0).add("},").newLine();
 			}
 			s.deleteLastChar();
@@ -292,7 +292,7 @@ public class MvcGenerater {
 		this.mapperPackage = mapperPackage;
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.trimUnderlinedFirstCharUpper(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(t.getName());
 			className = StringUtil.firstCharUpper(className);
 			s.add("package ").add(mapperPackage).line(";").newLine();
 			if (mapperBaseClass != null) {
@@ -316,7 +316,7 @@ public class MvcGenerater {
 		this.servicePackage = servicePackage;
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.trimUnderlinedFirstCharUpper(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(t.getName());
 			className = StringUtil.firstCharUpper(className);
 			s.add("package ").add(servicePackage).line(";").newLine();
 			if (serviceBaseClass != null) {
@@ -341,7 +341,7 @@ public class MvcGenerater {
 		this.controlPackage = controlPackage;
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.trimUnderlinedFirstCharUpper(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(t.getName());
 			className = StringUtil.firstCharUpper(className);
 			s.add("package ").add(controlPackage).line(";").newLine();
 			if (controlBaseClass != null) {
@@ -365,7 +365,7 @@ public class MvcGenerater {
 	public MvcGenerater createView(String viewPath) {
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.trimUnderlinedFirstCharUpper(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(t.getName());
 			// list
 			s.line("<div class=\"container-fluid\">");
 			s.line("    <div class=\"row\">");
@@ -397,7 +397,7 @@ public class MvcGenerater {
 			s.line("                    <#list pageInfo.list as p>");
 			s.line("                    <tr>");
 			for (Column c : t.getAllColumns()) {
-				String cn = StringUtil.firstCharLower(StringUtil.trimUnderlinedFirstCharUpper(c.getName()));
+				String cn = StringUtil.firstCharLower(StringUtil.underlineToLowerCamelCase(c.getName()));
 				if (c.getType().getJava().equals("java.util.Date")) {
 					s.add("                        <td>${p.").add(cn).line("?string('yyyy-MM-dd HH:mm:ss')}</td>");
 				} else {
@@ -405,7 +405,7 @@ public class MvcGenerater {
 				}
 			}
 			Column key = t.getPrimaryKeys().get(0);
-			String kn = StringUtil.firstCharLower(StringUtil.trimUnderlinedFirstCharUpper(key.getName()));
+			String kn = StringUtil.firstCharLower(StringUtil.underlineToLowerCamelCase(key.getName()));
 			s.add("                        <td><a href=\"#\" class=\"btn btn-default btn-xs\" onclick=\"edit('${p.")
 					.add(kn).line("}')\">编辑</a></td>");
 			s.line("                    </tr>");
@@ -470,7 +470,7 @@ public class MvcGenerater {
 					.add(kn).line("!}\">");
 			for (Column c : t.getColumns()) {
 				s.line("                <div class=\"form-group\">");
-				String cn = StringUtil.firstCharLower(StringUtil.trimUnderlinedFirstCharUpper(c.getName()));
+				String cn = StringUtil.firstCharLower(StringUtil.underlineToLowerCamelCase(c.getName()));
 				s.add("                    <label class=\"col-sm-2 control-label\" for=\"").add(cn).add("\">");
 				s.add((c.getRemark() == null || c.getRemark().isEmpty()) ? kn : c.getRemark()).line("</label>");
 				s.line("                    <div class=\"col-sm-6\">");
@@ -499,7 +499,7 @@ public class MvcGenerater {
 			s.line("        var b = true;");
 			s.line("        var msg = \"错误：\";");
 			for (Column c : t.getColumns()) {
-				String cn = StringUtil.firstCharLower(StringUtil.trimUnderlinedFirstCharUpper(c.getName()));
+				String cn = StringUtil.firstCharLower(StringUtil.underlineToLowerCamelCase(c.getName()));
 				s.add("        if ($(\"#").add(cn).line("\").val() == \"\") {");
 				s.line("            b = false;");
 				s.add("            msg += \"")

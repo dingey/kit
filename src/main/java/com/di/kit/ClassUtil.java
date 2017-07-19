@@ -70,7 +70,7 @@ public class ClassUtil {
 				} catch (NoSuchMethodException e1) {
 					try {
 						m = t.getClass().getDeclaredMethod("get"
-								+ StringUtil.firstCharUpper(StringUtil.trimUnderlinedFirstCharUpper(f.getName())));
+								+ StringUtil.firstCharUpper(StringUtil.underlineToLowerCamelCase(f.getName())));
 					} catch (NoSuchMethodException e2) {
 						try {
 							m = t.getClass().getDeclaredMethod(f.getName());
