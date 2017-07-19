@@ -36,12 +36,21 @@ public class XmlUtil {
 			str.add(o).add("</").add(n).add(">");
 			return str.toString();
 		} else if (o.getClass().isArray()) {
-			str.add("<").add(n).add(">");
+			str = new Str().add("<").add(n).add(">");
 			List<?> os = (List<?>) o;
 			for (Object o0 : os) {
 				str.add(toXml(o0));
 			}
 			str.add("</").add(n).add(">");
+			return str.toString();
+		}else if (o.getClass()== java.util.List.class || o.getClass() == java.util.ArrayList.class) {
+			str = new Str().add("<").add(n).add(">");
+			List<?> os = (List<?>) o;
+			for (Object o0 : os) {
+				str.add(toXml(o0));
+			}
+			str.add("</").add(n).add(">");
+			return str.toString();
 		} else if (o.getClass() == java.util.Map.class || o.getClass() == java.util.HashMap.class) {
 			Map<?, ?> m0 = (Map<?, ?>) o;
 			for (Object key : m0.keySet()) {

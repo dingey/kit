@@ -27,5 +27,6 @@ public class JsonTest {
 		roots.add(rx);
 		roots.add(rx);
 		System.out.println(JsonUtil.toJson(roots));
+		System.out.println(XmlUtil.toXml(roots));
 	}
 }
