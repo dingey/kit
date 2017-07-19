@@ -28,6 +28,16 @@ public class MvcGenerater {
 		}
 
 		private String name;
+		private boolean useGeneratedKeys;
+		
+		public boolean isUseGeneratedKeys() {
+			return useGeneratedKeys;
+		}
+
+		public PersistenceEnum setUseGeneratedKeys(boolean useGeneratedKeys) {
+			this.useGeneratedKeys = useGeneratedKeys;
+			return this;
+		}
 
 		public String getName() {
 			return name;
@@ -235,7 +245,12 @@ public class MvcGenerater {
 			s.line("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 			s.line("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\" >");
 			s.add("<mapper namespace=\"").add(mapperPackage).add(".").add(className).line("Mapper\">");
-			s.line("	<insert id=\"insert\">");
+			s.add("	<insert id=\"insert\"");
+			if(persistence.isUseGeneratedKeys()){
+				s.add(" useGeneratedKeys=\"true\" keyProperty=\"").
+				add(StringUtil.firstCharLower(StringUtil.trimUnderlinedFirstCharUpper(t.getPrimaryKeys().get(0).getName()))).add("\"");
+			}
+			s.line(">");
 			s.add("		insert into `").add(t.getName()).line("` (");
 			for (Column c : t.getAllColumns()) {
 				s.add("		`").add(c.getName()).add("`,").newLine();
