@@ -417,9 +417,10 @@ public class JsonUtil {
 							|| f.getType() == java.lang.Byte.class || f.getType() == java.lang.Short.class
 							|| f.getType() == java.lang.Integer.class || f.getType() == java.lang.Long.class
 							|| f.getType() == java.lang.Double.class || f.getType() == java.lang.Float.class
-							|| f.getType() == boolean.class || f.getType() == java.lang.Boolean.class
-							|| f.getType() == java.lang.String.class || f.getType() == java.lang.Character.class) {
+							|| f.getType() == boolean.class || f.getType() == java.lang.Boolean.class) {
 						str.add("\"").add(n0).add("\":").add(f.get(o)).add(",");
+					}else if(f.getType() == java.lang.String.class || f.getType() == java.lang.Character.class){
+						str.add("\"").add(n0).add("\":\"").add(f.get(o)).add("\",");
 					} else if (f.getType() == java.util.List.class || f.getType() == java.util.ArrayList.class) {
 						str.add("\"").add(n0).add("\":[");
 						List<?> os = (List<?>) f.get(o);
