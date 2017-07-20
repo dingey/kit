@@ -177,8 +177,9 @@ public class JsonUtil {
 		}
 		return str;
 	}
-
-	public static String toJson(Object o) {
+	
+	@SuppressWarnings("unused")
+	private static String toJson1(Object o) {
 		StringBuilder s = new StringBuilder("{");
 		try {
 			if (o.getClass() == java.util.Map.class || o.getClass() == java.util.HashMap.class) {
@@ -199,7 +200,7 @@ public class JsonUtil {
 						s.append("\"").append(key).append("\":\"")
 								.append(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(val)).append("\",");
 					} else {
-						s.append("\"").append(key).append("\":").append(toJson(val)).append(",");
+						s.append("\"").append(key).append("\":").append(toJson1(val)).append(",");
 					}
 				}
 				s = new StringBuilder(s.toString().substring(0, s.length() - 1));
@@ -211,11 +212,11 @@ public class JsonUtil {
 				s = new StringBuilder("[");
 				if (con.size() > 1) {
 					for (int i = 0; i < con.size() - 1; i++) {
-						s.append(toJson(con.toArray()[i])).append(",");
+						s.append(toJson1(con.toArray()[i])).append(",");
 					}
-					s.append(toJson(con.toArray()[con.size() - 1]));
+					s.append(toJson1(con.toArray()[con.size() - 1]));
 				} else if (con.size() == 1) {
-					s.append(toJson(con.toArray()[0]));
+					s.append(toJson1(con.toArray()[0]));
 				}
 				s.append("]");
 				return s.toString();
@@ -256,7 +257,7 @@ public class JsonUtil {
 					List<?> os = (List<?>) f.get(o);
 					StringBuilder s1 = new StringBuilder();
 					for (Object object : os) {
-						s1.append(toJson(object)).append(",");
+						s1.append(toJson1(object)).append(",");
 					}
 					s.append("\"").append(n).append("\":[").append(s1.toString().substring(0, s1.length() - 1))
 							.append("],");
@@ -265,7 +266,7 @@ public class JsonUtil {
 				} else if (f.getDeclaringClass() == Object.class) {
 					continue;
 				} else if (f.getType() instanceof Object) {
-					s.append("\"").append(n).append("\":").append(toJson(f.get(o))).append(",");
+					s.append("\"").append(n).append("\":").append(toJson1(f.get(o))).append(",");
 				}
 			}
 			s = new StringBuilder(s.toString().substring(0, s.length() - 1));
@@ -352,5 +353,99 @@ public class JsonUtil {
 
 	public static void createFromJson(String json, String packag) {
 		ClassCreate.createFromJson(json, packag, "");
+	}
+	
+	public static <T> String toJson(T o) {
+		String n = StringUtil.firstCharLower(o.getClass().getSimpleName());
+		if (o.getClass().isAnnotationPresent(Alias.class)) {
+			if (!o.getClass().getAnnotation(Alias.class).xml().isEmpty()) {
+				n = o.getClass().getAnnotation(Alias.class).xml();
+			} else if (!o.getClass().getAnnotation(Alias.class).value().isEmpty()) {
+				n = o.getClass().getAnnotation(Alias.class).value();
+			}
+		}
+		Str str = new Str();
+		if (o.getClass() == byte.class || o.getClass() == short.class || o.getClass() == int.class
+				|| o.getClass() == long.class || o.getClass() == double.class || o.getClass() == float.class
+				|| o.getClass() == java.lang.Byte.class || o.getClass() == java.lang.Short.class
+				|| o.getClass() == java.lang.Integer.class || o.getClass() == java.lang.Long.class
+				|| o.getClass() == java.lang.Double.class || o.getClass() == java.lang.Float.class
+				|| o.getClass() == boolean.class || o.getClass() == java.lang.Boolean.class
+				|| o.getClass() == java.lang.String.class || o.getClass() == java.lang.Character.class) {
+			str.add("{").add(o).add(":").add(n).add("}");
+			return str.toString();
+		} else if (o.getClass().isArray()) {
+			str = new Str().add("[");
+			Object[] os = (Object[]) o;
+			for (Object o0 : os) {
+				str.add(toJson(o0)).add(",");
+			}
+			return str.delLastChar().add("]").toString();
+		}else if (o.getClass()== java.util.List.class || o.getClass() == java.util.ArrayList.class) {
+			str.add("[");
+			List<?> os = (List<?>) o;
+			for (Object o0 : os) {
+				str.add(toJson(o0)).add(",");
+			}
+			return str.delLastChar().add("]").toString();
+		} else if (o.getClass() == java.util.Map.class || o.getClass() == java.util.HashMap.class) {
+			Map<?, ?> m0 = (Map<?, ?>) o;
+			for (Object key : m0.keySet()) {
+				str.add("{\"").add(key).add("\":").add(toJson(m0.get(key))).add(",");
+			}
+			return str.delLastChar().add("}").toString();
+		} else if (o instanceof Object) {
+			str.add("{");
+			try {
+				for (Field f : ClassUtil.getDeclaredFields(o)) {
+					f.setAccessible(true);
+					if (f.get(o) == null) {
+						continue;
+					}
+					String n0 = f.getName();
+					if (f.isAnnotationPresent(Alias.class)) {
+						if (!f.getAnnotation(Alias.class).xml().isEmpty()) {
+							n0 = f.getAnnotation(Alias.class).xml();
+						} else if (!f.getAnnotation(Alias.class).value().isEmpty()) {
+							n0 = f.getAnnotation(Alias.class).value();
+						}
+					}
+					if (Modifier.isFinal(f.getModifiers())) {
+						continue;
+					}else if (f.getType() == byte.class || f.getType() == short.class || f.getType() == int.class
+							|| f.getType() == long.class || f.getType() == double.class || f.getType() == float.class
+							|| f.getType() == java.lang.Byte.class || f.getType() == java.lang.Short.class
+							|| f.getType() == java.lang.Integer.class || f.getType() == java.lang.Long.class
+							|| f.getType() == java.lang.Double.class || f.getType() == java.lang.Float.class
+							|| f.getType() == boolean.class || f.getType() == java.lang.Boolean.class
+							|| f.getType() == java.lang.String.class || f.getType() == java.lang.Character.class) {
+						str.add("\"").add(n0).add("\":").add(f.get(o)).add(",");
+					} else if (f.getType() == java.util.List.class || f.getType() == java.util.ArrayList.class) {
+						str.add("\"").add(n0).add("\":[");
+						List<?> os = (List<?>) f.get(o);
+						for (Object o0 : os) {
+							str.add(toJson(o0)).add(",");
+						}
+						str.add("],");
+					} else if (f.getType() == java.util.Map.class || f.getType() == java.util.HashMap.class) {
+						str.add("\"").add(n0).add("\":{");
+						Map<?, ?> m0 = (Map<?, ?>) f.get(o);
+						for (Object key : m0.keySet()) {
+							str.add("\"").add(key).add("\":").add(m0.get(key)).add(",");
+						}
+						str.delLastChar().add("},");
+					}  else if (f.getDeclaringClass() == Object.class) {
+						continue;
+					} else if (f.getType() instanceof Object) {
+						str.add("\"").add(n0).add("\":").add(toJson(f.get(o))).add(",");
+					}
+				}
+				str.delLastChar();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			return str.add("}").toString();
+		}
+		return str.toString();
 	}
 }
