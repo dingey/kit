@@ -50,6 +50,8 @@ public class StringUtil {
 					sb.append(s.toCharArray()[i]);
 				}
 			}
+		}else{
+			sb.append(s.toLowerCase());
 		}
 		return sb.toString();
 	}
