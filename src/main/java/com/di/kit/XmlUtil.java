@@ -1,6 +1,7 @@
 package com.di.kit;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +59,7 @@ public class XmlUtil {
 			}
 		} else if (o instanceof Object) {
 			try {
-				for (Field f : o.getClass().getDeclaredFields()) {
+				for (Field f : ClassUtil.getDeclaredFields(o)) {
 					f.setAccessible(true);
 					if (f.get(o) == null) {
 						continue;
@@ -89,7 +90,9 @@ public class XmlUtil {
 							n0 = f.getAnnotation(Alias.class).value();
 						}
 					}
-					if (f.getType() == byte.class || f.getType() == short.class || f.getType() == int.class
+					if (Modifier.isFinal(f.getModifiers())) {
+						continue;
+					}else if (f.getType() == byte.class || f.getType() == short.class || f.getType() == int.class
 							|| f.getType() == long.class || f.getType() == double.class || f.getType() == float.class
 							|| f.getType() == java.lang.Byte.class || f.getType() == java.lang.Short.class
 							|| f.getType() == java.lang.Integer.class || f.getType() == java.lang.Long.class
@@ -109,6 +112,8 @@ public class XmlUtil {
 						for (Object key : m0.keySet()) {
 							str.add(m0.get(key));
 						}
+					}  else if (f.getDeclaringClass() == Object.class) {
+						continue;
 					} else if (f.getType() instanceof Object) {
 						str.add(toXml(f.get(o)));
 					}

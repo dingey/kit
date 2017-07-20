@@ -1,6 +1,7 @@
 package com.di.kit;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
@@ -204,23 +205,22 @@ public class JsonUtil {
 				s = new StringBuilder(s.toString().substring(0, s.length() - 1));
 				s.append("}");
 				return s.toString();
-			}else if(o.getClass() == java.util.Collection.class || o.getClass() == java.util.List.class
-					|| o.getClass() == java.util.ArrayList.class){
-				Collection<?> con=(Collection<?>) o; 
-				s=new StringBuilder("[");
-				if(con.size()>1){
-					for(int i=0;i<con.size()-1;i++){
+			} else if (o.getClass() == java.util.Collection.class || o.getClass() == java.util.List.class
+					|| o.getClass() == java.util.ArrayList.class) {
+				Collection<?> con = (Collection<?>) o;
+				s = new StringBuilder("[");
+				if (con.size() > 1) {
+					for (int i = 0; i < con.size() - 1; i++) {
 						s.append(toJson(con.toArray()[i])).append(",");
 					}
-					s.append(toJson(con.toArray()[con.size()-1]));
-				}else if(con.size()==1){
+					s.append(toJson(con.toArray()[con.size() - 1]));
+				} else if (con.size() == 1) {
 					s.append(toJson(con.toArray()[0]));
 				}
 				s.append("]");
 				return s.toString();
 			}
-			Field[] fs = o.getClass().getDeclaredFields();
-			for (Field f : fs) {
+			for (Field f : ClassUtil.getDeclaredFields(o)) {
 				f.setAccessible(true);
 				String n = f.getName();
 				if (f.isAnnotationPresent(Alias.class)) {
@@ -230,9 +230,11 @@ public class JsonUtil {
 						n = f.getAnnotation(Alias.class).value();
 					}
 				}
-				if (f.get(o) == null)
+				if (Modifier.isFinal(f.getModifiers())) {
 					continue;
-				if (f.getType() == byte.class || f.getType() == java.lang.Byte.class) {
+				}else if(f.get(o)==null){
+					s.append("\"").append(n).append("\":null,");
+				} else if (f.getType() == byte.class || f.getType() == java.lang.Byte.class) {
 					s.append("\"").append(n).append("\":").append(String.valueOf(f.getByte(o))).append(",");
 				} else if (f.getType() == short.class || f.getType() == java.lang.Short.class) {
 					s.append("\"").append(n).append("\":").append(String.valueOf(f.getShort(o))).append(",");
@@ -260,6 +262,8 @@ public class JsonUtil {
 							.append("],");
 				} else if (f.getType() == java.lang.String.class) {
 					s.append("\"").append(n).append("\":\"").append((String) f.get(o)).append("\",");
+				} else if (f.getDeclaringClass() == Object.class) {
+					continue;
 				} else if (f.getType() instanceof Object) {
 					s.append("\"").append(n).append("\":").append(toJson(f.get(o))).append(",");
 				}

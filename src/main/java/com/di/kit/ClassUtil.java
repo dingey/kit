@@ -69,8 +69,8 @@ public class ClassUtil {
 					m = t.getClass().getDeclaredMethod("get" + f.getName());
 				} catch (NoSuchMethodException e1) {
 					try {
-						m = t.getClass().getDeclaredMethod("get"
-								+ StringUtil.firstCharUpper(StringUtil.underlineToLowerCamelCase(f.getName())));
+						m = t.getClass().getDeclaredMethod(
+								"get" + StringUtil.firstCharUpper(StringUtil.underlineToLowerCamelCase(f.getName())));
 					} catch (NoSuchMethodException e2) {
 						try {
 							m = t.getClass().getDeclaredMethod(f.getName());
@@ -91,7 +91,7 @@ public class ClassUtil {
 
 	public static <T> Object getFieldValueByGetMethod(String fieldName, T t) {
 		try {
-			return getDeclaredMethod(t, "get"+StringUtil.firstCharUpper(fieldName), new Class[0]);
+			return getDeclaredMethod(t, "get" + StringUtil.firstCharUpper(fieldName), new Class[0]);
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		}
@@ -169,20 +169,14 @@ public class ClassUtil {
 
 	public static Field getDeclaredField(Object object, String fieldName) {
 		Field field = null;
-
 		Class<?> clazz = object.getClass();
-
 		for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
 			try {
 				field = clazz.getDeclaredField(fieldName);
 				return field;
 			} catch (Exception e) {
-				// 这里甚么都不要做！并且这里的异常必须这样写，不能抛出去。
-				// 如果这里的异常打印或者往外抛，则就不会执行clazz =
-				// clazz.getSuperclass(),最后就不会进入到父类中了
 			}
 		}
-
 		return null;
 	}
 
@@ -193,11 +187,22 @@ public class ClassUtil {
 				method = clazz.getDeclaredMethod(methodName, parameterTypes);
 				return method.invoke(object, new Object[0]);
 			} catch (Exception e) {
-				// 这里甚么都不要做！并且这里的异常必须这样写，不能抛出去。
-				// 如果这里的异常打印或者往外抛，则就不会执行clazz =
-				// clazz.getSuperclass(),最后就不会进入到父类中了
 			}
 		}
 		return null;
+	}
+
+	public static List<Field> getDeclaredFields(Object object) {
+		Class<?> clazz = object.getClass();
+		List<Field> fields = new ArrayList<>();
+		for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
+			try {
+				for (Field f : clazz.getDeclaredFields()) {
+					fields.add(f);
+				}
+			} catch (Exception e) {
+			}
+		}
+		return fields;
 	}
 }
