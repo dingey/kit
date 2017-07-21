@@ -3,6 +3,7 @@ package com.di.kit;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.ParseException;
@@ -198,7 +199,11 @@ public class ClassUtil {
 		for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
 			try {
 				for (Field f : clazz.getDeclaredFields()) {
-					fields.add(f);
+					int modifiers = f.getModifiers();
+					if (!Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers) && !Modifier.isNative(modifiers)
+							&& !Modifier.isTransient(modifiers)) {
+						fields.add(f);
+					}
 				}
 			} catch (Exception e) {
 			}
