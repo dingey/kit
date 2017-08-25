@@ -1,6 +1,7 @@
 package com.di.kit;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -19,5 +20,11 @@ public class ArraysUtil {
 	    i++;
 	}
 	return temps;
+    }
+
+    public static <T> T[] merge(T[] t1, T[] t2) {
+	T[] temp = Arrays.copyOf(t1, t1.length + t2.length);
+	System.arraycopy(t2, 0, temp, t1.length, t1.length);
+	return temp;
     }
 }
