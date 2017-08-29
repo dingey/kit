@@ -529,7 +529,7 @@ public class MvcGenerater {
 			return;
 		}
 		System.out.println(path);
-		FileUtil.writeToFile(path, content);
+		FileUtil.writeString(path, content);
 	}
 
 	private void createFile(String path) {
