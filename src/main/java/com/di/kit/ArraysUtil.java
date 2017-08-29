@@ -1,5 +1,6 @@
 package com.di.kit;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +25,20 @@ public class ArraysUtil {
 
     public static <T> T[] merge(T[] t1, T[] t2) {
 	T[] temp = Arrays.copyOf(t1, t1.length + t2.length);
-	System.arraycopy(t2, 0, temp, t1.length, t1.length);
+	System.arraycopy(t2, 0, temp, t1.length, t2.length);
 	return temp;
+    }
+
+    public static <T> List<T> merge(List<T> list, T[] args) {
+	List<T> tmp = new ArrayList<>();
+	tmp.addAll(list);
+	tmp.addAll(Arrays.asList(args));
+	return tmp;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T[] merge(T[] args, List<T> list) {
+	T[] tmp = (T[]) Array.newInstance(args.getClass().getComponentType(), list.size());
+	return merge(args, list.toArray(tmp));
     }
 }
