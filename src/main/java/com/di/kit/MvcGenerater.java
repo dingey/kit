@@ -123,14 +123,14 @@ public class MvcGenerater {
     private Class<?> serviceBaseClass;
     private Class<?> controlBaseClass;
     private String licenses;
-    private String author="MvcGenerator by d";
+    private String author = "MvcGenerator by d";
     private String viewHeader;
     private String viewFooter;
-    private boolean entityLicenses=false;
-    private boolean serviceLicenses=false;
-    private boolean controlLicenses=false;
-    private boolean mapperLicenses=false;
-    
+    private boolean entityLicenses = false;
+    private boolean serviceLicenses = false;
+    private boolean controlLicenses = false;
+    private boolean mapperLicenses = false;
+
     public MvcGenerater setPersistence(PersistenceEnum persistence) {
 	this.persistence = persistence;
 	return this;
@@ -165,45 +165,45 @@ public class MvcGenerater {
 	this.controlBaseClass = controlBaseClass;
 	return this;
     }
-    
+
     public MvcGenerater setLicenses(String licenses) {
-        this.licenses = licenses;
-        return this;
+	this.licenses = licenses;
+	return this;
     }
 
     public MvcGenerater setAuthor(String author) {
-        this.author = author;
-        return this;
+	this.author = author;
+	return this;
     }
 
     public MvcGenerater setViewHeader(String viewHeader) {
-        this.viewHeader = viewHeader;
-        return this;
+	this.viewHeader = viewHeader;
+	return this;
     }
 
     public MvcGenerater setViewFooter(String viewFooter) {
-        this.viewFooter = viewFooter;
-        return this;
+	this.viewFooter = viewFooter;
+	return this;
     }
 
     public MvcGenerater setEntityLicenses(boolean entityLicenses) {
-        this.entityLicenses = entityLicenses;
-        return this;
+	this.entityLicenses = entityLicenses;
+	return this;
     }
 
     public MvcGenerater setServiceLicenses(boolean serviceLicenses) {
-        this.serviceLicenses = serviceLicenses;
-        return this;
+	this.serviceLicenses = serviceLicenses;
+	return this;
     }
 
     public MvcGenerater setControlLicenses(boolean controlLicenses) {
-        this.controlLicenses = controlLicenses;
-        return this;
+	this.controlLicenses = controlLicenses;
+	return this;
     }
 
     public MvcGenerater setMapperLicenses(boolean mapperLicenses) {
-        this.mapperLicenses = mapperLicenses;
-        return this;
+	this.mapperLicenses = mapperLicenses;
+	return this;
     }
 
     private List<Table> tables = new ArrayList<>();
@@ -234,12 +234,12 @@ public class MvcGenerater {
 	    Str s = new Str();
 	    String className = StringUtil.underlineToLowerCamelCase(t.getName());
 	    className = StringUtil.firstCharUpper(className);
-	    if(licenses!=null&&!licenses.isEmpty()&&entityLicenses){
+	    if (licenses != null && !licenses.isEmpty() && entityLicenses) {
 		s.line(licenses);
 	    }
 	    s.add("package ").add(entityPackage).line(";").newLine();
 	    if (entityBaseClass == null) {
-		s.line("/**").add(" * ").line(t.getComment()).line(" * @author "+author);
+		s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
 		s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd hh:mm").format(new Date()));
 		s.line(" */");
 		s.add("public class ").add(className).line(" implements Serializable {");
@@ -253,11 +253,11 @@ public class MvcGenerater {
 		}
 	    } else {
 		s.add("import ").add(entityBaseClass.getName()).line(";");
-		s.line("/**").add(" * ").line(t.getComment()).line(" * @author "+author);
+		s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
 		s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd hh:mm").format(new Date()));
 		s.line(" */");
 		s.add("public class ").add(className).add(" extends ").add(entityBaseClass.getSimpleName());
-		if(hasParametersType(entityBaseClass)){
+		if (hasParametersType(entityBaseClass)) {
 		    s.add("<").add(className).add(">");
 		}
 		s.line(" {");
@@ -292,10 +292,10 @@ public class MvcGenerater {
 	}
 	return b;
     }
-    
-    private boolean hasParametersType(Class<?> a){
-	return a.getTypeParameters().length>0;
-    }   
+
+    private boolean hasParametersType(Class<?> a) {
+	return a.getTypeParameters().length > 0;
+    }
 
     public MvcGenerater createXml(String xmlPath) {
 	for (Table t : tables) {
@@ -355,21 +355,21 @@ public class MvcGenerater {
 	    Str s = new Str();
 	    String className = StringUtil.underlineToLowerCamelCase(t.getName());
 	    className = StringUtil.firstCharUpper(className);
-	    if(licenses!=null&&!licenses.isEmpty()&&mapperLicenses){
+	    if (licenses != null && !licenses.isEmpty() && mapperLicenses) {
 		s.line(licenses);
 	    }
 	    s.add("package ").add(mapperPackage).line(";").newLine();
 	    if (mapperBaseClass != null) {
-		s.add("import ").add(mapperBaseClass.getName()).line(";");		
+		s.add("import ").add(mapperBaseClass.getName()).line(";");
 	    }
 	    s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine().newLine();
-	    s.line("/**").add(" * ").line(t.getComment() + "Mapper接口").line(" * @author "+author);
+	    s.line("/**").add(" * ").line(t.getComment() + "Mapper接口").line(" * @author " + author);
 	    s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd hh:mm").format(new Date()));
 	    s.line(" */");
 	    s.add("public interface ").add(className).add("Mapper");
 	    if (mapperBaseClass != null) {
 		s.add(" extends ").add(mapperBaseClass.getSimpleName());
-		if(hasParametersType(mapperBaseClass)){
+		if (hasParametersType(mapperBaseClass)) {
 		    s.add("<").add(className).add(">");
 		}
 	    }
@@ -385,28 +385,32 @@ public class MvcGenerater {
 	    Str s = new Str();
 	    String className = StringUtil.underlineToLowerCamelCase(t.getName());
 	    className = StringUtil.firstCharUpper(className);
-	    if(licenses!=null&&!licenses.isEmpty()&&serviceLicenses){
+	    if (licenses != null && !licenses.isEmpty() && serviceLicenses) {
 		s.line(licenses);
 	    }
 	    s.add("package ").add(servicePackage).line(";").newLine();
 	    if (serviceBaseClass != null) {
-		s.add("import ").add(serviceBaseClass.getName()).line(";");		
+		s.add("import ").add(serviceBaseClass.getName()).line(";");
 	    }
 	    s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine();
 	    s.add("import ").add(mapperPackage).add(".").add(className).add("Mapper;").newLine().newLine();
-	    s.line("/**").add(" * ").line(t.getComment() + "service").line(" * @author "+author);
+	    s.line("/**").add(" * ").line(t.getComment() + "service").line(" * @author " + author);
 	    s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd hh:mm").format(new Date()));
 	    s.line(" */");
 	    s.add("public class ").add(className).add("Service");
 	    if (serviceBaseClass != null) {
 		s.add(" extends ").add(serviceBaseClass.getSimpleName());
-		if(hasParametersType(serviceBaseClass)){
+		if (hasParametersType(serviceBaseClass) && serviceBaseClass.getTypeParameters().length == 2) {
 		    String name2 = serviceBaseClass.getTypeParameters()[0].getName();
 		    String name = entityBaseClass.getTypeParameters()[0].getName();
-		    if(name.equals(name2)){
-			s.add("<").add(className).add(",").add(className).add("Mapper>");
-		    }else{
-			s.add("<").add(className).add("Mapper,").add(className).add(">");
+		    if (name.equals(name2)) {
+			if (serviceBaseClass.getTypeParameters().length == 2) {
+			    s.add("<").add(className).add(",").add(className).add("Mapper>");
+			}
+		    } else {
+			if (serviceBaseClass.getTypeParameters().length == 2) {
+			    s.add("<").add(className).add("Mapper,").add(className).add(">");
+			}
 		    }
 		}
 	    }
@@ -422,7 +426,7 @@ public class MvcGenerater {
 	    Str s = new Str();
 	    String className = StringUtil.underlineToLowerCamelCase(t.getName());
 	    className = StringUtil.firstCharUpper(className);
-	    if(licenses!=null&&!licenses.isEmpty()&&controlLicenses){
+	    if (licenses != null && !licenses.isEmpty() && controlLicenses) {
 		s.line(licenses);
 	    }
 	    s.add("package ").add(controlPackage).line(";").newLine();
@@ -431,7 +435,7 @@ public class MvcGenerater {
 	    }
 	    s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine();
 	    s.add("import ").add(servicePackage).add(".").add(className).add("Service;").newLine().newLine();
-	    s.line("/**").add(" * ").line(t.getComment() + "controller").line(" * @author "+author);
+	    s.line("/**").add(" * ").line(t.getComment() + "controller").line(" * @author " + author);
 	    s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd hh:mm").format(new Date()));
 	    s.line(" */");
 	    s.add("public class ").add(className).add("Controller");
@@ -449,7 +453,7 @@ public class MvcGenerater {
 	    Str s = new Str();
 	    String className = StringUtil.underlineToLowerCamelCase(t.getName());
 	    // list
-	    if(viewHeader!=null&&!viewHeader.isEmpty()){
+	    if (viewHeader != null && !viewHeader.isEmpty()) {
 		s.line(viewHeader);
 	    }
 	    s.line("<div class=\"container-fluid\">");
@@ -536,14 +540,14 @@ public class MvcGenerater {
 	    s.line("        window.location.href = \"edit?id=\" + id;");
 	    s.line("    }");
 	    s.line("</script>");
-	    if(viewFooter!=null&&!viewFooter.isEmpty()){
+	    if (viewFooter != null && !viewFooter.isEmpty()) {
 		s.line(viewFooter);
 	    }
 	    createFile(path.replaceFirst("java", "webapp") + viewPath + className);
 	    out(path.replaceFirst("java", "webapp") + viewPath + className + "/list.ftl", s.toString());
 	    // edit
 	    s = new Str();
-	    if(viewHeader!=null&&!viewHeader.isEmpty()){
+	    if (viewHeader != null && !viewHeader.isEmpty()) {
 		s.line(viewHeader);
 	    }
 	    s.line("<div class=\"container-fluid\">");
@@ -608,7 +612,7 @@ public class MvcGenerater {
 	    s.line("        }");
 	    s.line("    }");
 	    s.line("</script>");
-	    if(viewFooter!=null&&!viewFooter.isEmpty()){
+	    if (viewFooter != null && !viewFooter.isEmpty()) {
 		s.line(viewFooter);
 	    }
 	    out(path.replaceFirst("java", "webapp") + viewPath + className + "/edit.ftl", s.toString());
