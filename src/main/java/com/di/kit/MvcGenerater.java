@@ -12,6 +12,7 @@ import java.util.List;
 
 import com.di.kit.JdbcMetaUtil.Column;
 import com.di.kit.JdbcMetaUtil.Table;
+import com.di.kit.StringUtil;
 
 /**
  * @author d
@@ -130,6 +131,7 @@ public class MvcGenerater {
     private boolean serviceLicenses = false;
     private boolean controlLicenses = false;
     private boolean mapperLicenses = false;
+    private boolean lombok = false;
 
     public MvcGenerater setPersistence(PersistenceEnum persistence) {
 	this.persistence = persistence;
@@ -206,6 +208,11 @@ public class MvcGenerater {
 	return this;
     }
 
+    public MvcGenerater setLombok(boolean lombok) {
+	this.lombok = lombok;
+	return this;
+    }
+
     private List<Table> tables = new ArrayList<>();
 
     public MvcGenerater setTables(String... tableNames) {
@@ -238,10 +245,18 @@ public class MvcGenerater {
 		s.line(licenses);
 	    }
 	    s.add("package ").add(entityPackage).line(";").newLine();
+	    if (lombok) {
+		s.line("import lombok.Getter;");
+		s.line("import lombok.Setter;");
+	    }
 	    if (entityBaseClass == null) {
 		s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
-		s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd hh:mm").format(new Date()));
+		s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 		s.line(" */");
+		if (lombok) {
+		    s.line("@Getter");
+		    s.line("@Setter");
+		}
 		s.add("public class ").add(className).line(" implements Serializable {");
 		s.add("	private static final long serialVersionUID = ").add(IdWorker.nextId()).line("L;");
 		for (Column c1 : t.getAllColumns()) {
@@ -251,11 +266,30 @@ public class MvcGenerater {
 		    s.add("    private ").add(c1.getType().getJava()).add(" ");
 		    s.add(StringUtil.firstCharLower(StringUtil.underlineToLowerCamelCase(c1.getName()))).line(";");
 		}
+		if (!lombok) {
+		    for (Column c1 : t.getAllColumns()) {
+			String lower = StringUtil.underlineToLowerCamelCase(c1.getName());
+			String upper = StringUtil.underlineToUpperCamelCase(c1.getName());
+			if (!contain(entityBaseClass, lower)) {
+			    s.newLine().add("    public ").add(c1.getType().getJava()).add(" get").add(upper)
+				    .line("() {");
+			    s.add("        return ").add(lower).line(";");
+			    s.line("    }").newLine();
+			    s.add("    public void set").add(upper).add("(").add(c1.getType().getJava()).add(" ")
+				    .add(lower).line(") {");
+			    s.add("        this.").add(lower).add(" = ").add(lower).line(";").line("    }");
+			}
+		    }
+		}
 	    } else {
 		s.add("import ").add(entityBaseClass.getName()).line(";");
 		s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
-		s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd hh:mm").format(new Date()));
+		s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 		s.line(" */");
+		if (lombok) {
+		    s.line("@Getter");
+		    s.line("@Setter");
+		}
 		s.add("public class ").add(className).add(" extends ").add(entityBaseClass.getSimpleName());
 		if (hasParametersType(entityBaseClass)) {
 		    s.add("<").add(className).add(">");
@@ -270,6 +304,21 @@ public class MvcGenerater {
 			}
 			s.add("    private ").add(c1.getType().getJava()).add(" ");
 			s.add(fn).line(";");
+		    }
+		}
+		if (!lombok) {
+		    for (Column c1 : t.getAllColumns()) {
+			String lower = StringUtil.underlineToLowerCamelCase(c1.getName());
+			String upper = StringUtil.underlineToUpperCamelCase(c1.getName());
+			if (!contain(entityBaseClass, lower)) {
+			    s.newLine().add("    public ").add(c1.getType().getJava()).add(" get").add(upper)
+				    .line("() {");
+			    s.add("        return ").add(lower).line(";");
+			    s.line("    }").newLine();
+			    s.add("    public void set").add(upper).add("(").add(c1.getType().getJava()).add(" ")
+				    .add(lower).line(") {");
+			    s.add("        this.").add(lower).add(" = ").add(lower).line(";").line("    }");
+			}
 		    }
 		}
 	    }
@@ -364,7 +413,7 @@ public class MvcGenerater {
 	    }
 	    s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine().newLine();
 	    s.line("/**").add(" * ").line(t.getComment() + "Mapper接口").line(" * @author " + author);
-	    s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd hh:mm").format(new Date()));
+	    s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 	    s.line(" */");
 	    s.add("public interface ").add(className).add("Mapper");
 	    if (mapperBaseClass != null) {
@@ -395,7 +444,7 @@ public class MvcGenerater {
 	    s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine();
 	    s.add("import ").add(mapperPackage).add(".").add(className).add("Mapper;").newLine().newLine();
 	    s.line("/**").add(" * ").line(t.getComment() + "service").line(" * @author " + author);
-	    s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd hh:mm").format(new Date()));
+	    s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 	    s.line(" */");
 	    s.add("public class ").add(className).add("Service");
 	    if (serviceBaseClass != null) {
@@ -426,6 +475,7 @@ public class MvcGenerater {
 	    Str s = new Str();
 	    String className = StringUtil.underlineToLowerCamelCase(t.getName());
 	    className = StringUtil.firstCharUpper(className);
+	    String lowClassName = StringUtil.firstCharLower(className);
 	    if (licenses != null && !licenses.isEmpty() && controlLicenses) {
 		s.line(licenses);
 	    }
@@ -433,16 +483,48 @@ public class MvcGenerater {
 	    if (controlBaseClass != null) {
 		s.add("import ").add(controlBaseClass.getName()).line(";");
 	    }
+	    s.line("import org.springframework.beans.factory.annotation.Autowired;");
+	    s.line("import org.springframework.stereotype.Controller;");
+	    s.line("import org.springframework.ui.Model;");
+	    s.line("import org.springframework.web.bind.annotation.RequestMapping;");
+	    s.line("import org.springframework.web.bind.annotation.RequestParam;");
+	    s.line("import org.springframework.web.bind.annotation.ResponseBody;").newLine();
+	    s.line("import com.github.pagehelper.PageInfo;");
 	    s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine();
 	    s.add("import ").add(servicePackage).add(".").add(className).add("Service;").newLine().newLine();
 	    s.line("/**").add(" * ").line(t.getComment() + "controller").line(" * @author " + author);
-	    s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd hh:mm").format(new Date()));
+	    s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 	    s.line(" */");
+	    s.line("@Controller");
 	    s.add("public class ").add(className).add("Controller");
 	    if (controlBaseClass != null) {
 		s.add(" extends ").add(controlBaseClass.getSimpleName());
 	    }
-	    s.line(" {").newLine().add("}");
+	    s.line(" {");
+	    s.line("	@Autowired");
+	    s.add("	").add(className).add("Service ").add(StringUtil.firstCharLower(className)).line("Service;")
+		    .newLine();
+	    s.add("	@RequestMapping(path = \"/").add(StringUtil.firstCharLower(className)).line("/list\")");
+	    s.line("	public String list(@RequestParam(defaultValue = \"1\") int pageNum, @RequestParam(defaultValue = \"10\") int pageSize, Model model) {");
+	    s.add("		PageInfo<").add(className).add("> pageInfo = ").add(lowClassName)
+		    .add("Service.findPage(new ").add(className).line("(), pageNum, pageSize);");
+	    s.line("		model.addAttribute(\"pageInfo\", pageInfo);");
+	    s.add("		return \"/").add(lowClassName).line("/list\";");
+	    s.line("	}").newLine();
+	    s.add("	@RequestMapping(path = \"/").add(lowClassName).line("/edit\")");
+	    s.line("	public String edit(long id, Model model) {");
+	    s.add("		").add(className).add(" ").add(lowClassName).add(" = ").add(lowClassName)
+		    .line("Service.get(id);");
+	    s.add("		model.addAttribute(\"").add(lowClassName).add("\", ").add(lowClassName).line(");");
+	    s.add("		return \"/").add(lowClassName).add("/edit\";").newLine();
+	    s.line("	}").newLine();
+	    s.line("	@ResponseBody");
+	    s.add("	@RequestMapping(path = \"/").add(lowClassName).line("/save\")");
+	    s.add("	public String save(").add(className).add(" ").add(lowClassName).line(") {");
+	    s.add("		").add(lowClassName).add("Service.save(").add(lowClassName).line(");");
+	    s.line("		return \"{\\\"message\\\":\\\"success\\\"}\";");
+	    s.line("	}");
+	    s.add("}");
 	    out(path + controlPackage.replace(".", "/") + "/" + className + "Controller.java", s.toString());
 	}
 	return this;
