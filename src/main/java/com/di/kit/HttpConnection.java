@@ -1,53 +1,32 @@
 package com.di.kit;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.security.KeyStore;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
 import com.di.kit.ConnectionUtil.ContentTypeEnum;
-import com.di.kit.ConnectionUtil.MyX509TrustManager;
-import com.di.kit.ConnectionUtil.PostContentTypeEnum;
 
 /**
  * @author di
  */
-@SuppressWarnings("unused")
 public class HttpConnection {
 	static String DEFAULT_ENCODE = "UTF-8";
 	static String BOUNDARY = "--boundary--";
 
-	public static String postForm(String url, Map<Object, Object> params) {
+	public static String postForm(String url, Map<Object, Object> params) throws IOException {
 		return post(url, params, null, false);
 	}
 
-	public static String postMultipartForm(String url, Map<Object, Object> params) {
+	public static String postMultipartForm(String url, Map<Object, Object> params) throws IOException {
 		return post(url, params, null, true);
 	}
 
@@ -59,13 +38,12 @@ public class HttpConnection {
 		return post(url, params, null, ContentType.XML);
 	}
 
-	public static String post(String url, Map<Object, Object> params, boolean multipart) {
+	public static String post(String url, Map<Object, Object> params, boolean multipart) throws IOException {
 		return post(url, params, null, multipart);
 	}
 
-	public static String post(String url, Map<Object, Object> params, Map<String, Object> httpHeads,
-			boolean multipart) {
-		StringBuilder s = new StringBuilder();
+	public static String post(String url, Map<Object, Object> params, Map<String, Object> httpHeads, boolean multipart)
+			throws IOException {
 		if (params != null) {
 			if (httpHeads == null) {
 				httpHeads = new HashMap<>();
@@ -74,34 +52,38 @@ public class HttpConnection {
 			}
 			if (multipart) {
 				httpHeads.put("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				for (Object key : params.keySet()) {
 					Object v = params.get(key);
 					if (v == null) {
 						continue;
 					}
-					s.append("\r\n--").append(BOUNDARY).append("\r\n");
+					out.write(("\r\n--" + BOUNDARY + "\r\n").getBytes());
 					if (v.getClass() == java.io.File.class) {
 						try {
 							File file = (File) v;
 							String fileName = file.getName();
 							String contentType = ContentTypeEnum.getMimeByFileExt(fileName);
-							s.append("Content-Disposition: form-data; name=\"" + key + "\"; filename=\"" + fileName
-									+ "\"\r\n");
-							s.append("Content-Type:" + contentType + "\r\n\r\n");
+							out.write(("Content-Disposition: form-data; name=\"" + key + "\"; filename=\"" + fileName
+									+ "\"\r\n").getBytes());
+							out.write(("Content-Type:" + contentType + "\r\n\r\n").getBytes());
 							DataInputStream in = new DataInputStream(new FileInputStream(file));
 							byte[] bufferOut = new byte[1024];
 							while (in.read(bufferOut) != -1) {
-								s.append(new String(bufferOut));
+								out.write(bufferOut);
 							}
 							in.close();
 						} catch (IOException e) {
 						}
 					} else {
-						s.append("Content-Disposition: form-data; name=\"" + key + "\"\r\n\r\n")
-								.append(String.valueOf(v));
+						out.write(("Content-Disposition: form-data; name=\"" + key + "\"\r\n\r\n" + String.valueOf(v))
+								.getBytes());
 					}
 				}
+				httpHeads.put("Content-Length", out.size());
+				return new String(connect(url, out.toByteArray(), httpHeads, false));
 			} else {
+				StringBuilder s = new StringBuilder();
 				httpHeads.put("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
 				for (Object key : params.keySet()) {
 					Object v = params.get(key);
@@ -109,7 +91,7 @@ public class HttpConnection {
 						continue;
 					}
 					try {
-						v=URLEncoder.encode(String.valueOf(v),DEFAULT_ENCODE);
+						v = URLEncoder.encode(String.valueOf(v), DEFAULT_ENCODE);
 					} catch (UnsupportedEncodingException e) {
 						e.printStackTrace();
 					}
@@ -118,10 +100,11 @@ public class HttpConnection {
 				if (s.length() > 0 && s.charAt(s.length() - 1) == '&') {
 					s.deleteCharAt(s.length() - 1);
 				}
+				httpHeads.put("Content-Length", s.toString().getBytes().length);
+				return post(url, s.toString(), httpHeads, DEFAULT_ENCODE, null);
 			}
-			httpHeads.put("Content-Length", s.toString().getBytes().length);
 		}
-		return post(url, s.toString(), httpHeads, DEFAULT_ENCODE, null);
+		return post(url, null, httpHeads, DEFAULT_ENCODE, null);
 	}
 
 	public static String post(String url, String params, Map<String, Object> httpHeads, ContentType contentType) {
@@ -143,9 +126,7 @@ public class HttpConnection {
 			if (params == null) {
 				params = "";
 			}
-			return URLDecoder.decode(
-					new String(connect(url, params.getBytes(encode), httpHeads, false),
-							encode),
+			return URLDecoder.decode(new String(connect(url, params.getBytes(encode), httpHeads, false), encode),
 					encode);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -193,7 +174,7 @@ public class HttpConnection {
 				while (conn.getInputStream().read(bytes) > 0) {
 					out.write(bytes);
 				}
-			}else{
+			} else {
 				while (conn.getErrorStream().read(bytes) > 0) {
 					out.write(bytes);
 				}
