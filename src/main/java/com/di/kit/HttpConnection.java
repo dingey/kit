@@ -188,7 +188,6 @@ public class HttpConnection {
 				conn.setRequestMethod("POST");
 				conn.setDoOutput(true);
 				conn.getOutputStream().write(params);
-				System.out.println(new String(params,DEFAULT_ENCODE));
 			}
 			if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
 				while (conn.getInputStream().read(bytes) > 0) {
