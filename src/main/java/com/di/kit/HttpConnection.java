@@ -108,7 +108,12 @@ public class HttpConnection {
 					if (v == null) {
 						continue;
 					}
-					s.append(String.valueOf(key)).append("=").append(String.valueOf(v)).append("&");
+					try {
+						v=URLEncoder.encode(String.valueOf(v),DEFAULT_ENCODE);
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace();
+					}
+					s.append(String.valueOf(key)).append("=").append(v).append("&");
 				}
 				if (s.length() > 0 && s.charAt(s.length() - 1) == '&') {
 					s.deleteCharAt(s.length() - 1);
@@ -139,7 +144,7 @@ public class HttpConnection {
 				params = "";
 			}
 			return URLDecoder.decode(
-					new String(connect(url, URLEncoder.encode(params, encode).getBytes(encode), httpHeads, false),
+					new String(connect(url, params.getBytes(encode), httpHeads, false),
 							encode),
 					encode);
 		} catch (UnsupportedEncodingException e) {
@@ -180,8 +185,10 @@ public class HttpConnection {
 				}
 			}
 			if (!get) {
+				conn.setRequestMethod("POST");
 				conn.setDoOutput(true);
 				conn.getOutputStream().write(params);
+				System.out.println(new String(params,DEFAULT_ENCODE));
 			}
 			if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
 				while (conn.getInputStream().read(bytes) > 0) {
