@@ -10,9 +10,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import com.di.kit.ConnectionUtil.ContentTypeEnum;
 
 /**
@@ -20,30 +29,31 @@ import com.di.kit.ConnectionUtil.ContentTypeEnum;
  */
 public class HttpConnection {
 	static String DEFAULT_ENCODE = "UTF-8";
-	static String BOUNDARY = "--boundary--";
+	static String BOUNDARY = "--boundary666--";
 
 	public static String postForm(String url, Map<Object, Object> params) throws IOException {
-		return post(url, params, null, false);
+		return post(url, params, null, false, url.startsWith("https") || url.startsWith("HTTPS"));
 	}
 
 	public static String postMultipartForm(String url, Map<Object, Object> params) throws IOException {
-		return post(url, params, null, true);
+		return post(url, params, null, true, url.startsWith("https") || url.startsWith("HTTPS"));
 	}
 
-	public static String postJson(String url, String params) {
-		return post(url, params, null, ContentType.JSON);
+	public static String postJson(String url, String json) {
+		return post(url, json, null, ContentType.JSON, url.startsWith("https") || url.startsWith("HTTPS"));
 	}
 
-	public static String postXml(String url, String params) {
-		return post(url, params, null, ContentType.XML);
+	public static String postXml(String url, String xml) {
+		return post(url, xml, null, ContentType.XML, url.startsWith("https") || url.startsWith("HTTPS"));
 	}
 
-	public static String post(String url, Map<Object, Object> params, boolean multipart) throws IOException {
-		return post(url, params, null, multipart);
-	}
-
-	public static String post(String url, Map<Object, Object> params, Map<String, Object> httpHeads, boolean multipart)
+	public static String post(String url, Map<Object, Object> params, boolean multipart, boolean https)
 			throws IOException {
+		return post(url, params, null, multipart, https);
+	}
+
+	public static String post(String url, Map<Object, Object> params, Map<String, Object> httpHeads, boolean multipart,
+			boolean https) throws IOException {
 		if (params != null) {
 			if (httpHeads == null) {
 				httpHeads = new HashMap<>();
@@ -81,7 +91,11 @@ public class HttpConnection {
 					}
 				}
 				httpHeads.put("Content-Length", out.size());
-				return new String(connect(url, out.toByteArray(), httpHeads, false));
+				if (https) {
+					return new String(connects(url, out.toByteArray(), httpHeads, false));
+				} else {
+					return new String(connect(url, out.toByteArray(), httpHeads, false));
+				}
 			} else {
 				StringBuilder s = new StringBuilder();
 				httpHeads.put("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
@@ -101,18 +115,19 @@ public class HttpConnection {
 					s.deleteCharAt(s.length() - 1);
 				}
 				httpHeads.put("Content-Length", s.toString().getBytes().length);
-				return post(url, s.toString(), httpHeads, DEFAULT_ENCODE, null);
+				return post(url, s.toString(), httpHeads, DEFAULT_ENCODE, null, https);
 			}
 		}
-		return post(url, null, httpHeads, DEFAULT_ENCODE, null);
+		return post(url, null, httpHeads, DEFAULT_ENCODE, null, https);
 	}
 
-	public static String post(String url, String params, Map<String, Object> httpHeads, ContentType contentType) {
-		return post(url, params, httpHeads, DEFAULT_ENCODE, contentType);
+	public static String post(String url, String params, Map<String, Object> httpHeads, ContentType contentType,
+			boolean https) {
+		return post(url, params, httpHeads, DEFAULT_ENCODE, contentType, https);
 	}
 
 	public static String post(String url, String params, Map<String, Object> httpHeads, String encode,
-			ContentType contentType) {
+			ContentType contentType, boolean https) {
 		try {
 			if (httpHeads == null) {
 				httpHeads = new HashMap<>();
@@ -126,8 +141,13 @@ public class HttpConnection {
 			if (params == null) {
 				params = "";
 			}
-			return URLDecoder.decode(new String(connect(url, params.getBytes(encode), httpHeads, false), encode),
-					encode);
+			if (https) {
+				return URLDecoder.decode(new String(connects(url, params.getBytes(encode), httpHeads, false), encode),
+						encode);
+			} else {
+				return URLDecoder.decode(new String(connect(url, params.getBytes(encode), httpHeads, false), encode),
+						encode);
+			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -183,6 +203,72 @@ public class HttpConnection {
 			e.printStackTrace();
 		}
 		return out.toByteArray();
+	}
+
+	public static byte[] connects(String url, byte[] params, Map<String, Object> httpHeads, boolean get) {
+		byte[] bytes = new byte[512];
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			URL realURL = new URL(url);
+			HttpsURLConnection conn = (HttpsURLConnection) realURL.openConnection();
+			conn.setConnectTimeout(5000);
+			conn.setReadTimeout(3000);
+			conn.setDoInput(true);
+			conn.setSSLSocketFactory(My509TrustManager.getSSFactory());
+			if (httpHeads == null) {
+				conn.setRequestProperty("accept", "*/*");
+				conn.setRequestProperty("connection", "Keep-Alive");
+				conn.setRequestProperty("user-agent", "Mozilla/4.0(compatible;MSIE)");
+			} else {
+				for (String key : httpHeads.keySet()) {
+					conn.setRequestProperty(key, String.valueOf(httpHeads.get(key)));
+				}
+			}
+			if (!get) {
+				conn.setRequestMethod("POST");
+				conn.setDoOutput(true);
+				conn.getOutputStream().write(params);
+			}
+			if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+				while (conn.getInputStream().read(bytes) > 0) {
+					out.write(bytes);
+				}
+			} else {
+				while (conn.getErrorStream().read(bytes) > 0) {
+					out.write(bytes);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return out.toByteArray();
+	}
+
+	public static class My509TrustManager implements X509TrustManager {
+
+		@Override
+		public void checkClientTrusted(java.security.cert.X509Certificate[] arg0, String arg1)
+				throws CertificateException {
+		}
+
+		@Override
+		public void checkServerTrusted(java.security.cert.X509Certificate[] arg0, String arg1)
+				throws CertificateException {
+		}
+
+		@Override
+		public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+			return null;
+		}
+
+		public static SSLSocketFactory getSSFactory()
+				throws NoSuchAlgorithmException, NoSuchProviderException, KeyManagementException {
+			TrustManager[] tm = { new My509TrustManager() };
+			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
+			sslContext.init(null, tm, new java.security.SecureRandom());
+			SSLSocketFactory ssf = sslContext.getSocketFactory();
+			return ssf;
+		}
 	}
 
 	public enum ContentType {
