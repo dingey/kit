@@ -155,12 +155,16 @@ public class HttpConnection {
 	}
 
 	public static String get(String url) {
-		return get(url, DEFAULT_ENCODE);
+		return get(url, DEFAULT_ENCODE, url.startsWith("https") || url.startsWith("HTTPS"));
 	}
 
-	public static String get(String url, String encode) {
+	public static String get(String url, String encode, boolean https) {
 		try {
-			return new String(connect(url, new byte[0], null, true), encode);
+			if (https) {
+				return new String(connects(url, new byte[0], null, true), encode);
+			} else {
+				return new String(connect(url, new byte[0], null, true), encode);
+			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
