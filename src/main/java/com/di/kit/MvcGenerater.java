@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.di.kit.JdbcMetaUtil.Column;
-import com.di.kit.JdbcMetaUtil.Table;
+import com.di.kit.JdbcMeta.Column;
+import com.di.kit.JdbcMeta.Table;
 import com.di.kit.StringUtil;
 
 /**
@@ -111,10 +111,11 @@ public class MvcGenerater {
 	}
 
 	public MvcGenerater(String url, String username, String password) {
-		JdbcMetaUtil.setConfig(url, username, password);
+		this.jdbcMeta = new JdbcMeta().setConfig(url, username, password);
 		path = getPath();
 	}
 
+	private JdbcMeta jdbcMeta;
 	private PersistenceEnum persistence;
 	private ControlEnum control;
 	private ViewEnum view;
@@ -132,8 +133,8 @@ public class MvcGenerater {
 	private boolean controlLicenses = false;
 	private boolean mapperLicenses = false;
 	private boolean lombok = false;
-	private boolean war=false;
-	
+	private boolean war = false;
+
 	public MvcGenerater setPersistence(PersistenceEnum persistence) {
 		this.persistence = persistence;
 		return this;
@@ -224,14 +225,16 @@ public class MvcGenerater {
 	public MvcGenerater setTables(String... tableNames) {
 		try {
 			if (tableNames == null || tableNames.length == 0) {
-				tables = JdbcMetaUtil.getAllTables();
+				tables = this.jdbcMeta.getAllTables();
 			} else {
 				for (String n : tableNames) {
-					tables.add(JdbcMetaUtil.getTable(n));
+					tables.add(this.jdbcMeta.getTable(n));
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			this.jdbcMeta.close();
 		}
 		return this;
 	}
@@ -703,9 +706,9 @@ public class MvcGenerater {
 			if (viewFooter != null && !viewFooter.isEmpty()) {
 				s.line(viewFooter);
 			}
-			if(war){
+			if (war) {
 				out(path.replaceFirst("java", "webapp") + viewPath + className + "/edit.ftl", s.toString());
-			}else{
+			} else {
 				out(path.replaceFirst("java", "resources") + viewPath + className + "/edit.ftl", s.toString());
 			}
 		}
