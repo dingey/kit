@@ -132,10 +132,15 @@ public class MvcGenerater {
 	private boolean controlLicenses = false;
 	private boolean mapperLicenses = false;
 	private boolean lombok = false;
-
+	private boolean war=false;
+	
 	public MvcGenerater setPersistence(PersistenceEnum persistence) {
 		this.persistence = persistence;
 		return this;
+	}
+
+	public void setWar(boolean war) {
+		this.war = war;
 	}
 
 	public MvcGenerater setControl(ControlEnum control) {
@@ -697,7 +702,11 @@ public class MvcGenerater {
 			if (viewFooter != null && !viewFooter.isEmpty()) {
 				s.line(viewFooter);
 			}
-			out(path.replaceFirst("java", "webapp") + viewPath + className + "/edit.ftl", s.toString());
+			if(war){
+				out(path.replaceFirst("java", "webapp") + viewPath + className + "/edit.ftl", s.toString());
+			}else{
+				out(path.replaceFirst("java", "resources") + viewPath + className + "/edit.ftl", s.toString());
+			}
 		}
 		return this;
 	}
