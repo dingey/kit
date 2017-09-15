@@ -139,8 +139,9 @@ public class MvcGenerater {
 		return this;
 	}
 
-	public void setWar(boolean war) {
+	public MvcGenerater setWar(boolean war) {
 		this.war = war;
+		return this;
 	}
 
 	public MvcGenerater setControl(ControlEnum control) {
