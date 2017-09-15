@@ -9,11 +9,6 @@ import java.util.List;
 public class FilterUtil {
 	/**
 	 * 获取数组1和数组2对象的交集部分
-	 * 
-	 * @param list1 数组1
-	 * @param list2 数组2
-	 * @param key 判断对象一致的key
-	 * @return List<T>
 	 */
 	public static <T> List<T> andSetTogether(List<T> list1, List<T> list2, String... keys) {
 		List<T> tmps = new ArrayList<>();
@@ -40,11 +35,6 @@ public class FilterUtil {
 
 	/**
 	 * 获取数组1减去与数组2交集部分
-	 * 
-	 * @param list1 数组1
-	 * @param list2 数组2
-	 * @param key 判断对象一致的key
-	 * @return List<T>
 	 */
 	public static <T> List<T> miniusSet(List<T> list1, List<T> list2, String... keys) {
 		List<T> tmps = new ArrayList<>();
@@ -71,13 +61,9 @@ public class FilterUtil {
 		}
 		return tmps;
 	}
+
 	/**
 	 * 获取数组1与数组2交集和差集部分
-	 * 
-	 * @param list1 数组1
-	 * @param list2 数组2
-	 * @param key 判断对象一致的key
-	 * @return new List[]{List<T>,List<T>}
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> List<T>[] minusAndTogether(List<T> list1, List<T> list2, String... keys) {
@@ -106,6 +92,6 @@ public class FilterUtil {
 				ands.add(t1);
 			}
 		}
-		return new List[]{ minus, ands };
+		return new List[] { minus, ands };
 	}
 }

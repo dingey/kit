@@ -13,7 +13,7 @@ public class DateUtil {
 	/**
 	 * 获取现在时间
 	 * 
-	 * @return
+	 * @return new Date
 	 */
 	public static Date getCurrentDate() {
 		return new Date();
@@ -202,22 +202,22 @@ public class DateUtil {
 	}
     /**
      * 获取本月第一天零点时间
-     * @return
+     * @return 零点时间
      */
     public static Date getCurrentMonthFirstDate(){
        return getMonthFirstDate(0);
     }
     /**
      * 获取本月最后一秒时间
-     * @return
+     * @return 本月最后一秒时间
      */
     public static Date getCurrentMonthLastDate(){
         return getMonthLastDate(0);
     }
     /**
      * 获取距本月n月后该月第一天零点时间
-     * @param months
-     * @return
+     * @param months 月数
+     * @return 距本月n月后该月第一天零点时间
      */
     public static Date getMonthFirstDate(int months){
         Calendar calendar = Calendar.getInstance();
@@ -233,8 +233,8 @@ public class DateUtil {
 
     /**
      * 获取距本月n月后该月最后一秒时间
-     * @param months
-     * @return
+     * @param months 月数
+     * @return 距本月n月后该月最后一秒时间
      */
     public static Date getMonthLastDate(int months){
         Calendar calendar = Calendar.getInstance();
@@ -251,7 +251,7 @@ public class DateUtil {
     /**
      * 获取本月是本年的第月
      *
-     * @return
+     * @return 本月是本年的第月
      */
     public static int getCurrentMonthIndex(){
         SimpleDateFormat sdf=new SimpleDateFormat("MM");

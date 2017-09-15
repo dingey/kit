@@ -11,8 +11,8 @@ public class EncryptionUtil {
 	/**
 	 * base64解密
 	 * 
-	 * @param input
-	 * @return
+	 * @param input 输入字符串
+	 * @return base64编码后的字符串
 	 */
 	public static String base64DecodeString(String input) {
 		return new String(base64Decode(input));
@@ -21,8 +21,8 @@ public class EncryptionUtil {
 	/**
 	 * base64解密
 	 * 
-	 * @param input
-	 * @return
+	 * @param input 输入字符串
+	 * @return base64解码后的字节
 	 */
 	public static byte[] base64Decode(String input) {
 		if (input.length() % 4 != 0) {
@@ -54,8 +54,8 @@ public class EncryptionUtil {
 	/**
 	 * base64加密
 	 * 
-	 * @param s
-	 * @return
+	 * @param s 输入字符串
+	 * @return base64解码后字符串
 	 */
 	public static String base64Encode(String s) {
 		return base64Encode(s.getBytes());
@@ -64,8 +64,8 @@ public class EncryptionUtil {
 	/**
 	 * base64加密
 	 * 
-	 * @param in
-	 * @return
+	 * @param in 输入字节
+	 * @return 输出base64加密字符串
 	 */
 	public static String base64Encode(byte[] in) {
 		StringBuilder out = new StringBuilder((in.length * 4) / 3);
@@ -130,7 +130,7 @@ public class EncryptionUtil {
 	/***
 	 * SHA加密 生成40位SHA码
 	 * 
-	 * @param 待加密字符串
+	 * @param inStr 待加密字符串
 	 * @return 返回40位SHA码
 	 */
 	public static String shaEncode(String inStr) throws Exception {

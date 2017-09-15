@@ -26,15 +26,14 @@
 	</developers>
 	<scm>
 		<connection>
-            scm:git:https://github.com/dingey/tookit.git
+            scm:git:https://github.com/dingey/kit.git
         </connection>
 		<developerConnection>
-            scm:git:https://github.com/dingey/tookit.git
+            scm:git:https://github.com/dingey/kit.git
         </developerConnection>
-		<url>https://github.com/dingey/tookit</url>
+		<url>https://github.com/dingey/kit</url>
 		<tag>1.0</tag>
 	</scm>
-	<!-- 
 	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>
@@ -44,19 +43,10 @@
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
-	</distributionManagement>-->
+	</distributionManagement>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jackson.version>2.6.7</jackson.version>
 	</properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-		</dependency>
-	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -95,7 +85,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
@@ -109,7 +98,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>-->
+			</plugin>
 		</plugins>
 	</build>
 </project>
