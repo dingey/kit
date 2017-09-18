@@ -734,18 +734,7 @@ public class MvcGenerater {
 
 	String path = null;
 
-	private String getPath() {
-		if (path == null) {
-			path = "";
-			try {
-				path = Thread.currentThread().getContextClassLoader().getResource("").toURI().getPath();
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}
-			if (path.indexOf("target") != -1) {
-				path = path.substring(0, path.indexOf("target")) + "src/main/java/";
-			}
-		}
-		return path;
+	private String getPath() {		
+		return PathUtil.getMavenSrcPath()+"main/java/";
 	}
 }
