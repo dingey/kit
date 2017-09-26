@@ -337,6 +337,8 @@ public class JsonUtil {
 						os_.add(o0);
 					}
 					f.set(o, os_);
+				}else if(f.getType()==java.util.Map.class||f.getType()==java.util.HashMap.class){
+					f.set(o, m.get(f.getName()));
 				} else if (f.getType() instanceof Object) {
 					Object fo;
 					fo = f.getType().newInstance();
