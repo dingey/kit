@@ -55,7 +55,7 @@ public class XmlUtil {
 		} else if (o.getClass() == java.util.Map.class || o.getClass() == java.util.HashMap.class) {
 			Map<?, ?> m0 = (Map<?, ?>) o;
 			for (Object key : m0.keySet()) {
-				str.add(toXml(m0.get(key)));
+				str.add("<").add(key).add(">").add(toXml(m0.get(key))).add("</").add(key).add(">");
 			}
 		} else if (o instanceof Object) {
 			try {
@@ -109,9 +109,11 @@ public class XmlUtil {
 						str.add("</").add(n0).add(">");
 					} else if (f.getType() == java.util.Map.class || f.getType() == java.util.HashMap.class) {
 						Map<?, ?> m0 = (Map<?, ?>) f.get(o);
+						str.add("<").add(n0).add(">");
 						for (Object key : m0.keySet()) {
-							str.add(m0.get(key));
+							str.add("<").add(key).add(">").add(m0.get(key)).add("</").add(key).add(">");
 						}
+						str.add("</").add(n0).add(">");
 					}  else if (f.getDeclaringClass() == Object.class) {
 						continue;
 					} else if (f.getType() instanceof Object) {
