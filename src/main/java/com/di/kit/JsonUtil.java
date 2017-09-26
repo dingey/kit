@@ -163,6 +163,10 @@ public class JsonUtil {
 			for (String s : s0.split(",")) {
 				ls.add(s.replaceAll("\"", ""));
 			}
+		}else{
+			for (String s : s0.split(",")) {
+				ls.add(s.replaceAll("\"", ""));
+			}
 		}
 		return ls;
 	}
@@ -330,11 +334,15 @@ public class JsonUtil {
 					String typeName = type2.getTypeName();
 					List<Object> os = (List<Object>) m.get(f.getName());
 					List<Object> os_ = new ArrayList<>();
-					for (Object oo : os) {
-						Map<String, Object> m0 = (Map<String, Object>) oo;
-						Object o0 = Class.forName(typeName).newInstance();
-						set(m0, o0);
-						os_.add(o0);
+					if(type==java.util.Map.class||type==java.util.HashMap.class){
+						for (Object oo : os) {
+							Map<String, Object> m0 = (Map<String, Object>) oo;
+							Object o0 = Class.forName(typeName).newInstance();
+							set(m0, o0);
+							os_.add(o0);				
+						}
+					}else{
+						os_=os;
 					}
 					f.set(o, os_);
 				}else if(f.getType()==java.util.Map.class||f.getType()==java.util.HashMap.class){
