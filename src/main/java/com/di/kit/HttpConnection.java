@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -94,7 +95,7 @@ public class HttpConnection {
 				if (https) {
 					return new String(connects(url, out.toByteArray(), httpHeads, false));
 				} else {
-					return new String(connect(url, out.toByteArray(), httpHeads, false));
+					return new String(connect(url, out.toByteArray(), httpHeads));
 				}
 			} else {
 				StringBuilder s = new StringBuilder();
@@ -145,8 +146,7 @@ public class HttpConnection {
 				return URLDecoder.decode(new String(connects(url, params.getBytes(encode), httpHeads, false), encode),
 						encode);
 			} else {
-				return URLDecoder.decode(new String(connect(url, params.getBytes(encode), httpHeads, false), encode),
-						encode);
+				return URLDecoder.decode(new String(connect(url, params.getBytes(encode), httpHeads), encode), encode);
 			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -163,7 +163,7 @@ public class HttpConnection {
 			if (https) {
 				return new String(connects(url, new byte[0], null, true), encode);
 			} else {
-				return new String(connect(url, new byte[0], null, true), encode);
+				return new String(connect(url, new byte[0], null), encode);
 			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -171,28 +171,38 @@ public class HttpConnection {
 		return null;
 	}
 
-	public static byte[] connect(String url, byte[] params, Map<String, Object> httpHeads, boolean get) {
+	public static byte[] connect(String url, byte[] params, Map<String, Object> httpHeads) {
 		byte[] bytes = new byte[512];
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
 			URL realURL = new URL(url);
-			HttpURLConnection conn = (HttpURLConnection) realURL.openConnection();
+			HttpURLConnection conn = null;
+			if (realURL.getProtocol().equals("https")) {
+				conn = (HttpsURLConnection) realURL.openConnection();
+			} else {
+				conn = (HttpURLConnection) realURL.openConnection();
+			}
 			conn.setConnectTimeout(5000);
 			conn.setReadTimeout(3000);
 			conn.setDoInput(true);
 			if (httpHeads == null) {
 				conn.setRequestProperty("accept", "*/*");
-				conn.setRequestProperty("connection", "Keep-Alive");
-				conn.setRequestProperty("user-agent", "Mozilla/4.0(compatible;MSIE)");
+				// conn.setRequestProperty("connection", "Keep-Alive");
+				// conn.setRequestProperty("user-agent",
+				// "Mozilla/4.0(compatible;MSIE)");
 			} else {
 				for (String key : httpHeads.keySet()) {
 					conn.setRequestProperty(key, String.valueOf(httpHeads.get(key)));
 				}
 			}
-			if (!get) {
+			if (params != null && params.length > 0) {
 				conn.setRequestMethod("POST");
 				conn.setDoOutput(true);
-				conn.getOutputStream().write(params);
+				OutputStream outputStream = conn.getOutputStream();
+				outputStream.write(params);
+				outputStream.close();
+			} else {
+				conn.setRequestMethod("GET");
 			}
 			if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
 				while (conn.getInputStream().read(bytes) > 0) {
