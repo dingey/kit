@@ -28,7 +28,7 @@ import com.di.kit.ConnectionUtil.ContentTypeEnum;
 /**
  * @author di
  */
-public class HttpConnection {
+public class HttpClient {
 	static String DEFAULT_ENCODE = "UTF-8";
 	static String BOUNDARY = "--boundary666--";
 
