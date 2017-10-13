@@ -257,13 +257,12 @@ public class MvcGenerater {
 			if (lombok) {
 				s.line("import lombok.Getter;");
 				s.line("import lombok.Setter;");
-			}else{
-				s.line("import java.io.Serializable;");
 			}
 			if (entityBaseClass == null) {
 				s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
 				s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 				s.line(" */");
+				s.line("import java.io.Serializable;");
 				if (lombok) {
 					s.line("@Getter");
 					s.line("@Setter");
