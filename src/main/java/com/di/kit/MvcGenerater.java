@@ -257,6 +257,8 @@ public class MvcGenerater {
 			if (lombok) {
 				s.line("import lombok.Getter;");
 				s.line("import lombok.Setter;");
+			}else{
+				s.line("import java.io.Serializable;");
 			}
 			if (entityBaseClass == null) {
 				s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
@@ -341,8 +343,10 @@ public class MvcGenerater {
 	private boolean contain(Class<?> o, String n) {
 		boolean b = false;
 		try {
-			if (o.getSuperclass() != Object.class) {
+			if (o!=null&&o.getSuperclass() != Object.class) {
 				b = contain(o.getSuperclass(), n);
+			}else{
+				return false;
 			}
 			if (!b)
 				b = o.getDeclaredField(n) != null;

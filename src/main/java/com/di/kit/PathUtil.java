@@ -19,6 +19,8 @@ public class PathUtil {
 		String classPath = getClassPath();
 		if (null != classPath && classPath.contains("/target/classes/")) {
 			classPath = classPath.replaceFirst("/target/classes/", "/");
+		}else if(null != classPath && classPath.contains("/target/test-classes/")){
+			classPath = classPath.replaceFirst("/target/test-classes/", "/");
 		}
 		return classPath;
 	}
