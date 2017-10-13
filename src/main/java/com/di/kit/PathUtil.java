@@ -49,6 +49,8 @@ public class PathUtil {
 		String classPath = getClassPath();
 		if (classPath.endsWith("/target/classes/")) {
 			classPath = classPath.replaceFirst("/target/classes/", "/");
+		}else if (classPath.endsWith("/build/test-classes/")) {
+			classPath = classPath.replaceFirst("/build/test-classes/", "/");
 		} else if (classPath.endsWith("/build/classes/")) {
 			classPath = classPath.replaceFirst("/build/classes/", "/");
 		} else if (classPath.endsWith("/WebContent/WEB-INF/lib/")) {
