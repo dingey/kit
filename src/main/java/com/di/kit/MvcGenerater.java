@@ -259,10 +259,10 @@ public class MvcGenerater {
 				s.line("import lombok.Setter;");
 			}
 			if (entityBaseClass == null) {
+				s.line("import java.io.Serializable;");
 				s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
 				s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 				s.line(" */");
-				s.line("import java.io.Serializable;");
 				if (lombok) {
 					s.line("@Getter");
 					s.line("@Setter");
@@ -344,10 +344,8 @@ public class MvcGenerater {
 		try {
 			if (o!=null&&o.getSuperclass() != Object.class) {
 				b = contain(o.getSuperclass(), n);
-			}else{
-				return false;
 			}
-			if (!b)
+			if (!b&&o!=null)
 				b = o.getDeclaredField(n) != null;
 		} catch (NoSuchFieldException | SecurityException e) {
 		}
