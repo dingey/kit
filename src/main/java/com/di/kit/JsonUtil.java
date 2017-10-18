@@ -163,7 +163,7 @@ public class JsonUtil {
 			for (String s : s0.split(",")) {
 				ls.add(s.replaceAll("\"", ""));
 			}
-		}else{
+		} else {
 			for (String s : s0.split(",")) {
 				ls.add(s.replaceAll("\"", ""));
 			}
@@ -181,7 +181,7 @@ public class JsonUtil {
 		}
 		return str;
 	}
-	
+
 	@SuppressWarnings("unused")
 	private static String toJson1(Object o) {
 		StringBuilder s = new StringBuilder("{");
@@ -225,7 +225,7 @@ public class JsonUtil {
 				s.append("]");
 				return s.toString();
 			}
-			for (Field f : ClassUtil.getDeclaredFields(o)) {
+			for (Field f : ClassUtil.getDeclaredFields(o.getClass())) {
 				f.setAccessible(true);
 				String n = f.getName();
 				if (f.isAnnotationPresent(Alias.class)) {
@@ -237,7 +237,7 @@ public class JsonUtil {
 				}
 				if (Modifier.isFinal(f.getModifiers())) {
 					continue;
-				}else if(f.get(o)==null){
+				} else if (f.get(o) == null) {
 					s.append("\"").append(n).append("\":null,");
 				} else if (f.getType() == byte.class || f.getType() == java.lang.Byte.class) {
 					s.append("\"").append(n).append("\":").append(String.valueOf(f.getByte(o))).append(",");
@@ -334,18 +334,18 @@ public class JsonUtil {
 					String typeName = type2.getTypeName();
 					List<Object> os = (List<Object>) m.get(f.getName());
 					List<Object> os_ = new ArrayList<>();
-					if(type==java.util.Map.class||type==java.util.HashMap.class){
+					if (type == java.util.Map.class || type == java.util.HashMap.class) {
 						for (Object oo : os) {
 							Map<String, Object> m0 = (Map<String, Object>) oo;
 							Object o0 = Class.forName(typeName).newInstance();
 							set(m0, o0);
-							os_.add(o0);				
+							os_.add(o0);
 						}
-					}else{
-						os_=os;
+					} else {
+						os_ = os;
 					}
 					f.set(o, os_);
-				}else if(f.getType()==java.util.Map.class||f.getType()==java.util.HashMap.class){
+				} else if (f.getType() == java.util.Map.class || f.getType() == java.util.HashMap.class) {
 					f.set(o, m.get(f.getName()));
 				} else if (f.getType() instanceof Object) {
 					Object fo;
@@ -364,7 +364,7 @@ public class JsonUtil {
 	public static void createFromJson(String json, String packag) {
 		ClassCreate.createFromJson(json, packag, "");
 	}
-	
+
 	public static <T> String toJson(T o) {
 		String n = StringUtil.firstCharLower(o.getClass().getSimpleName());
 		if (o.getClass().isAnnotationPresent(Alias.class)) {
@@ -391,7 +391,7 @@ public class JsonUtil {
 				str.add(toJson(o0)).add(",");
 			}
 			return str.delLastChar().add("]").toString();
-		}else if (o.getClass()== java.util.List.class || o.getClass() == java.util.ArrayList.class) {
+		} else if (o.getClass() == java.util.List.class || o.getClass() == java.util.ArrayList.class) {
 			str.add("[");
 			List<?> os = (List<?>) o;
 			for (Object o0 : os) {
@@ -404,10 +404,10 @@ public class JsonUtil {
 				str.add("{\"").add(key).add("\":").add(toJson(m0.get(key))).add(",");
 			}
 			return str.delLastChar().add("}").toString();
-		} else if (o instanceof Object) {
+		} else if ((o instanceof Object) && o.getClass() != Object.class) {
 			str.add("{");
 			try {
-				for (Field f : ClassUtil.getDeclaredFields(o)) {
+				for (Field f : ClassUtil.getDeclaredFields(o.getClass())) {
 					f.setAccessible(true);
 					if (f.get(o) == null) {
 						continue;
@@ -422,14 +422,14 @@ public class JsonUtil {
 					}
 					if (Modifier.isFinal(f.getModifiers())) {
 						continue;
-					}else if (f.getType() == byte.class || f.getType() == short.class || f.getType() == int.class
+					} else if (f.getType() == byte.class || f.getType() == short.class || f.getType() == int.class
 							|| f.getType() == long.class || f.getType() == double.class || f.getType() == float.class
 							|| f.getType() == java.lang.Byte.class || f.getType() == java.lang.Short.class
 							|| f.getType() == java.lang.Integer.class || f.getType() == java.lang.Long.class
 							|| f.getType() == java.lang.Double.class || f.getType() == java.lang.Float.class
 							|| f.getType() == boolean.class || f.getType() == java.lang.Boolean.class) {
 						str.add("\"").add(n0).add("\":").add(f.get(o)).add(",");
-					}else if(f.getType() == java.lang.String.class || f.getType() == java.lang.Character.class){
+					} else if (f.getType() == java.lang.String.class || f.getType() == java.lang.Character.class) {
 						str.add("\"").add(n0).add("\":\"").add(f.get(o)).add("\",");
 					} else if (f.getType() == java.util.List.class || f.getType() == java.util.ArrayList.class) {
 						str.add("\"").add(n0).add("\":[");
@@ -445,7 +445,7 @@ public class JsonUtil {
 							str.add("\"").add(key).add("\":").add(m0.get(key)).add(",");
 						}
 						str.delLastChar().add("},");
-					}  else if (f.getDeclaringClass() == Object.class) {
+					} else if (f.getDeclaringClass() == Object.class) {
 						continue;
 					} else if (f.getType() instanceof Object) {
 						str.add("\"").add(n0).add("\":").add(toJson(f.get(o))).add(",");

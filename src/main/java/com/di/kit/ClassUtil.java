@@ -51,39 +51,24 @@ public class ClassUtil {
 
 	public static <T> Object getFieldValue(String fieldName, T t) {
 		try {
-			Field f = t.getClass().getDeclaredField(fieldName);
+			Field f = getDeclaredField(t.getClass(), fieldName);
 			f.setAccessible(true);
 			return f.get(t);
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+		} catch (IllegalArgumentException | IllegalAccessException | SecurityException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 
 	public static <T> Object getFieldValueByGetMethod(Field f, T t) {
-		Method m = null;
 		try {
-			try {
-				m = t.getClass().getDeclaredMethod("get" + StringUtil.firstCharUpper(f.getName()));
-			} catch (NoSuchMethodException e) {
-				try {
-					m = t.getClass().getDeclaredMethod("get" + f.getName());
-				} catch (NoSuchMethodException e1) {
-					try {
-						m = t.getClass().getDeclaredMethod(
-								"get" + StringUtil.firstCharUpper(StringUtil.underlineToLowerCamelCase(f.getName())));
-					} catch (NoSuchMethodException e2) {
-						try {
-							m = t.getClass().getDeclaredMethod(f.getName());
-						} catch (NoSuchMethodException e3) {
-							e3.printStackTrace();
-						}
-					}
-				}
+			Method m = null;
+			if (f.getType() == boolean.class || f.getType() == Boolean.class) {
+				m = getDeclaredMethod(t.getClass(), "is" + StringUtil.firstCharUpper(f.getName()));
+			} else {
+				m = getDeclaredMethod(t.getClass(), "get" + StringUtil.firstCharUpper(f.getName()));
 			}
-			if (m != null) {
-				return m.invoke(t);
-			}
+			return m.invoke(t);
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
@@ -92,7 +77,7 @@ public class ClassUtil {
 
 	public static <T> Object getFieldValueByGetMethod(String fieldName, T t) {
 		try {
-			return getDeclaredMethod(t, "get" + StringUtil.firstCharUpper(fieldName), new Class[0]);
+			return getFieldValueByGetMethod(getDeclaredField(t.getClass(), fieldName), t);
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		}
@@ -168,33 +153,19 @@ public class ClassUtil {
 		}
 	}
 
-	public static Field getDeclaredField(Object object, String fieldName) {
-		Field field = null;
-		Class<?> clazz = object.getClass();
+	public static <T> Field getDeclaredField(Class<T> t, String fieldName) {
+		Class<?> clazz = t;
 		for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
 			try {
-				field = clazz.getDeclaredField(fieldName);
-				return field;
+				return clazz.getDeclaredField(fieldName);
 			} catch (Exception e) {
 			}
 		}
 		return null;
 	}
 
-	public static Object getDeclaredMethod(Object object, String methodName, Class<?>... parameterTypes) {
-		Method method = null;
-		for (Class<?> clazz = object.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
-			try {
-				method = clazz.getDeclaredMethod(methodName, parameterTypes);
-				return method.invoke(object, new Object[0]);
-			} catch (Exception e) {
-			}
-		}
-		return null;
-	}
-
-	public static List<Field> getDeclaredFields(Object object) {
-		Class<?> clazz = object.getClass();
+	public static <T> List<Field> getDeclaredFields(Class<T> t) {
+		Class<?> clazz = t;
 		List<Field> fields = new ArrayList<>();
 		for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
 			try {
@@ -209,5 +180,31 @@ public class ClassUtil {
 			}
 		}
 		return fields;
+	}
+
+	public static <T> Method getDeclaredMethod(Class<T> t, String methodName, Class<?>... parameterTypes) {
+		for (Class<?> clazz = t; clazz != Object.class; clazz = clazz.getSuperclass()) {
+			try {
+				return clazz.getDeclaredMethod(methodName, parameterTypes);
+			} catch (Exception e) {
+			}
+		}
+		return null;
+	}
+
+	public static <T> List<Method> getDeclaredMethods(Class<T> t) {
+		List<Method> methods = new ArrayList<>();
+		for (Class<?> clazz = t; clazz != Object.class; clazz = clazz.getSuperclass()) {
+			try {
+				for (Method m : clazz.getDeclaredMethods()) {
+					if (ModifierUtil.isCommon(m.getModifiers())) {
+						methods.add(m);
+					}
+				}
+				// methods.addAll(Arrays.asList(clazz.getDeclaredMethods()));
+			} catch (Exception e) {
+			}
+		}
+		return methods;
 	}
 }

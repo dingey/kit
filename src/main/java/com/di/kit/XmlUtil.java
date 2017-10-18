@@ -59,7 +59,7 @@ public class XmlUtil {
 			}
 		} else if (o instanceof Object) {
 			try {
-				for (Field f : ClassUtil.getDeclaredFields(o)) {
+				for (Field f : ClassUtil.getDeclaredFields(o.getClass())) {
 					f.setAccessible(true);
 					if (f.get(o) == null) {
 						continue;
