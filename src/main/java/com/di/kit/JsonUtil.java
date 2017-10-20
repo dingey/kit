@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -143,7 +143,7 @@ public class JsonUtil {
 	}
 
 	private static Map<String, Object> toMap(String str) {
-		HashMap<String, Object> m = new HashMap<>();
+		LinkedHashMap<String, Object> m = new LinkedHashMap<>();
 		String s0 = str.substring(str.indexOf("{") + 1, str.lastIndexOf("}")).trim();
 		for (String s : split(s0)) {
 			m.put(s.substring(0, s.indexOf(":") - 1).replaceAll("\"", "").trim(),
@@ -186,7 +186,7 @@ public class JsonUtil {
 	private static String toJson1(Object o) {
 		StringBuilder s = new StringBuilder("{");
 		try {
-			if (o.getClass() == java.util.Map.class || o.getClass() == java.util.HashMap.class) {
+			if (o.getClass() == java.util.Map.class || o.getClass() == java.util.LinkedHashMap.class) {
 				Map<?, ?> m = (Map<?, ?>) o;
 				for (Object key : m.keySet()) {
 					Object val = m.get(key);
@@ -287,7 +287,7 @@ public class JsonUtil {
 		try {
 			if (json.startsWith("{")) {
 				Map<String, Object> map = toMap(json);
-				if (cl == Map.class || cl == HashMap.class) {
+				if (cl == Map.class || cl == LinkedHashMap.class) {
 					return (T) map;
 				} else {
 					o = cl.newInstance();
@@ -334,7 +334,7 @@ public class JsonUtil {
 					String typeName = type2.getTypeName();
 					List<Object> os = (List<Object>) m.get(f.getName());
 					List<Object> os_ = new ArrayList<>();
-					if (type == java.util.Map.class || type == java.util.HashMap.class) {
+					if (type == java.util.Map.class || type == java.util.LinkedHashMap.class) {
 						for (Object oo : os) {
 							Map<String, Object> m0 = (Map<String, Object>) oo;
 							Object o0 = Class.forName(typeName).newInstance();
@@ -345,7 +345,7 @@ public class JsonUtil {
 						os_ = os;
 					}
 					f.set(o, os_);
-				} else if (f.getType() == java.util.Map.class || f.getType() == java.util.HashMap.class) {
+				} else if (f.getType() == java.util.Map.class || f.getType() == java.util.LinkedHashMap.class) {
 					f.set(o, m.get(f.getName()));
 				} else if (f.getType() instanceof Object) {
 					Object fo;
@@ -398,7 +398,7 @@ public class JsonUtil {
 				str.add(toJson(o0)).add(",");
 			}
 			return str.delLastChar().add("]").toString();
-		} else if (o.getClass() == java.util.Map.class || o.getClass() == java.util.HashMap.class) {
+		} else if (o.getClass() == java.util.Map.class || o.getClass() == java.util.LinkedHashMap.class) {
 			Map<?, ?> m0 = (Map<?, ?>) o;
 			for (Object key : m0.keySet()) {
 				str.add("{\"").add(key).add("\":").add(toJson(m0.get(key))).add(",");
@@ -438,7 +438,7 @@ public class JsonUtil {
 							str.add(toJson(o0)).add(",");
 						}
 						str.add("],");
-					} else if (f.getType() == java.util.Map.class || f.getType() == java.util.HashMap.class) {
+					} else if (f.getType() == java.util.Map.class || f.getType() == java.util.LinkedHashMap.class) {
 						str.add("\"").add(n0).add("\":{");
 						Map<?, ?> m0 = (Map<?, ?>) f.get(o);
 						for (Object key : m0.keySet()) {

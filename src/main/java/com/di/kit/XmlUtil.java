@@ -3,7 +3,7 @@ package com.di.kit;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +52,7 @@ public class XmlUtil {
 			}
 			str.add("</").add(n).add(">");
 			return str.toString();
-		} else if (o.getClass() == java.util.Map.class || o.getClass() == java.util.HashMap.class) {
+		} else if (o.getClass() == java.util.Map.class || o.getClass() == java.util.LinkedHashMap.class) {
 			Map<?, ?> m0 = (Map<?, ?>) o;
 			for (Object key : m0.keySet()) {
 				str.add("<").add(key).add(">").add(toXml(m0.get(key))).add("</").add(key).add(">");
@@ -107,7 +107,7 @@ public class XmlUtil {
 							str.add(toXml(o0));
 						}
 						str.add("</").add(n0).add(">");
-					} else if (f.getType() == java.util.Map.class || f.getType() == java.util.HashMap.class) {
+					} else if (f.getType() == java.util.Map.class || f.getType() == java.util.LinkedHashMap.class) {
 						Map<?, ?> m0 = (Map<?, ?>) f.get(o);
 						str.add("<").add(n0).add(">");
 						for (Object key : m0.keySet()) {
@@ -134,7 +134,7 @@ public class XmlUtil {
 		if (cl == java.util.Collection.class || cl == java.util.List.class || cl == java.util.ArrayList.class) {
 			List<Object> l = toList(xml);
 			return (T) l;
-		} else if (cl == java.util.Map.class || cl == java.util.HashMap.class) {
+		} else if (cl == java.util.Map.class || cl == java.util.LinkedHashMap.class) {
 			Map<String, Object> m = toMap(xml);
 			o = (T) m;
 		} else {
@@ -154,7 +154,7 @@ public class XmlUtil {
 	}
 
 	public static Map<String, Object> toMap(String xml) {
-		Map<String, Object> m = new HashMap<>();
+		Map<String, Object> m = new LinkedHashMap<>();
 		//m.put("attributes", getAttributes(xml));
 		//m.put("element name", getWrapperName(xml));
 		put(m,"element attributes",getAttributes(xml));
@@ -237,7 +237,7 @@ public class XmlUtil {
 		if (ss.length == 1) {
 			return null;
 		}
-		Map<String, String> m = new HashMap<>();
+		Map<String, String> m = new LinkedHashMap<>();
 		for (int i = 1; i < ss.length; i++) {
 			String s0 = ss[i].trim();
 			if (!s0.isEmpty()) {
