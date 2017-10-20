@@ -44,7 +44,7 @@ public class XmlUtil {
 			}
 			str.add("</").add(n).add(">");
 			return str.toString();
-		}else if (o.getClass()== java.util.List.class || o.getClass() == java.util.ArrayList.class) {
+		} else if (o.getClass() == java.util.List.class || o.getClass() == java.util.ArrayList.class) {
 			str = new Str().add("<").add(n).add(">");
 			List<?> os = (List<?>) o;
 			for (Object o0 : os) {
@@ -92,7 +92,7 @@ public class XmlUtil {
 					}
 					if (Modifier.isFinal(f.getModifiers())) {
 						continue;
-					}else if (f.getType() == byte.class || f.getType() == short.class || f.getType() == int.class
+					} else if (f.getType() == byte.class || f.getType() == short.class || f.getType() == int.class
 							|| f.getType() == long.class || f.getType() == double.class || f.getType() == float.class
 							|| f.getType() == java.lang.Byte.class || f.getType() == java.lang.Short.class
 							|| f.getType() == java.lang.Integer.class || f.getType() == java.lang.Long.class
@@ -114,7 +114,7 @@ public class XmlUtil {
 							str.add("<").add(key).add(">").add(m0.get(key)).add("</").add(key).add(">");
 						}
 						str.add("</").add(n0).add(">");
-					}  else if (f.getDeclaringClass() == Object.class) {
+					} else if (f.getDeclaringClass() == Object.class) {
 						continue;
 					} else if (f.getType() instanceof Object) {
 						str.add(toXml(f.get(o)));
@@ -155,8 +155,10 @@ public class XmlUtil {
 
 	public static Map<String, Object> toMap(String xml) {
 		Map<String, Object> m = new HashMap<>();
-		m.put("attributes", getAttributes(xml));
-		m.put("element name", getWrapperName(xml));
+		//m.put("attributes", getAttributes(xml));
+		//m.put("element name", getWrapperName(xml));
+		put(m,"element attributes",getAttributes(xml));
+		put(m,"element name",getWrapperName(xml));
 		if (getWrapperValue(xml).indexOf("<") == -1) {
 			m.put(getWrapperName(xml), getWrapperValue(xml));
 			return m;
@@ -164,19 +166,47 @@ public class XmlUtil {
 		xml = getWrapperValue(xml);
 		List<String> split = split(xml);
 		for (String s : split) {
-			String value = getWrapperValue(s);
 			String name = getWrapperName(s);
+			if (getAttributes(s) != null) {
+				// m.put(name, toMap(s));
+				put(m, name, toMap(s));
+				continue;
+			}
+			String value = getWrapperValue(s);
 			if (!value.startsWith("<") && !value.startsWith(start)) {
-				m.put(name, value);
+				//m.put(name, value);
+				put(m, name, value);
 			} else if (value.startsWith(start)) {
-				m.put(name, replaceEscape(value));
+				//m.put(name, replaceEscape(value));
+				put(m, name, replaceEscape(value));
 			} else if (value.startsWith("<") && !isList(value)) {
-				m.put(name, toMap(s));
+				//m.put(name, toMap(s));
+				put(m, name,toMap(s));
 			} else if (isList(value)) {
-				m.put(name, toList(value));
+				//m.put(name, toList(value));
+				put(m, name, toList(value));
 			}
 		}
 		return m;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void put(Map<String, Object> m, String k, Object v) {
+		if (m.containsKey(k)) {
+			Object val = m.get(k);
+			if (val.getClass() == ArrayList.class || val.getClass() == List.class) {
+				List<Object> os = (List<Object>) val;
+				os.add(v);
+				m.put(k, os);
+			} else {
+				List<Object> os = new ArrayList<>();
+				os.add(val);
+				os.add(v);
+				m.put(k, os);
+			}			
+		} else {
+			m.put(k, v);
+		}
 	}
 
 	private static boolean isList(String xml) {

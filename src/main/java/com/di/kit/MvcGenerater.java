@@ -245,6 +245,10 @@ public class MvcGenerater {
 	private String controlPackage;
 
 	public MvcGenerater createEntity(String entityPackage) {
+		return this.createEntity(entityPackage, false);
+	}
+
+	public MvcGenerater createEntity(String entityPackage, boolean replace) {
 		this.entityPackage = entityPackage;
 		for (Table t : tables) {
 			Str s = new Str();
@@ -334,7 +338,7 @@ public class MvcGenerater {
 			}
 			s.add("}");
 			String epath = getPath() + entityPackage.replace(".", "/");
-			out(epath + "/" + className + ".java", s.toString());
+			out(epath + "/" + className + ".java", s.toString(), replace);
 		}
 		return this;
 	}
@@ -342,10 +346,10 @@ public class MvcGenerater {
 	private boolean contain(Class<?> o, String n) {
 		boolean b = false;
 		try {
-			if (o!=null&&o.getSuperclass() != Object.class) {
+			if (o != null && o.getSuperclass() != Object.class) {
 				b = contain(o.getSuperclass(), n);
 			}
-			if (!b&&o!=null)
+			if (!b && o != null)
 				b = o.getDeclaredField(n) != null;
 		} catch (NoSuchFieldException | SecurityException e) {
 		}
@@ -357,6 +361,10 @@ public class MvcGenerater {
 	}
 
 	public MvcGenerater createXml(String xmlPath) {
+		return this.createXml(xmlPath, false);
+	}
+
+	public MvcGenerater createXml(String xmlPath, boolean replace) {
 		for (Table t : tables) {
 			Str s = new Str();
 			String className = StringUtil.underlineToLowerCamelCase(t.getName());
@@ -403,7 +411,7 @@ public class MvcGenerater {
 			s.add("        SELECT * FROM `").add(t.getName());
 			s.line("` WHERE `del_flag` = #{DEL_FLAG_NORMAL} ORDER BY `updated_at` DESC");
 			s.line("    </select>").line("</mapper>");
-			out(path.replaceFirst("java", "resources") + xmlPath + className + "Mapper.xml", s.toString());
+			out(path.replaceFirst("java", "resources") + xmlPath + className + "Mapper.xml", s.toString(), replace);
 		}
 		return this;
 	}
@@ -717,8 +725,12 @@ public class MvcGenerater {
 	}
 
 	private void out(String path, String content) {
+		this.out(path, content, false);
+	}
+
+	private void out(String path, String content, boolean replace) {
 		File f = new File(path);
-		if (f.exists()) {
+		if (f.exists() && !replace) {
 			System.err.println("mvc generator error (exists path): " + path);
 			return;
 		}
@@ -735,7 +747,7 @@ public class MvcGenerater {
 
 	String path = null;
 
-	private String getPath() {		
-		return PathUtil.getMavenSrcPath()+"main/java/";
+	private String getPath() {
+		return PathUtil.getMavenSrcPath() + "main/java/";
 	}
 }
