@@ -105,6 +105,7 @@ public class JdbcMeta {
 			c.setRemark(columnSet.getString("REMARKS"));
 			c.setPrimaryKey(primaryKeyMap.get(c.getName()) != null);
 			c.setImportKey(foreignKeyMap.get(c.getName()));
+			c.setLength(columnSet.getInt("COLUMN_SIZE"));
 			if (c.isPrimaryKey()) {
 				primaryColumns.add(c);
 			} else {
@@ -242,6 +243,15 @@ public class JdbcMeta {
 		private String remark;
 		private ImportKey importKey;
 		private boolean nullable;
+		private int length;
+		
+		public int getLength() {
+			return length;
+		}
+
+		public void setLength(int length) {
+			this.length = length;
+		}
 
 		public boolean isNullable() {
 			return nullable;
