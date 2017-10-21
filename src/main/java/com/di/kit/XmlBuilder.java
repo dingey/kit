@@ -12,7 +12,6 @@ import java.util.Map;
 public class XmlBuilder {
 	private Map<String, Object> xmlMap;
 	private Node node;
-	private static boolean format = false;
 
 	public XmlBuilder() {
 	}
@@ -136,11 +135,6 @@ public class XmlBuilder {
 		return this.node;
 	}
 
-	public XmlBuilder format(boolean format) {
-		XmlBuilder.format = format;
-		return this;
-	}
-
 	public static class Node {
 		private Node parent;
 		private LinkedHashMap<String, String> attributes;
@@ -167,13 +161,31 @@ public class XmlBuilder {
 
 		public String toString() {
 			StringBuilder s = new StringBuilder();
-			String blank = "";
-			if (format) {
-				Node p = this.parent;
-				while (p != null) {
-					blank += "  ";
-					p = p.parent;
+			s.append("<").append(this.name);
+			if (this.attributes != null && !this.attributes.isEmpty()) {
+				for (String k : this.attributes.keySet()) {
+					s.append(" ").append(k).append("=\"").append(this.attribute(k)).append("\"");
 				}
+			}
+			s.append(">");
+			if (!this.children().isEmpty()) {
+				for (Node n : this.children()) {
+					s.append(n.toString());
+				}
+			} else {
+				s.append(this.text);
+			}
+			s.append("</").append(this.name).append(">");
+			return s.toString();
+		}
+
+		public String toFormatString() {
+			StringBuilder s = new StringBuilder();
+			String blank = "";
+			Node p = this.parent;
+			while (p != null) {
+				blank += "  ";
+				p = p.parent;
 			}
 			s.append("<").append(this.name);
 			if (this.attributes != null && !this.attributes.isEmpty()) {
@@ -181,21 +193,19 @@ public class XmlBuilder {
 					s.append("  ").append(k).append("=\"").append(this.attribute(k)).append("\"");
 				}
 			}
-			s.append(format ? ">\n" : ">");
+			s.append(">\n");
 			if (!this.children().isEmpty()) {
 				for (Node n : this.children()) {
-					String b="";
-					if (format) {
-						Node p = n.parent;
-						while (p != null) {
-							b += "  ";
-							p = p.parent;
-						}
+					String b = "";
+					p = n.parent;
+					while (p != null) {
+						b += "  ";
+						p = p.parent;
 					}
-					s.append(b).append(n.toString()).append(format ? "\n" : "");
+					s.append(b).append(n.toFormatString()).append("\n");
 				}
 			} else {
-				s.append(blank).append(format?"  ":"").append(this.text).append(format ? "\n" : "");
+				s.append(blank).append("  ").append(this.text).append("\n");
 			}
 			s.append(blank).append("</").append(this.name).append(">");
 			return s.toString();

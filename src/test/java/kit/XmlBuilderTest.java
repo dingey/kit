@@ -15,17 +15,18 @@ public class XmlBuilderTest {
 	}
 
 	public void create() {
-		XmlBuilder p = new XmlBuilder().format(true);
+		XmlBuilder p = new XmlBuilder();
 		Node r = p.createRootNode("root");
 		r.text("aaa");
 		Node n1 = r.createNode().name("n1");
-		n1.text("n1text");		
+		n1.text("n1text");
 		r.append(n1);
 		Node n2 = r.createNode().name("n1");
 		Node n3 = n2.createNode().name("n3").text("n2-n1");
 		n2.append(n3);
 		r.append(n2);
 		System.out.println(r.toString());
+		System.out.println(r.toFormatString());
 	}
 
 	public void parse() {
