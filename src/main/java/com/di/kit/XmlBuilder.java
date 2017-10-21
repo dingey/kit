@@ -1,6 +1,7 @@
 package com.di.kit;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,15 +9,19 @@ import java.util.Map;
 /**
  * @author d
  */
-public class XmlParser {
+public class XmlBuilder {
 	private Map<String, Object> xmlMap;
 	private Node node;
+	private static boolean format = false;
 
-	public XmlParser(String xml) {
+	public XmlBuilder() {
+	}
+
+	public XmlBuilder(String xml) {
 		parse(xml);
 	}
 
-	public XmlParser parse(String xml) {
+	public XmlBuilder parse(String xml) {
 		this.xmlMap = XmlUtil.toMap(xml);
 		this.node = fromMapObject(this.xmlMap);
 		return this;
@@ -123,6 +128,19 @@ public class XmlParser {
 		return node;
 	}
 
+	public Node createRootNode(String... name) {
+		this.node = new Node();
+		if (name != null && name.length > 0) {
+			this.node.name = name[0];
+		}
+		return this.node;
+	}
+
+	public XmlBuilder format(boolean format) {
+		XmlBuilder.format = format;
+		return this;
+	}
+
 	public static class Node {
 		private Node parent;
 		private LinkedHashMap<String, String> attributes;
@@ -142,8 +160,54 @@ public class XmlParser {
 			return this.name;
 		}
 
+		public Node name(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public String toString() {
+			StringBuilder s = new StringBuilder();
+			String blank = "";
+			if (format) {
+				Node p = this.parent;
+				while (p != null) {
+					blank += "  ";
+					p = p.parent;
+				}
+			}
+			s.append("<").append(this.name);
+			if (this.attributes != null && !this.attributes.isEmpty()) {
+				for (String k : this.attributes.keySet()) {
+					s.append("  ").append(k).append("=\"").append(this.attribute(k)).append("\"");
+				}
+			}
+			s.append(format ? ">\n" : ">");
+			if (!this.children().isEmpty()) {
+				for (Node n : this.children()) {
+					String b="";
+					if (format) {
+						Node p = n.parent;
+						while (p != null) {
+							b += "  ";
+							p = p.parent;
+						}
+					}
+					s.append(b).append(n.toString()).append(format ? "\n" : "");
+				}
+			} else {
+				s.append(blank).append(format?"  ":"").append(this.text).append(format ? "\n" : "");
+			}
+			s.append(blank).append("</").append(this.name).append(">");
+			return s.toString();
+		}
+
 		public String text() {
 			return this.text;
+		}
+
+		public Node text(String text) {
+			this.text = text;
+			return this;
 		}
 
 		public Node parent() {
@@ -165,8 +229,27 @@ public class XmlParser {
 			return nodes;
 		}
 
+		public Node createNode() {
+			Node n = new Node();
+			n.parent = this;
+			return n;
+		}
+
 		public Node append(Node node) {
 			this.children().add(node);
+			return this;
+		}
+
+		public Node appendNode(Node nod) {
+			return appendNodes(nod);
+		}
+
+		public Node appendNodes(Node... nodes) {
+			return appendNodes(Arrays.asList(nodes));
+		}
+
+		public Node appendNodes(List<Node> nodes) {
+			this.children().addAll(nodes);
 			return this;
 		}
 	}
