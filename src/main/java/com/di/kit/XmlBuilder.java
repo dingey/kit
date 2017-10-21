@@ -32,7 +32,7 @@ public class XmlBuilder {
 
 	public Node getById(Node nod, String id) {
 		List<Node> list = getByAttrValue(nod, "id", id);
-		return list == null ? null : list.get(0);
+		return (list == null||list.isEmpty()) ? null : list.get(0);
 	}
 
 	public List<Node> getByAttrName(String attrName) {
@@ -230,6 +230,14 @@ public class XmlBuilder {
 
 		public LinkedHashMap<String, String> attributes() {
 			return attributes;
+		}
+		
+		public Node addAttribute(String name,String value) {
+			if(attributes==null){
+				attributes=new LinkedHashMap<>();
+			}
+			attributes.put(name, value);
+			return this;
 		}
 
 		public List<Node> children() {

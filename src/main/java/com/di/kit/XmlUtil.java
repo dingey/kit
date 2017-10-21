@@ -154,6 +154,12 @@ public class XmlUtil {
 	}
 
 	public static Map<String, Object> toMap(String xml) {
+		if(xml.startsWith("<?xml")){
+			xml=xml.substring(xml.indexOf("?>")+2).trim();
+		}
+		if(xml.startsWith("<!DOCTYPE")){
+			xml=xml.substring(xml.indexOf(">")+1).trim();
+		}
 		Map<String, Object> m = new LinkedHashMap<>();
 		//m.put("attributes", getAttributes(xml));
 		//m.put("element name", getWrapperName(xml));
@@ -232,7 +238,7 @@ public class XmlUtil {
 	}
 
 	private static Map<String, String> getAttributes(String xml) {
-		String s = xml.substring(xml.indexOf("<") + 1, xml.indexOf(">"));
+		String s = sub(xml,"<",">");
 		String[] ss = s.split(" ");
 		if (ss.length == 1) {
 			return null;
@@ -240,15 +246,31 @@ public class XmlUtil {
 		Map<String, String> m = new LinkedHashMap<>();
 		for (int i = 1; i < ss.length; i++) {
 			String s0 = ss[i].trim();
-			if (!s0.isEmpty()) {
+			if (!s0.isEmpty()&&s0.split("=").length>1) {
 				m.put(s0.split("=")[0], delQuot(s0.split("=")[1]));
 			}
 		}
 		return m;
 	}
+	
+	private static String sub(String s,String start,String end){
+		int s1=s.indexOf(start)+start.length(),s2=s.indexOf(end);
+		if(0<s1&&s1<s2){
+			return s.substring(s1, s2);
+		}else{
+			return s.replaceFirst("<", "").replaceFirst(">", "");
+		}
+	}
 
 	private static String delQuot(String s) {
-		return s.substring(s.indexOf('"') + 1, s.lastIndexOf('"'));
+		int start=0,end=s.length();
+		if(s.indexOf('"')>0){
+			start=s.indexOf('"');
+		}
+		if(s.lastIndexOf('"')>start){
+			end=s.lastIndexOf('"');
+		}
+		return s.substring(start+1,end);
 	}
 
 	private static String getWrapperName(String xml) {

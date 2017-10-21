@@ -13,6 +13,7 @@ import java.util.List;
 import com.di.kit.JdbcMeta.Column;
 import com.di.kit.JdbcMeta.Table;
 import com.di.kit.StringUtil;
+import com.di.kit.XmlBuilder.Node;
 
 /**
  * @author d
@@ -749,5 +750,142 @@ public class MvcGenerater {
 
 	private String getPath() {
 		return PathUtil.getMavenSrcPath() + "main/java/";
+	}
+
+	public MvcGenerater createXmlReplaceable(String xmlPath,boolean selective) {
+		for (Table t : tables) {
+			String className = StringUtil.underlineToLowerCamelCase(t.getName());
+			className = StringUtil.firstCharUpper(className);
+			String pathname = path.replaceFirst("java", "resources") + xmlPath + className + "Mapper.xml";
+			File f = new File(pathname);
+			if (f.exists()) {
+				String xml = FileUtil.readString(pathname, null);
+				XmlBuilder builder = new XmlBuilder(xml);
+				String keyCol = (t.getPrimaryKeys() != null && t.getPrimaryKeys().size() > 0)
+						? t.getPrimaryKeys().get(0).getName() : "";
+				String keyProp = StringUtil.underlineToLowerCamelCase(keyCol);
+				Str s = new Str();			
+
+				Node insert = builder.getById("insert");
+				if (insert == null) {
+					insert = builder.rootNode().createNode().name("insert");
+					insert.addAttribute("id", "insert");
+					if(persistence.isUseGeneratedKeys()){
+						insert.addAttribute("useGeneratedKeys", "true");
+					}
+				}else{
+					builder.rootNode().children().remove(insert);
+				}
+				s.add("insert into ").add(t.getName()).add(" (");
+				for(Column c:t.getAllColumns()){
+					s.add(c.getName()).add(",");
+				}
+				s.delLastChar().add(") values (");
+				for(Column c:t.getAllColumns()){
+					s.add("#{").add(StringUtil.underlineToLowerCamelCase(c.getName())).add("},");
+				}
+				s.delLastChar().add(")");
+				insert.text(s.toString());
+				builder.rootNode().children().add(insert);
+				if(selective){
+					Node is = builder.getById("insertSelective");
+					if (is == null) {
+						is = builder.rootNode().createNode().name("insert");
+						is.addAttribute("id", "insertSelective");
+						if(persistence.isUseGeneratedKeys()){
+							is.addAttribute("useGeneratedKeys", "true");
+						}
+					}else{
+						builder.rootNode().children().remove(is);
+					}
+					s.empty("insert into ").add(t.getName());
+					s.add("<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\" >");
+					for(Column c:t.getAllColumns()){
+						String pro=StringUtil.underlineToLowerCamelCase(c.getName());
+						s.add("<if test=\""+pro+" != null\" >").add(c.getName()).add(",</if>");
+					}
+					s.add("</trim>");
+					s.add("<trim prefix=\"values (\" suffix=\")\" suffixOverrides=\",\" >");
+					for(Column c:t.getAllColumns()){
+						String pro=StringUtil.underlineToLowerCamelCase(c.getName());
+						s.add("<if test=\""+pro+" != null\" >").add(pro).add(",</if>");
+					}
+					s.add("</trim>");
+					is.text(s.toString());
+					builder.rootNode().children().add(is);
+				}
+
+				Node update = builder.getById("update");
+				if (update == null) {
+					update = builder.rootNode().createNode().name("update");
+					update.addAttribute("id", "update");
+				}else{
+					builder.rootNode().children().remove(update);
+				}
+				s.empty("update ").add(t.getName()).add(" set ");
+				for(Column c:t.getAllColumns()){
+					s.add(c.getName()).add("=#{").add(StringUtil.underlineToLowerCamelCase(c.getName())).add("},");
+				}
+				s.delLastChar().add(" where "+ keyCol + "=#{" + keyProp + "}");
+				update.text(s.toString());
+				builder.rootNode().children().add(update);
+				if(selective){
+					Node us = builder.getById("updateSelective");
+					if (us == null) {
+						us = builder.rootNode().createNode().name("update");
+						us.addAttribute("id", "updateSelective");
+					}else{
+						builder.rootNode().children().remove(us);
+					}
+					s.empty("update ").add(t.getName());
+					s.add("<set>");
+					for(Column c:t.getAllColumns()){
+						String pro=StringUtil.underlineToLowerCamelCase(c.getName());
+						s.add("<if test=\""+pro+" != null\" >").add(pro).add("=#{").add(pro).add("},</if>");
+					}
+					s.add("</set>").add(" where "+ keyCol + "=#{" + keyProp + "}");
+					us.text(s.toString());
+					builder.rootNode().children().add(us);
+				}
+				
+				Node del = builder.getById("delete");
+				if (del == null) {
+					del = builder.rootNode().createNode().name("select");
+					del.addAttribute("id", "delete");
+				}else{
+					builder.rootNode().children().remove(del);
+				}
+				del.text("update " + t.getName() + " set del=1 where " + keyCol + "=#{" + keyProp + "}");
+				builder.rootNode().children().add(del);
+				
+				Node get = builder.getById("get");
+				if (get == null) {
+					get = builder.rootNode().createNode().name("select");
+					get.addAttribute("id", "get").addAttribute("resultType", className);
+				}else{
+					builder.rootNode().children().remove(get);
+				}
+				get.text("select * from " + t.getName() + " where " + keyCol + "=#{" + keyProp + "}");
+				builder.rootNode().children().add(get);
+				
+				Node list = builder.getById("list");
+				if (list == null) {
+					list = builder.rootNode().createNode().name("select");
+					list.addAttribute("id", "list").addAttribute("resultType", className);
+				}else{
+					builder.rootNode().children().remove(list);
+				}
+				list.text("select * from " + t.getName());
+				builder.rootNode().children().add(list);
+				
+				s.empty("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
+				s.line("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\" >");
+				s.add(builder.rootNode().toString());
+				out(pathname, s.toString(), true);
+			} else {
+				createXml(xmlPath);
+			}
+		}
+		return this;
 	}
 }
