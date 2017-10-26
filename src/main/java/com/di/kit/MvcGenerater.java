@@ -808,7 +808,7 @@ public class MvcGenerater {
 					s.add("<trim prefix=\"values (\" suffix=\")\" suffixOverrides=\",\" >");
 					for(Column c:t.getAllColumns()){
 						String pro=StringUtil.underlineToLowerCamelCase(c.getName());
-						s.add("<if test=\""+pro+" != null\" >").add(pro).add(",</if>");
+						s.add("<if test=\""+pro+" != null\" >#{").add(pro).add("},</if>");
 					}
 					s.add("</trim>");
 					is.text(s.toString());
@@ -841,7 +841,7 @@ public class MvcGenerater {
 					s.add("<set>");
 					for(Column c:t.getColumns()){
 						String pro=StringUtil.underlineToLowerCamelCase(c.getName());
-						s.add("<if test=\""+pro+" != null\" >").add(pro).add("=#{").add(pro).add("},</if>");
+						s.add("<if test=\""+pro+" != null\" >").add(c.getName()).add("=#{").add(pro).add("},</if>");
 					}
 					s.add("</set>").add(" where "+ keyCol + "=#{" + keyProp + "}");
 					us.text(s.toString());
