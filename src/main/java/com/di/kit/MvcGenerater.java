@@ -823,7 +823,7 @@ public class MvcGenerater {
 					builder.rootNode().children().remove(update);
 				}
 				s.empty("update ").add(t.getName()).add(" set ");
-				for(Column c:t.getAllColumns()){
+				for(Column c:t.getColumns()){
 					s.add(c.getName()).add("=#{").add(StringUtil.underlineToLowerCamelCase(c.getName())).add("},");
 				}
 				s.delLastChar().add(" where "+ keyCol + "=#{" + keyProp + "}");
@@ -839,7 +839,7 @@ public class MvcGenerater {
 					}
 					s.empty("update ").add(t.getName());
 					s.add("<set>");
-					for(Column c:t.getAllColumns()){
+					for(Column c:t.getColumns()){
 						String pro=StringUtil.underlineToLowerCamelCase(c.getName());
 						s.add("<if test=\""+pro+" != null\" >").add(pro).add("=#{").add(pro).add("},</if>");
 					}
@@ -887,5 +887,10 @@ public class MvcGenerater {
 			}
 		}
 		return this;
+	}
+	
+	public static interface ViewStyle{
+		String edit(Table t);
+		String list(Table t);
 	}
 }
