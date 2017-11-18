@@ -207,4 +207,32 @@ public class ClassUtil {
 		}
 		return methods;
 	}
+
+	public static Class<?> getByClassName(String className) {
+		if (className.equals("byte.class")) {
+			return byte.class;
+		} else if (className.equals("short.class")) {
+			return short.class;
+		} else if (className.equals("int.class")) {
+			return int.class;
+		} else if (className.equals("long.class")) {
+			return long.class;
+		} else if (className.equals("double.class")) {
+			return double.class;
+		} else if (className.equals("float.class")) {
+			return float.class;
+		} else if (className.equals("boolean.class")) {
+			return boolean.class;
+		} else if (className.equals("char.class")) {
+			return char.class;
+		} else if (className.equals("String.class")) {
+			return String.class;
+		} else {
+			try {
+				return Class.forName(className);
+			} catch (ClassNotFoundException e) {
+			}
+		}
+		return null;
+	}
 }

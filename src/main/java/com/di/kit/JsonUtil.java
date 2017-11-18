@@ -431,13 +431,20 @@ public class JsonUtil {
 						str.add("\"").add(n0).add("\":").add(f.get(o)).add(",");
 					} else if (f.getType() == java.lang.String.class || f.getType() == java.lang.Character.class) {
 						str.add("\"").add(n0).add("\":\"").add(f.get(o)).add("\",");
+					} else if (f.getType().isArray()) {
+						str.add("\"").add(n0).add("\":[");
+						Object[] os=(Object[]) f.get(o);
+						for (Object o0 : os) {
+							str.add(toJson(o0)).add(",");
+						}
+						str.deleteLastChar().add("],");
 					} else if (f.getType() == java.util.List.class || f.getType() == java.util.ArrayList.class) {
 						str.add("\"").add(n0).add("\":[");
 						List<?> os = (List<?>) f.get(o);
 						for (Object o0 : os) {
 							str.add(toJson(o0)).add(",");
 						}
-						str.add("],");
+						str.deleteLastChar().add("],");
 					} else if (f.getType() == java.util.Map.class || f.getType() == java.util.LinkedHashMap.class) {
 						str.add("\"").add(n0).add("\":{");
 						Map<?, ?> m0 = (Map<?, ?>) f.get(o);
