@@ -164,7 +164,7 @@ public class ClassUtil {
 		return null;
 	}
 
-	public static <T> List<Field> getDeclaredFields(Class<T> t) {
+	public static List<Field> getDeclaredFields(Class<?> t) {
 		Class<?> clazz = t;
 		List<Field> fields = new ArrayList<>();
 		for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
