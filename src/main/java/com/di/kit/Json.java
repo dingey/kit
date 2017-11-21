@@ -110,6 +110,10 @@ public class Json {
 		return getJson().toObject(json, c);
 	}
 
+	public static String toJsonString(Object o) {
+		return getJson().toJson(o);
+	}
+
 	public <T> String toJson(T o) {
 		if (o == null) {
 			return null;
