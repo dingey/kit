@@ -1,28 +1,30 @@
 package com.di.socket;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import com.di.kit.Json;
 
 /**
  * @author d
  */
 public class SimpleSocketClient {
-	ObjectInputStream objectInputStream = null;
-	InputStream inputStream = null;
-	ObjectOutputStream objectOutputStream = null;
-	OutputStream outputStream = null;
+	static InputStream inputStream = null;
+	static OutputStream outputStream = null;
 
 	public static void main(String[] args) throws Exception {
 		Socket s = new Socket("localhost", 6666);
 		long l1 = System.currentTimeMillis();
 		request(s);
 		long l2 = System.currentTimeMillis();
-		System.out.println((l2 - l1) + "ms");
+		System.out.println("总耗时：" + (l2 - l1) + "ms");
 		s.close();
 	}
 
@@ -32,16 +34,34 @@ public class SimpleSocketClient {
 		m.setMethodName("say");
 		m.setParamTypes(new String[] { "String.class" });
 		m.setParamValues(new Object[] { "alice" });
+
 		long l1 = System.currentTimeMillis();
-		ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
-		out.writeObject(m);
-		out.flush();
+		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(s.getOutputStream(), "UTF-8"));
+		bw.write(Json.toJsonString(m));
+		bw.flush();
 		long l2 = System.currentTimeMillis();
-		System.out.println("ObjectOutputStream:" + (l2 - l1) + "ms");
-		ObjectInputStream in = new ObjectInputStream(s.getInputStream());
-		Object readObject = in.readObject();
-		System.out.println(readObject);
+		System.out.println("write:" + (l2 - l1) + "ms:" + Json.toJsonString(m));
+		if (!s.isOutputShutdown()) {
+			s.shutdownOutput();
+		}
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream(), "UTF-8"));
+		StringBuffer buffer = new StringBuffer();
+		String line = "";
+		while ((line = br.readLine()) != null) {
+			buffer.append(line);
+		}
+		String fromJson = Json.fromJson(buffer.toString(), String.class);
+		System.out.println("接收服务端反馈: " + fromJson);
 		long l3 = System.currentTimeMillis();
-		System.out.println("ObjectInputStream:" + (l3 - l2) + "ms");
+		System.out.println("inputStream:" + (l3 - l2) + "ms");
+		bw.close();
+		br.close();
+		if (!s.isClosed() && !s.isInputShutdown()) {
+			s.shutdownInput();
+		}
+		if (!s.isClosed()) {
+			s.shutdownInput();
+		}
 	}
 }

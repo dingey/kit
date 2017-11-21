@@ -2,7 +2,7 @@ package kit;
 
 import org.junit.Test;
 
-import com.di.kit.JsonUtil;
+import com.di.kit.Json;
 import com.di.socket.ServiceMethod;
 import com.di.socket.UserService;
 
@@ -17,8 +17,9 @@ public class JsonTest {
 		m.setMethodName("say");
 		m.setParamTypes(new String[] { "String.class" });
 		m.setParamValues(new Object[] { "alice" });
-		String json = JsonUtil.toJson(m);
+		String json = Json.toJsonString(m);
 		System.out.println(json);
-		ServiceMethod object = JsonUtil.toObject(json, ServiceMethod.class);
+		ServiceMethod object = Json.fromJson(json, ServiceMethod.class);
+		System.out.println(Json.toJsonString(object));
 	}
 }

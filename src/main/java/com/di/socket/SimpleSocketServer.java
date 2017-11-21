@@ -1,25 +1,30 @@
 package com.di.socket;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import com.di.kit.ClassUtil;
+import com.di.kit.Json;
 
 /**
  * @author d
  */
 public class SimpleSocketServer implements Runnable, Handler {
 	private Socket socket;
-	ObjectInputStream objectInputStream = null;
 	InputStream inputStream = null;
-	ObjectOutputStream objectOutputStream = null;
 	OutputStream outputStream = null;
+	ByteArrayInputStream in;
+	ByteArrayOutputStream out;
 
 	public SimpleSocketServer(Socket socket) throws IOException {
 		this.socket = socket;
@@ -30,31 +35,39 @@ public class SimpleSocketServer implements Runnable, Handler {
 		try {
 			// 采用循环不断从Socket中读取客户端发送过来的数据
 			while (!this.socket.isClosed()) {
-				Object readObject = null;
-				inputStream = this.socket.getInputStream();
-				objectInputStream = new ObjectInputStream(inputStream);
-				readObject = objectInputStream.readObject();
-
 				long l1 = System.currentTimeMillis();
-				System.out.println("收：" + Thread.currentThread().getId() + ":" + readObject);
-				Object writeObject = handler(readObject);
-				long l2 = System.currentTimeMillis();
-				System.out.println("耗时:" + (l2 - l1) + "ms发:" + Thread.currentThread().getId() + ":" + writeObject);
+				BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+				StringBuffer buffer = new StringBuffer();
+				String line = "";
+				while ((line = br.readLine()) != null) {
+					buffer.append(line);
+				}
+				System.out.println("接收客户端反馈: " + buffer.toString());
+				if (!socket.isInputShutdown()) {
+					socket.shutdownInput();
+				}
 
-				outputStream = this.socket.getOutputStream();
-				objectOutputStream = new ObjectOutputStream(outputStream);
-				objectOutputStream.writeObject(writeObject);
-				objectOutputStream.flush();
-				if (!this.socket.isOutputShutdown()) {
-					objectOutputStream.close();
-					outputStream.close();
+				ServiceMethod method = Json.fromJson(buffer.toString(), ServiceMethod.class);
+
+				System.out.println("收：" + Thread.currentThread().getId() + ":" + buffer.toString());
+				Object writeObject = handler(method);
+				System.out.println("发:" + Thread.currentThread().getId() + ":" + writeObject);
+
+				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
+				bw.write(Json.toJsonString(writeObject));
+				bw.flush();
+				br.close();
+				bw.close();
+				if (!socket.isClosed() && !socket.isOutputShutdown()) {
+					this.socket.shutdownOutput();
 				}
-				if (!this.socket.isInputShutdown()) {
-					inputStream.close();
-					objectInputStream.close();
+				if (!socket.isClosed()) {
+					this.socket.close();
 				}
+				long l2 = System.currentTimeMillis();
+				System.out.println("耗时:" + (l2 - l1) + "ms");
 			}
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
