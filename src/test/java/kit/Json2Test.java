@@ -15,23 +15,27 @@ public class Json2Test {
 	@Test
 	public void test() {
 		Json j = new Json();
-		String j1 = "[1,2]";
+		// String j1 = "[1,2]";
 		// Object[] object = j.toObject(j1, Object[].class);
 		// Object o1 = j.toObject(j1);
 		// String j2 = "[[1],[1]]";
 		// Object o2 = j.toObject(j2);
 		// j.toObject(j2, List.class);
-		String j3 = "{\"id\":9,\"n\":\"alice\",\"ns\":[\"a\"]}";
+		String j3 = "{\"id\":9,\"n\":\"alice\",\"create\":2017-11-21 13:56:20,\"ns\":[\"a\"],\"cs\":[{\"n\":\"a\",\"ns\":[\"a\"]}]}";
 		Man o3 = j.toObject(j3, Man.class);
+		System.out.println(j.toJson(o3));
+		String j4 = "{\"cs\":[{\"n\":\"a\"}]}";
+		Man o4 = j.toObject(j4, Man.class);
 	}
 
 	public static class Man {
-		int id;
+		Integer id;
 		String n;
-		int[]is;
+		int[] is;
 		String[] ns;
 		List<String> nl;
 		Date create;
+		List<Child> cs;
 
 		public int getId() {
 			return id;
@@ -73,5 +77,19 @@ public class Json2Test {
 			this.create = create;
 		}
 
+	}
+
+	public static class Child {
+		private String n;
+		int[] is;
+		String[] ns;
+
+		public String getN() {
+			return n;
+		}
+
+		public void setN(String n) {
+			this.n = n;
+		}
 	}
 }
