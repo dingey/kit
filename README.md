@@ -1,9 +1,8 @@
-# kit
+#  kit
 toolkit simple:xml,json,httpconnection etc.
 
 # json
 json字符串转Object
-
 ```
 class Man{
   int id;
@@ -34,5 +33,14 @@ j.setCamelCaseToUnderscores(true);
 ```
 Json.getJson().toObject(json);
 ```
-
 # xml
+adasdas
+# httpclient
+http工具类
+```
+postForm(String, Map<Object, Object>);
+postMultipartForm(String, Map<Object, Object>);
+postJson(String, String);
+postXml(String, String);
+get(String);
+```
