@@ -17,6 +17,10 @@ import java.util.Map;
  * @author di
  */
 public class ClassUtil {
+	public static boolean isJdkClass(Class<?> clz) {
+		return clz != null && clz.getClassLoader() == null;
+	}
+
 	public static <T> Object invokeMethod(Method m, T o, Object... args) {
 		try {
 			return m.invoke(o, args);
