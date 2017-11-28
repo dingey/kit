@@ -32,7 +32,7 @@ public class XmlBuilder {
 
 	public Node getById(Node nod, String id) {
 		List<Node> list = getByAttrValue(nod, "id", id);
-		return (list == null||list.isEmpty()) ? null : list.get(0);
+		return (list == null || list.isEmpty()) ? null : list.get(0);
 	}
 
 	public List<Node> getByAttrName(String attrName) {
@@ -173,7 +173,11 @@ public class XmlBuilder {
 					s.append(n.toString());
 				}
 			} else {
-				s.append(this.text);
+				if (this.text != null && this.text.indexOf("<") != 1) {
+					s.append("<![CDATA[ ").append(this.text).append(" ]]>");
+				} else {
+					s.append(this.text);
+				}
 			}
 			s.append("</").append(this.name).append(">");
 			return s.toString();
@@ -205,7 +209,13 @@ public class XmlBuilder {
 					s.append(b).append(n.toFormatString()).append("\n");
 				}
 			} else {
-				s.append(blank).append("  ").append(this.text).append("\n");
+				s.append(blank).append("  ");
+				if (this.text != null && this.text.indexOf("<") != 1) {
+					s.append("<![CDATA[ ").append(this.text).append(" ]]>");
+				} else {
+					s.append(this.text);
+				}
+				s.append("\n");
 			}
 			s.append(blank).append("</").append(this.name).append(">");
 			return s.toString();
@@ -231,10 +241,10 @@ public class XmlBuilder {
 		public LinkedHashMap<String, String> attributes() {
 			return attributes;
 		}
-		
-		public Node addAttribute(String name,String value) {
-			if(attributes==null){
-				attributes=new LinkedHashMap<>();
+
+		public Node addAttribute(String name, String value) {
+			if (attributes == null) {
+				attributes = new LinkedHashMap<>();
 			}
 			attributes.put(name, value);
 			return this;

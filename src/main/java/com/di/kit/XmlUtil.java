@@ -34,7 +34,12 @@ public class XmlUtil {
 				|| o.getClass() == java.lang.Double.class || o.getClass() == java.lang.Float.class
 				|| o.getClass() == boolean.class || o.getClass() == java.lang.Boolean.class
 				|| o.getClass() == java.lang.String.class || o.getClass() == java.lang.Character.class) {
-			str.add(o).add("</").add(n).add(">");
+			if(String.valueOf(o).indexOf("<")!=-1){
+				str.add(start+" ").add(o).add(" "+end);
+			}else{
+				str.add(o);
+			}
+			str.add("</").add(n).add(">");
 			return str.toString();
 		} else if (o.getClass().isArray()) {
 			str = new Str().add("<").add(n).add(">");
@@ -99,7 +104,13 @@ public class XmlUtil {
 							|| f.getType() == java.lang.Double.class || f.getType() == java.lang.Float.class
 							|| f.getType() == boolean.class || f.getType() == java.lang.Boolean.class
 							|| f.getType() == java.lang.String.class || f.getType() == java.lang.Character.class) {
-						str.add("<").add(n0).add(">").add(f.get(o)).add("</").add(n0).add(">");
+						str.add("<").add(n0).add(">");
+						if(String.valueOf(f.get(o)).indexOf("<")!=-1){
+							str.add(start+" ").add(f.get(o)).add(" "+end);
+						}else{
+							str.add(f.get(o));
+						}
+						str.add("</").add(n0).add(">");
 					} else if (f.getType() == java.util.List.class || f.getType() == java.util.ArrayList.class) {
 						str.add("<").add(n0).add(">");
 						List<?> os = (List<?>) f.get(o);
