@@ -210,7 +210,7 @@ public class XmlBuilder {
 				}
 			} else {
 				s.append(blank).append("  ");
-				if (this.text != null && this.text.indexOf("<") != 1) {
+				if (this.text != null && this.text.indexOf("<") != -1 && this.children().size() == 0) {
 					s.append("<![CDATA[ ").append(this.text).append(" ]]>");
 				} else {
 					s.append(this.text);

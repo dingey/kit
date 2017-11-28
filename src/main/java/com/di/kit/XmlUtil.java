@@ -34,9 +34,9 @@ public class XmlUtil {
 				|| o.getClass() == java.lang.Double.class || o.getClass() == java.lang.Float.class
 				|| o.getClass() == boolean.class || o.getClass() == java.lang.Boolean.class
 				|| o.getClass() == java.lang.String.class || o.getClass() == java.lang.Character.class) {
-			if(String.valueOf(o).indexOf("<")!=-1){
-				str.add(start+" ").add(o).add(" "+end);
-			}else{
+			if (String.valueOf(o).indexOf("<") != -1) {
+				str.add(start + " ").add(o).add(" " + end);
+			} else {
 				str.add(o);
 			}
 			str.add("</").add(n).add(">");
@@ -105,9 +105,9 @@ public class XmlUtil {
 							|| f.getType() == boolean.class || f.getType() == java.lang.Boolean.class
 							|| f.getType() == java.lang.String.class || f.getType() == java.lang.Character.class) {
 						str.add("<").add(n0).add(">");
-						if(String.valueOf(f.get(o)).indexOf("<")!=-1){
-							str.add(start+" ").add(f.get(o)).add(" "+end);
-						}else{
+						if (String.valueOf(f.get(o)).indexOf("<") != -1) {
+							str.add(start + " ").add(f.get(o)).add(" " + end);
+						} else {
 							str.add(f.get(o));
 						}
 						str.add("</").add(n0).add(">");
@@ -165,17 +165,21 @@ public class XmlUtil {
 	}
 
 	public static Map<String, Object> toMap(String xml) {
-		if(xml.startsWith("<?xml")){
-			xml=xml.substring(xml.indexOf("?>")+2).trim();
+		if (xml.startsWith("<?xml")) {
+			xml = xml.substring(xml.indexOf("?>") + 2).trim();
 		}
-		if(xml.startsWith("<!DOCTYPE")){
-			xml=xml.substring(xml.indexOf(">")+1).trim();
+		if (xml.startsWith("<!DOCTYPE")) {
+			xml = xml.substring(xml.indexOf(">") + 1).trim();
+		}
+		if (xml.startsWith(start)) {
+			xml = xml.substring(xml.indexOf(start) + 1).trim();
+			xml = xml.substring(xml.indexOf(end) + 1).trim();
 		}
 		Map<String, Object> m = new LinkedHashMap<>();
-		//m.put("attributes", getAttributes(xml));
-		//m.put("element name", getWrapperName(xml));
-		put(m,"element attributes",getAttributes(xml));
-		put(m,"element name",getWrapperName(xml));
+		// m.put("attributes", getAttributes(xml));
+		// m.put("element name", getWrapperName(xml));
+		put(m, "element attributes", getAttributes(xml));
+		put(m, "element name", getWrapperName(xml));
 		if (getWrapperValue(xml).indexOf("<") == -1) {
 			m.put(getWrapperName(xml), getWrapperValue(xml));
 			return m;
@@ -191,16 +195,16 @@ public class XmlUtil {
 			}
 			String value = getWrapperValue(s);
 			if (!value.startsWith("<") && !value.startsWith(start)) {
-				//m.put(name, value);
+				// m.put(name, value);
 				put(m, name, value);
 			} else if (value.startsWith(start)) {
-				//m.put(name, replaceEscape(value));
+				// m.put(name, replaceEscape(value));
 				put(m, name, replaceEscape(value));
 			} else if (value.startsWith("<") && !isList(value)) {
-				//m.put(name, toMap(s));
-				put(m, name,toMap(s));
+				// m.put(name, toMap(s));
+				put(m, name, toMap(s));
 			} else if (isList(value)) {
-				//m.put(name, toList(value));
+				// m.put(name, toList(value));
 				put(m, name, toList(value));
 			}
 		}
@@ -220,7 +224,7 @@ public class XmlUtil {
 				os.add(val);
 				os.add(v);
 				m.put(k, os);
-			}			
+			}
 		} else {
 			m.put(k, v);
 		}
@@ -249,7 +253,7 @@ public class XmlUtil {
 	}
 
 	private static Map<String, String> getAttributes(String xml) {
-		String s = sub(xml,"<",">");
+		String s = sub(xml, "<", ">");
 		String[] ss = s.split(" ");
 		if (ss.length == 1) {
 			return null;
@@ -257,31 +261,31 @@ public class XmlUtil {
 		Map<String, String> m = new LinkedHashMap<>();
 		for (int i = 1; i < ss.length; i++) {
 			String s0 = ss[i].trim();
-			if (!s0.isEmpty()&&s0.split("=").length>1) {
+			if (!s0.isEmpty() && s0.split("=").length > 1) {
 				m.put(s0.split("=")[0], delQuot(s0.split("=")[1]));
 			}
 		}
 		return m;
 	}
-	
-	private static String sub(String s,String start,String end){
-		int s1=s.indexOf(start)+start.length(),s2=s.indexOf(end);
-		if(0<s1&&s1<s2){
+
+	private static String sub(String s, String start, String end) {
+		int s1 = s.indexOf(start) + start.length(), s2 = s.indexOf(end);
+		if (0 < s1 && s1 < s2) {
 			return s.substring(s1, s2);
-		}else{
+		} else {
 			return s.replaceFirst("<", "").replaceFirst(">", "");
 		}
 	}
 
 	private static String delQuot(String s) {
-		int start=0,end=s.length();
-		if(s.indexOf('"')>0){
-			start=s.indexOf('"');
+		int start = 0, end = s.length();
+		if (s.indexOf('"') > 0) {
+			start = s.indexOf('"');
 		}
-		if(s.lastIndexOf('"')>start){
-			end=s.lastIndexOf('"');
+		if (s.lastIndexOf('"') > start) {
+			end = s.lastIndexOf('"');
 		}
-		return s.substring(start+1,end);
+		return s.substring(start + 1, end);
 	}
 
 	private static String getWrapperName(String xml) {
@@ -290,8 +294,13 @@ public class XmlUtil {
 	}
 
 	private static String getWrapperValue(String xml) {
-		return xml.substring(xml.indexOf(">") > -1 ? (xml.indexOf(">") + 1) : 0,
-				xml.lastIndexOf("<") > -1 ? xml.lastIndexOf("<") : xml.length());
+		if (xml.startsWith(start)) {
+			xml = xml.substring(xml.indexOf(start) + 1).trim();
+			xml = xml.substring(xml.indexOf(end) + 1).trim();
+		}
+		int begin = xml.indexOf(">") > 0 ? (xml.indexOf(">") + 1) : 0;
+		int end = xml.lastIndexOf("</") > 0 ? xml.lastIndexOf("</") : xml.length();
+		return xml.substring(begin, end);
 	}
 
 	private static String replaceEscape(String xml) {
