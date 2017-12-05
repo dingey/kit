@@ -5,8 +5,7 @@ import java.util.Date;
 import org.junit.Test;
 
 import com.di.kit.ClassUtil;
-
-import kit.XmlTest.Man;
+import com.di.kit.Json;
 
 /**
  * @author d
@@ -34,6 +33,6 @@ public class ClassTest {
 		System.out.println(ClassUtil.isJdkClass(Character.class));
 		System.out.println(ClassUtil.isJdkClass(String.class));
 		System.out.println(ClassUtil.isJdkClass(Date.class));
-		System.out.println(ClassUtil.isJdkClass(Man.class));
+		System.out.println(ClassUtil.isJdkClass(Json.class));
 	}
 }
