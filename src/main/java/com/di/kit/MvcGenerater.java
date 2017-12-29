@@ -135,6 +135,19 @@ public class MvcGenerater {
 	private boolean mapperLicenses = false;
 	private boolean lombok = false;
 	private boolean war = false;
+	private String tablePrefix;
+
+	public MvcGenerater setTablePrefix(String tablePrefix) {
+		this.tablePrefix = tablePrefix;
+		return this;
+	}
+
+	String replacePrefix(String s) {
+		if (tablePrefix != null && !tablePrefix.isEmpty()) {
+			return s.replaceFirst(tablePrefix, "");
+		}
+		return s;
+	}
 
 	public MvcGenerater setPersistence(PersistenceEnum persistence) {
 		this.persistence = persistence;
@@ -253,7 +266,7 @@ public class MvcGenerater {
 		this.entityPackage = entityPackage;
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.underlineToLowerCamelCase(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(replacePrefix(t.getName()));
 			className = StringUtil.firstCharUpper(className);
 			if (licenses != null && !licenses.isEmpty() && entityLicenses) {
 				s.line(licenses);
@@ -368,8 +381,12 @@ public class MvcGenerater {
 	public MvcGenerater createXml(String xmlPath, boolean replace) {
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.underlineToLowerCamelCase(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(replacePrefix(t.getName()));
 			className = StringUtil.firstCharUpper(className);
+			String keyCol = (t.getPrimaryKeys() != null && t.getPrimaryKeys().size() > 0)
+					? t.getPrimaryKeys().get(0).getName() : "";
+			String keyProp = StringUtil.underlineToLowerCamelCase(keyCol);
+			
 			s.line("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 			s.line("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\" >");
 			s.add("<mapper namespace=\"").add(mapperPackage).add(".").add(className).line("Mapper\">");
@@ -392,6 +409,28 @@ public class MvcGenerater {
 			}
 			s.deleteLastChar();
 			s.line("		)").line("	</insert>");
+			
+			s.add("	<insert id=\"insertSelective\"");
+			if (persistence.isUseGeneratedKeys()) {
+				s.add(" useGeneratedKeys=\"true\" keyProperty=\"").add(StringUtil
+						.firstCharLower(StringUtil.underlineToLowerCamelCase(t.getPrimaryKeys().get(0).getName())))
+						.add("\"");
+			}
+			s.line(">");
+			s.add("		insert into `").add(t.getName()).line("` (");
+			s.line("		<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\" >");
+			for (Column c : t.getAllColumns()) {
+				String pro = StringUtil.underlineToLowerCamelCase(c.getName());
+				s.add("			<if test=\"" + pro + " != null\" >").add(c.getName()).line(",</if>");
+			}
+			s.line("		</trim>");
+			s.line("		<trim prefix=\"values (\" suffix=\")\" suffixOverrides=\",\" >");
+			for (Column c : t.getAllColumns()) {
+				String pro = StringUtil.underlineToLowerCamelCase(c.getName());
+				s.add("			<if test=\"" + pro + " != null\" >#{").add(pro).line("},</if>");
+			}
+			s.line("		</trim>").line("	</insert>");
+			
 			s.line("    <update id=\"update\">");
 			s.add("		update `").add(t.getName()).line("` set ");
 			for (Column c : t.getColumns()) {
@@ -399,18 +438,29 @@ public class MvcGenerater {
 				s.add("		`").add(c.getName()).add("` = #{").add(s0).add("},").newLine();
 			}
 			s.deleteLastChar();
-			s.line("		WHERE id = #{id}");
+			s.line("		where "+keyCol+" = #{"+keyProp+"}");
 			s.line("	</update>");
+			
+			s.line("    <update id=\"updateSelective\">");
+			s.add("		update ").line(t.getName());
+			s.line("		<set>");
+			for (Column c : t.getColumns()) {
+				String pro = StringUtil.underlineToLowerCamelCase(c.getName());
+				s.add("			<if test=\"" + pro + " != null\" >").add(c.getName()).add("=#{").add(pro).line("},</if>");
+			}
+			s.line("		</set>").line("		where " + keyCol + "=#{" + keyProp + "}");
+			s.line("	</update>");
+			
 			s.line("    <delete id=\"delete\">");
 			s.add("		update `").add(t.getName()).line("` set");
-			s.line("		`del_flag` =#{DEL_FLAG_DELETE}");
-			s.line("		WHERE id = #{id}").line("	</delete>");
-			s.add("    <select id=\"get\" resultType=\"").add(className).line("\">");
-			s.add("        SELECT * FROM `").add(t.getName());
-			s.line("` WHERE `del_flag` = 0 AND `id` = #{id}").line("    </select>");
-			s.add("    <select id=\"findList\" resultType=\"").add(className).line("\">");
-			s.add("        SELECT * FROM `").add(t.getName());
-			s.line("` WHERE `del_flag` = #{DEL_FLAG_NORMAL} ORDER BY `updated_at` DESC");
+			s.line("		`del_flag` =0");
+			s.line("		where "+keyCol+" = #{"+keyProp+"}").line("	</delete>");
+			s.add("    <select id=\"get\" resultType=\"").add(entityPackage).add(".").add(className).line("\">");
+			s.add("        select * from `").add(t.getName());
+			s.line("` where `del_flag` = 0 and "+keyCol+" = #{"+keyProp+"}").line("    </select>");
+			s.add("    <select id=\"findList\" resultType=\"").add(entityPackage).add(".").add(className).line("\">");
+			s.add("        select * from `").add(t.getName());
+			s.line("` where `del_flag` = 0 order by `created_at` desc");
 			s.line("    </select>").line("</mapper>");
 			out(path.replaceFirst("java", "resources") + xmlPath + className + "Mapper.xml", s.toString(), replace);
 		}
@@ -421,7 +471,7 @@ public class MvcGenerater {
 		this.mapperPackage = mapperPackage;
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.underlineToLowerCamelCase(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(replacePrefix(t.getName()));
 			className = StringUtil.firstCharUpper(className);
 			if (licenses != null && !licenses.isEmpty() && mapperLicenses) {
 				s.line(licenses);
@@ -451,7 +501,7 @@ public class MvcGenerater {
 		this.servicePackage = servicePackage;
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.underlineToLowerCamelCase(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(replacePrefix(t.getName()));
 			className = StringUtil.firstCharUpper(className);
 			if (licenses != null && !licenses.isEmpty() && serviceLicenses) {
 				s.line(licenses);
@@ -465,7 +515,12 @@ public class MvcGenerater {
 			s.line("/**").add(" * ").line(t.getComment() + "service").line(" * @author " + author);
 			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 			s.line(" */");
-			s.add("public class ").add(className).add("Service");
+			if(serviceBaseClass.isInterface()){
+				s.add("public interface ");
+			}else{
+				s.add("public class ");
+			}
+			s.add(className).add("Service");
 			if (serviceBaseClass != null) {
 				s.add(" extends ").add(serviceBaseClass.getSimpleName());
 				if (hasParametersType(serviceBaseClass) && serviceBaseClass.getTypeParameters().length == 2) {
@@ -492,7 +547,7 @@ public class MvcGenerater {
 		this.controlPackage = controlPackage;
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.underlineToLowerCamelCase(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(replacePrefix(t.getName()));
 			className = StringUtil.firstCharUpper(className);
 			String lowClassName = StringUtil.firstCharLower(className);
 			if (licenses != null && !licenses.isEmpty() && controlLicenses) {
@@ -552,7 +607,7 @@ public class MvcGenerater {
 	public MvcGenerater createView(String viewPath) {
 		for (Table t : tables) {
 			Str s = new Str();
-			String className = StringUtil.underlineToLowerCamelCase(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(replacePrefix(t.getName()));
 			// list
 			if (viewHeader != null && !viewHeader.isEmpty()) {
 				s.line(viewHeader);
@@ -752,9 +807,9 @@ public class MvcGenerater {
 		return PathUtil.getMavenSrcPath() + "main/java/";
 	}
 
-	public MvcGenerater createXmlReplaceable(String xmlPath,boolean selective) {
+	public MvcGenerater createXmlReplaceable(String xmlPath, boolean selective) {
 		for (Table t : tables) {
-			String className = StringUtil.underlineToLowerCamelCase(t.getName());
+			String className = StringUtil.underlineToLowerCamelCase(replacePrefix(t.getName()));
 			className = StringUtil.firstCharUpper(className);
 			String pathname = path.replaceFirst("java", "resources") + xmlPath + className + "Mapper.xml";
 			File f = new File(pathname);
@@ -764,51 +819,51 @@ public class MvcGenerater {
 				String keyCol = (t.getPrimaryKeys() != null && t.getPrimaryKeys().size() > 0)
 						? t.getPrimaryKeys().get(0).getName() : "";
 				String keyProp = StringUtil.underlineToLowerCamelCase(keyCol);
-				Str s = new Str();			
+				Str s = new Str();
 
 				Node insert = builder.getById("insert");
 				if (insert == null) {
 					insert = builder.rootNode().createNode().name("insert");
 					insert.addAttribute("id", "insert");
-					if(persistence.isUseGeneratedKeys()){
+					if (persistence.isUseGeneratedKeys()) {
 						insert.addAttribute("useGeneratedKeys", "true");
 					}
-				}else{
+				} else {
 					builder.rootNode().children().remove(insert);
 				}
 				s.add("insert into ").add(t.getName()).add(" (");
-				for(Column c:t.getAllColumns()){
+				for (Column c : t.getAllColumns()) {
 					s.add(c.getName()).add(",");
 				}
 				s.delLastChar().add(") values (");
-				for(Column c:t.getAllColumns()){
+				for (Column c : t.getAllColumns()) {
 					s.add("#{").add(StringUtil.underlineToLowerCamelCase(c.getName())).add("},");
 				}
 				s.delLastChar().add(")");
 				insert.text(s.toString());
 				builder.rootNode().children().add(insert);
-				if(selective){
+				if (selective) {
 					Node is = builder.getById("insertSelective");
 					if (is == null) {
 						is = builder.rootNode().createNode().name("insert");
 						is.addAttribute("id", "insertSelective");
-						if(persistence.isUseGeneratedKeys()){
+						if (persistence.isUseGeneratedKeys()) {
 							is.addAttribute("useGeneratedKeys", "true");
 						}
-					}else{
+					} else {
 						builder.rootNode().children().remove(is);
 					}
 					s.empty("insert into ").add(t.getName());
 					s.add("<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\" >");
-					for(Column c:t.getAllColumns()){
-						String pro=StringUtil.underlineToLowerCamelCase(c.getName());
-						s.add("<if test=\""+pro+" != null\" >").add(c.getName()).add(",</if>");
+					for (Column c : t.getAllColumns()) {
+						String pro = StringUtil.underlineToLowerCamelCase(c.getName());
+						s.add("<if test=\"" + pro + " != null\" >").add(c.getName()).add(",</if>");
 					}
 					s.add("</trim>");
 					s.add("<trim prefix=\"values (\" suffix=\")\" suffixOverrides=\",\" >");
-					for(Column c:t.getAllColumns()){
-						String pro=StringUtil.underlineToLowerCamelCase(c.getName());
-						s.add("<if test=\""+pro+" != null\" >#{").add(pro).add("},</if>");
+					for (Column c : t.getAllColumns()) {
+						String pro = StringUtil.underlineToLowerCamelCase(c.getName());
+						s.add("<if test=\"" + pro + " != null\" >#{").add(pro).add("},</if>");
 					}
 					s.add("</trim>");
 					is.text(s.toString());
@@ -819,65 +874,65 @@ public class MvcGenerater {
 				if (update == null) {
 					update = builder.rootNode().createNode().name("update");
 					update.addAttribute("id", "update");
-				}else{
+				} else {
 					builder.rootNode().children().remove(update);
 				}
 				s.empty("update ").add(t.getName()).add(" set ");
-				for(Column c:t.getColumns()){
+				for (Column c : t.getColumns()) {
 					s.add(c.getName()).add("=#{").add(StringUtil.underlineToLowerCamelCase(c.getName())).add("},");
 				}
-				s.delLastChar().add(" where "+ keyCol + "=#{" + keyProp + "}");
+				s.delLastChar().add(" where " + keyCol + "=#{" + keyProp + "}");
 				update.text(s.toString());
 				builder.rootNode().children().add(update);
-				if(selective){
+				if (selective) {
 					Node us = builder.getById("updateSelective");
 					if (us == null) {
 						us = builder.rootNode().createNode().name("update");
 						us.addAttribute("id", "updateSelective");
-					}else{
+					} else {
 						builder.rootNode().children().remove(us);
 					}
 					s.empty("update ").add(t.getName());
 					s.add("<set>");
-					for(Column c:t.getColumns()){
-						String pro=StringUtil.underlineToLowerCamelCase(c.getName());
-						s.add("<if test=\""+pro+" != null\" >").add(c.getName()).add("=#{").add(pro).add("},</if>");
+					for (Column c : t.getColumns()) {
+						String pro = StringUtil.underlineToLowerCamelCase(c.getName());
+						s.add("<if test=\"" + pro + " != null\" >").add(c.getName()).add("=#{").add(pro).add("},</if>");
 					}
-					s.add("</set>").add(" where "+ keyCol + "=#{" + keyProp + "}");
+					s.add("</set>").add(" where " + keyCol + "=#{" + keyProp + "}");
 					us.text(s.toString());
 					builder.rootNode().children().add(us);
 				}
-				
+
 				Node del = builder.getById("delete");
 				if (del == null) {
 					del = builder.rootNode().createNode().name("select");
 					del.addAttribute("id", "delete");
-				}else{
+				} else {
 					builder.rootNode().children().remove(del);
 				}
 				del.text("update " + t.getName() + " set del=1 where " + keyCol + "=#{" + keyProp + "}");
 				builder.rootNode().children().add(del);
-				
+
 				Node get = builder.getById("get");
 				if (get == null) {
 					get = builder.rootNode().createNode().name("select");
 					get.addAttribute("id", "get").addAttribute("resultType", className);
-				}else{
+				} else {
 					builder.rootNode().children().remove(get);
 				}
 				get.text("select * from " + t.getName() + " where " + keyCol + "=#{" + keyProp + "}");
 				builder.rootNode().children().add(get);
-				
+
 				Node list = builder.getById("list");
 				if (list == null) {
 					list = builder.rootNode().createNode().name("select");
 					list.addAttribute("id", "list").addAttribute("resultType", className);
-				}else{
+				} else {
 					builder.rootNode().children().remove(list);
 				}
 				list.text("select * from " + t.getName());
 				builder.rootNode().children().add(list);
-				
+
 				s.empty("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 				s.line("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\" >");
 				s.add(builder.rootNode().toString());
@@ -888,9 +943,10 @@ public class MvcGenerater {
 		}
 		return this;
 	}
-	
-	public static interface ViewStyle{
+
+	public static interface ViewStyle {
 		String edit(Table t);
+
 		String list(Table t);
 	}
 }
