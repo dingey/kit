@@ -179,7 +179,7 @@ public class ClassUtil {
 	public static List<Field> getDeclaredFields(Class<?> t) {
 		Class<?> clazz = t;
 		List<Field> fields = new ArrayList<>();
-		for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
+		for (; clazz != Object.class && clazz != Class.class && clazz != Field.class; clazz = clazz.getSuperclass()) {
 			try {
 				for (Field f : clazz.getDeclaredFields()) {
 					int modifiers = f.getModifiers();
@@ -195,7 +195,7 @@ public class ClassUtil {
 	}
 
 	public static <T> Method getDeclaredMethod(Class<T> t, String methodName, Class<?>... parameterTypes) {
-		for (Class<?> clazz = t; clazz != Object.class; clazz = clazz.getSuperclass()) {
+		for (Class<?> clazz = t; clazz != Object.class && clazz != Class.class; clazz = clazz.getSuperclass()) {
 			try {
 				return clazz.getDeclaredMethod(methodName, parameterTypes);
 			} catch (Exception e) {
