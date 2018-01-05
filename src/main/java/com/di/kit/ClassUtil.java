@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,13 @@ import java.util.Map;
  * @author di
  */
 public class ClassUtil {
+	public static boolean isUserClass(Class<?> c) {
+		return !c.isPrimitive() && c != Byte.class && c != Short.class && c != Integer.class && c != Long.class
+				&& c != Double.class && c != Float.class && c != Character.class && c != Boolean.class
+				&& c != Date.class && c != java.sql.Date.class && !c.isInterface() && !c.isEnum()
+				&& (c instanceof Object) && c != Object.class && c != Class.class;
+	}
+
 	public static boolean isJdkClass(Class<?> clz) {
 		return clz != null && clz.getClassLoader() == null;
 	}
