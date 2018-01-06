@@ -206,7 +206,7 @@ public class ClassUtil {
 
 	public static <T> List<Method> getDeclaredMethods(Class<T> t) {
 		List<Method> methods = new ArrayList<>();
-		for (Class<?> clazz = t; clazz != Object.class; clazz = clazz.getSuperclass()) {
+		for (Class<?> clazz = t; clazz != Object.class && clazz != Class.class; clazz = clazz.getSuperclass()) {
 			try {
 				for (Method m : clazz.getDeclaredMethods()) {
 					if (ModifierUtil.isCommon(m.getModifiers())) {
