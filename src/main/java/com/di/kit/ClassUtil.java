@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -246,5 +247,19 @@ public class ClassUtil {
 			}
 		}
 		return null;
+	}
+
+	public static Class<?> getFieldListType(Field f) {
+		ParameterizedType pt = (ParameterizedType) f.getGenericType();
+		Type t = pt.getActualTypeArguments()[0];
+		return (Class<?>) t;
+	}
+
+	public static boolean isListField(Field f) {
+		return f.getType() == List.class || f.getType() == Collection.class || f.getType() == ArrayList.class;
+	}
+
+	public static Class<?> getFieldArrayType(Field f) {
+		return f.getType().getComponentType();
 	}
 }
