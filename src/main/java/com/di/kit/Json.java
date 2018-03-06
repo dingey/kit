@@ -187,6 +187,18 @@ public class Json {
 		o = (T) toObjectVal(toObject(json), c);
 		return o;
 	}
+	
+	public <T> List<T> toObjects(String json, Class<T> c) {
+		if (json == null && !c.isPrimitive()) {
+			return null;
+		} else if ((json == null || json.isEmpty()) && c.isPrimitive()) {
+			throw new IllegalArgumentException("json is null or empty that can't be transform to primitive Class.");
+		}
+		List<T> list=new ArrayList<>();
+		json = json.trim();
+		toObjectVal(toObject(json), List.class);
+		return list;
+	}
 
 	@SuppressWarnings("unchecked")
 	private Object toObjectVal(Object val, Class<?> c) {
