@@ -260,7 +260,7 @@ public class Json {
 				}
 				return o;
 			}
-		} catch (Exception e) {
+		} catch(ClassCastException e1){return null;}catch (Exception e) {
 			e.printStackTrace();
 		}
 		return val;
