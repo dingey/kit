@@ -1,11 +1,9 @@
 package kit;
 
-import java.util.Map;
-
 import org.junit.Test;
 
 import com.di.kit.XmlBuilder;
-import com.di.kit.XmlUtil;
+import com.di.kit.Xml;
 
 /**
  * @author di
@@ -168,9 +166,9 @@ public class A {
 				+ "        </if>\n" + "        <if test=\"end!=null\">\n"
 				+ "            <![CDATA[  AND `activity_end_time`<=#{end}  ]]>\n" + "        </if>\n"
 				+ "        ORDER BY `created_at` DESC\n" + "    </select>\n" + "</mapper>";
-		Map<String, Object> map = XmlUtil.toMap(s);
+		Xml.toMap(s);
 		XmlBuilder parse = new XmlBuilder().parse(s);
-		String ss = parse.rootNode().toFormatString();
+		parse.rootNode().toFormatString();
 		System.out.println(s);
 	}
 }
