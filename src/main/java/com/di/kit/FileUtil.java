@@ -1,5 +1,7 @@
 package com.di.kit;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
@@ -196,15 +199,29 @@ public class FileUtil {
 		return path;
 	}
 
-	private static void readClasses(String relativePath) {
-		String realPath = getRealPath(relativePath);
-		File f = new File(realPath);
-		if (f.exists()) {
-			if (f.isDirectory()) {
-				
-			} else {
-
-			}
+	public static byte[] readResBytesInJar(Class<?> jarClass, String filename) throws IOException {
+		// 返回读取指定资源的输入流
+		InputStream is = jarClass.getResourceAsStream("/" + filename);
+		// InputStream is=当前类.class.getResourceAsStream("XX.config");
+		BufferedInputStream bis = new BufferedInputStream(is);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		byte[] bs = new byte[1024];
+		while (bis.read(bs) != -1) {
+			out.write(bs);
 		}
+		return out.toByteArray();
+	}
+
+	public static String readResStringInJar(Class<?> jarClass, String filename, String encode) throws IOException {
+		// 返回读取指定资源的输入流
+		InputStream is = jarClass.getResourceAsStream("/" + filename);
+		BufferedReader br = new BufferedReader(
+				new InputStreamReader(is, (encode == null || encode.isEmpty()) ? "UTF-8" : encode));
+		StringBuilder sb = new StringBuilder();
+		String s = "";
+		while ((s = br.readLine()) != null) {
+			sb.append(s).append("\r\n");
+		}
+		return sb.toString();
 	}
 }
