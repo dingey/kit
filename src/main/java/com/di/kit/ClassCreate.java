@@ -102,7 +102,7 @@ public class ClassCreate {
 	}
 
 	public static void createFromXml(String xml, String packag, String path) {
-		Map<String, Object> map = XmlUtil.toMap(xml);
+		Map<String, Object> map = Xml.toMap(xml);
 		createClass(map, packag, path, xml.substring(xml.indexOf("<") + 1, xml.indexOf(">")));
 	}
 

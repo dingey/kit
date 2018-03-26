@@ -21,7 +21,7 @@ public class XmlBuilder {
 	}
 
 	public XmlBuilder parse(String xml) {
-		this.xmlMap = XmlUtil.toMap(xml);
+		this.xmlMap = Xml.toMap(xml);
 		this.node = fromMapObject(this.xmlMap);
 		return this;
 	}
