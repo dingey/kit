@@ -15,6 +15,10 @@ public enum JDBCTypeEnum {
 	DATE(java.sql.Date.class,JDBCType.DATE),
 	TIME(java.sql.Time.class,JDBCType.TIME),
 	TIMESTAMP(java.sql.Timestamp.class,JDBCType.TIMESTAMP),
+	CLOB(java.sql.Clob.class,JDBCType.CLOB),
+	BLOB(java.sql.Blob.class,JDBCType.DATALINK),
+	ARRAY(java.sql.Array.class,JDBCType.ARRAY),
+	REF(java.sql.Ref.class,JDBCType.REF),
 	URL(java.net.URL.class,JDBCType.DATALINK),
 	BYTE_ARRAY(byte[].class,JDBCType.BINARY,JDBCType.VARBINARY,JDBCType.LONGVARBINARY);
 
