@@ -15,6 +15,7 @@ public enum JDBCTypeEnum {
 	DATE(java.sql.Date.class,JDBCType.DATE),
 	TIME(java.sql.Time.class,JDBCType.TIME),
 	TIMESTAMP(java.sql.Timestamp.class,JDBCType.TIMESTAMP),
+	DATETIME(java.util.Date.class),
 	CLOB(java.sql.Clob.class,JDBCType.CLOB),
 	BLOB(java.sql.Blob.class,JDBCType.DATALINK),
 	ARRAY(java.sql.Array.class,JDBCType.ARRAY),
@@ -60,5 +61,25 @@ public enum JDBCTypeEnum {
 			}
 		}
 		return javaTypes[0];
+	}
+	
+	public static JDBCTypeEnum getByJdbcType(String jdbcType){
+		jdbcType = jdbcType.replaceAll("UNSIGNED", "").trim();
+		for(JDBCTypeEnum e:values()) {
+			if(e.getJdbcTypes()!=null&&e.getJavaTypes().length>0) {
+				for(JDBCType jt:e.getJdbcTypes()) {
+					if(jt.name().equalsIgnoreCase(jdbcType)) {
+						return e;
+					}
+				}
+			} else {
+				for(Class<?> c:e.getJavaTypes()) {
+					if(c.getSimpleName().equalsIgnoreCase(jdbcType)) {
+						return e;
+					}
+				}
+			}
+		}
+		return STRING;
 	}
 }
