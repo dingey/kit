@@ -244,7 +244,7 @@ public class JdbcMeta {
 		private ImportKey importKey;
 		private boolean nullable;
 		private int length;
-		
+
 		public int getLength() {
 			return length;
 		}
@@ -334,7 +334,7 @@ public class JdbcMeta {
 
 	public static enum Type {
 		INT("int", "int"), CHAR("char", "String"), VARCHAR("varchar", "String"), TIME_STAMP("timestamp",
-				"java.util.Date"), DATE_TIME("datetime", "java.util.Date"), TINYINT("tinyint", "int"), BIT("bit",
+				"java.util.Date"), DATE_TIME("datetime", "java.util.Date"), TINYINT("tinyint", "byte"), BIT("bit",
 						"boolean"), BIGINT("bigint", "long"), DOUBLE("double",
 								"double"), DECIMAL("decimal", "java.math.BigDecimal"), FLOAT("float", "float");
 		private String sql;
@@ -362,6 +362,7 @@ public class JdbcMeta {
 		}
 
 		public static Type getBySql(String sql) {
+			sql = sql.replaceAll("UNSIGNED", "").trim();
 			for (Type t : Type.values()) {
 				if (t.getSql().equalsIgnoreCase(sql)) {
 					return t;
