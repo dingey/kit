@@ -135,6 +135,7 @@ public class MvcGenerater {
 	private boolean mapperLicenses = false;
 	private boolean lombok = false;
 	private boolean war = false;
+	private boolean swaggerEntity=false;
 	private String tablePrefix;
 
 	public MvcGenerater setTablePrefix(String tablePrefix) {
@@ -233,6 +234,11 @@ public class MvcGenerater {
 		this.lombok = lombok;
 		return this;
 	}
+	
+	public MvcGenerater setSwaggerEntity(boolean swaggerEntity) {
+		this.swaggerEntity = swaggerEntity;
+		return this;
+	} 
 
 	private List<Table> tables = new ArrayList<>();
 
@@ -276,6 +282,10 @@ public class MvcGenerater {
 				s.line("import lombok.Getter;");
 				s.line("import lombok.Setter;");
 			}
+			if(swaggerEntity) {
+				s.line("import io.swagger.annotations.ApiModel;");
+				s.line("import io.swagger.annotations.ApiModelProperty;");
+			}
 			if (entityBaseClass == null) {
 				s.line("import java.io.Serializable;");
 				s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
@@ -285,11 +295,18 @@ public class MvcGenerater {
 					s.line("@Getter");
 					s.line("@Setter");
 				}
+				if(swaggerEntity) {
+					s.add("@ApiModel(\"").add(t.getComment()).add("\")");
+				}
 				s.add("public class ").add(className).line(" implements Serializable {");
 				s.add("	private static final long serialVersionUID = ").add(IdWorker.nextId()).line("L;");
 				for (Column c1 : t.getAllColumns()) {
 					if (!c1.getRemark().isEmpty()) {
-						s.line("    /**").add("	 * ").line(c1.getRemark()).line("	 */");
+						if(swaggerEntity) {
+							s.add("	@ApiModelProperty(\"").add(c1.getRemark()).line("\")");
+						}else {
+							s.line("    /**").add("	 * ").line(c1.getRemark()).line("	 */");
+						}
 					}
 					s.add("    private ").add(c1.getType().getJava()).add(" ");
 					s.add(StringUtil.firstCharLower(StringUtil.underlineToLowerCamelCase(c1.getName()))).line(";");
