@@ -528,7 +528,8 @@ public class MvcGenerater {
 				s.add("import ").add(serviceBaseClass.getName()).line(";");
 			}
 			s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine();
-			s.add("import ").add(mapperPackage).add(".").add(className).add("Mapper;").newLine().newLine();
+			if (hasParametersType(serviceBaseClass) && serviceBaseClass.getTypeParameters().length == 2)
+				s.add("import ").add(mapperPackage).add(".").add(className).add("Mapper;").newLine().newLine();
 			s.line("/**").add(" * ").line(t.getComment() + "service").line(" * @author " + author);
 			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 			s.line(" */");
@@ -552,6 +553,8 @@ public class MvcGenerater {
 							s.add("<").add(className).add("Mapper,").add(className).add(">");
 						}
 					}
+				}else if (hasParametersType(serviceBaseClass) && serviceBaseClass.getTypeParameters().length == 1) {
+					s.add("<").add(className).add(">");
 				}
 			}
 			s.line(" {").newLine().add("}");
