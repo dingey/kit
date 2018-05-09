@@ -562,7 +562,132 @@ public class MvcGenerater {
 		}
 		return this;
 	}
-
+	
+	private Class<?> serviceInterface;
+	private String serviceInterfacePackage;
+	
+	public MvcGenerater setServiceInterface(Class<?> serviceInterface) {
+		this.serviceInterface=serviceInterface;
+		return this;
+	}
+	
+	public MvcGenerater createServiceInterface(String serviceInterfacePackage) {
+		this.serviceInterfacePackage=serviceInterfacePackage;
+		for (Table t : tables) {
+			Str s = new Str();
+			String className = StringUtil.underlineToLowerCamelCase(replacePrefix(t.getName()));
+			className = StringUtil.firstCharUpper(className);
+			if (licenses != null && !licenses.isEmpty() && serviceLicenses) {
+				s.line(licenses);
+			}
+			s.add("package ").add(serviceInterfacePackage).line(";").newLine();
+			if (serviceInterface != null) {
+				s.add("import ").add(serviceInterface.getName()).line(";");
+			}
+			s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine();
+			s.line("/**").add(" * ").line(t.getComment() + "service").line(" * @author " + author);
+			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
+			s.line(" */");
+			s.add("public interface ").add(className).add("Service");
+			if (serviceInterface != null) {
+				s.add(" extends ").add(serviceInterface.getSimpleName());
+				if (hasParametersType(serviceInterface) && serviceInterface.getTypeParameters().length == 2) {
+					String name2 = serviceBaseClass.getTypeParameters()[0].getName();
+					String name = entityBaseClass.getTypeParameters()[0].getName();
+					if (name.equals(name2)) {
+						if (serviceBaseClass.getTypeParameters().length == 2) {
+							s.add("<").add(className).add(",").add(className).add("Mapper>");
+						}
+					} else {
+						if (serviceBaseClass.getTypeParameters().length == 2) {
+							s.add("<").add(className).add("Mapper,").add(className).add(">");
+						}
+					}
+				}else if (hasParametersType(serviceInterface) && serviceInterface.getTypeParameters().length == 1) {
+					s.add("<").add(className).add(">");
+				}
+			}
+			s.line(" {").newLine().add("}");
+			out(path + serviceInterfacePackage.replace(".", "/") + "/" + className + "Service.java", s.toString());
+		}
+		return this;
+	}
+	
+	private Class<?> serviceImpl;
+	private String serviceImplPackage;
+	
+	public MvcGenerater setServiceImpl(Class<?> serviceImpl) {
+		this.serviceImpl=serviceImpl;
+		return this;
+	}
+	
+	public MvcGenerater createServiceImpl(String serviceImplPackage) {
+		this.serviceImplPackage=serviceImplPackage;
+		for (Table t : tables) {
+			Str s = new Str();
+			String className = StringUtil.underlineToLowerCamelCase(replacePrefix(t.getName()));
+			className = StringUtil.firstCharUpper(className);
+			if (licenses != null && !licenses.isEmpty() && serviceLicenses) {
+				s.line(licenses);
+			}
+			s.add("package ").add(serviceImplPackage).line(";").newLine();
+			if (serviceInterface != null) {
+				s.add("import ").add(serviceInterfacePackage).add(".").add(className).line("Service;");
+			}
+			if (serviceImpl != null) {
+				s.add("import ").add(serviceImpl.getName()).line(";");
+				if (hasParametersType(serviceImpl) && serviceImpl.getTypeParameters().length == 2)
+					s.add("import ").add(mapperPackage).add(".").add(className).line("Mapper;");
+			}
+			s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine();
+			s.line("import org.springframework.stereotype.Service;");
+			s.line("/**").add(" * ").line(t.getComment() + "service").line(" * @author " + author);
+			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
+			s.line(" */");
+			s.add("@Service(\"").add(StringUtil.firstCharLower(className)).line("Service\")");
+			s.add("public class ").add(className).add("ServiceImpl");
+			if (serviceImpl != null) {
+				s.add(" extends ").add(serviceImpl.getSimpleName());
+				if (hasParametersType(serviceImpl) && serviceImpl.getTypeParameters().length == 2) {
+					String name2 = serviceImpl.getTypeParameters()[0].getName();
+					String name = entityBaseClass.getTypeParameters()[0].getName();
+					if (name.equals(name2)) {
+						if (serviceImpl.getTypeParameters().length == 2) {
+							s.add("<").add(className).add(",").add(className).add("Mapper>");
+						}
+					} else {
+						if (serviceImpl.getTypeParameters().length == 2) {
+							s.add("<").add(className).add("Mapper,").add(className).add(">");
+						}
+					}
+				}else if (hasParametersType(serviceImpl) && serviceImpl.getTypeParameters().length == 1) {
+					s.add("<").add(className).add(">");
+				}
+			}
+			if (serviceInterface != null) {
+				s.add(" implements ").add(className).add("Service");
+				if (hasParametersType(serviceInterface) && serviceInterface.getTypeParameters().length == 2) {
+					String name2 = serviceInterface.getTypeParameters()[0].getName();
+					String name = entityBaseClass.getTypeParameters()[0].getName();
+					if (name.equals(name2)) {
+						if (serviceInterface.getTypeParameters().length == 2) {
+							s.add("<").add(className).add(",").add(className).add("Mapper>");
+						}
+					} else {
+						if (serviceInterface.getTypeParameters().length == 2) {
+							s.add("<").add(className).add("Mapper,").add(className).add(">");
+						}
+					}
+				}else if (hasParametersType(serviceInterface) && serviceInterface.getTypeParameters().length == 1) {
+					//s.add("<").add(className).add(">");
+				}
+			}
+			s.line(" {").newLine().add("}");
+			out(path + serviceImplPackage.replace(".", "/") + "/" + className + "ServiceImpl.java", s.toString());
+		}
+		return this;
+	}
+	
 	public MvcGenerater createControl(String controlPackage) {
 		this.controlPackage = controlPackage;
 		for (Table t : tables) {
