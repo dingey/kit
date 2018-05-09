@@ -506,7 +506,7 @@ public class MvcGenerater {
 			s.add("        select * from `").add(t.getName());
 			s.line("` where `del_flag` = 0 order by `created_at` desc");
 			s.line("    </select>").line("</mapper>");
-			out(path.replaceFirst("java", "resources") + xmlPath + className + "Mapper.xml", s.toString(), replace);
+			out(getPath().replaceFirst("java", "resources") + xmlPath + className + "Mapper.xml", s.toString(), replace);
 		}
 		return this;
 	}
