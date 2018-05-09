@@ -263,6 +263,12 @@ public class MvcGenerater {
 	private String servicePackage;
 	private String controlPackage;
 	private boolean jpaAnnotation=false;
+	
+	public MvcGenerater jpaAnnotation(boolean jpaAnnotation) {
+		this.jpaAnnotation=jpaAnnotation;
+		return this;
+	}
+	
 	public MvcGenerater createEntity(String entityPackage) {
 		return this.createEntity(entityPackage, false);
 	}
@@ -299,7 +305,7 @@ public class MvcGenerater {
 					s.add("@ApiModel(\"").add(t.getComment()).add("\")");
 				}
 				if(jpaAnnotation) {
-					s.add("@Table(name = \"").add(t.getName()).add("\")");
+					s.add("@Table(name = \"").add(t.getName()).line("\")");
 				}
 				s.add("public class ").add(className).line(" implements Serializable {");
 				s.add("	private static final long serialVersionUID = ").add(IdWorker.nextId()).line("L;");
@@ -345,6 +351,9 @@ public class MvcGenerater {
 				}
 				if(swaggerEntity) {
 					s.add("@ApiModel(\"").add(t.getComment()).line("\")");
+				}
+				if(jpaAnnotation) {
+					s.add("@Table(name = \"").add(t.getName()).line("\")");
 				}
 				s.add("public class ").add(className).add(" extends ").add(entityBaseClass.getSimpleName());
 				if (hasParametersType(entityBaseClass)) {
