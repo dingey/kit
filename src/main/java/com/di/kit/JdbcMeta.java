@@ -101,7 +101,7 @@ public class JdbcMeta {
 			Column c = new Column();
 			c.setName(columnSet.getString("COLUMN_NAME"));
 			c.setType(Type.getBySql(columnSet.getString("TYPE_NAME")));
-			c.setNullable(columnSet.getInt("NULLABLE") == 1);
+			c.setNullable(columnSet.getInt("NULLABLE") != 1);
 			c.setRemark(columnSet.getString("REMARKS"));
 			c.setPrimaryKey(primaryKeyMap.get(c.getName()) != null);
 			c.setImportKey(foreignKeyMap.get(c.getName()));
@@ -333,14 +333,25 @@ public class JdbcMeta {
 	}
 
 	public static enum Type {
-		INT("int", "int"), CHAR("char", "String"), VARCHAR("varchar", "String"), TIME_STAMP("timestamp",
-				"java.util.Date"), DATE_TIME("datetime", "java.util.Date"), TINYINT("tinyint", "byte"), BIT("bit",
-						"boolean"), BIGINT("bigint", "long"), DOUBLE("double",
-								"double"), DECIMAL("decimal", "java.math.BigDecimal"), FLOAT("float", "float");
+		BOOL("bit",boolean.class,Boolean.class),
+		BYTE("tinyint",byte.class,Byte.class),		
+		SHORT("smallint",short.class,Short.class),		
+		INT("int", int.class,Integer.class),
+		LONG("bigint",long.class,Long.class),
+		DOUBLE("double", double.class,Double.class), 
+		FLOAT("float", float.class,Float.class),
+		CHAR("char", String.class), 
+		VARCHAR("varchar", String.class), 
+		DATE("date", java.sql.Date.class),
+		TIME("time", java.sql.Time.class),
+		TIME_STAMP("timestamp", java.sql.Timestamp.class), 
+		DATE_TIME("datetime", java.util.Date.class), 
+		DECIMAL("decimal", java.math.BigDecimal.class);
+		
 		private String sql;
-		private String java;
+		private Class<?>[] java;
 
-		private Type(String sql, String java) {
+		private Type(String sql, Class<?>...java) {
 			this.java = java;
 			this.sql = sql;
 		}
@@ -353,11 +364,32 @@ public class JdbcMeta {
 			this.sql = sql;
 		}
 
-		public String getJava() {
-			return java;
+		public Class<?> getJava(){
+			return getJava(null);
+		}
+		
+		public Class<?> getJava(Boolean nullable) {
+			if(nullable==null) {
+				nullable=false;
+			}
+			for(Class<?> c:this.java) {
+				if(nullable&&!c.isPrimitive()) {
+					return c;
+				}else if(!nullable&&c.isPrimitive()) {
+					return c;
+				}
+			}
+			return java[0];
+		}
+		
+		public String getJavaString(Boolean nullable) {
+			Class<?> java2 = getJava(nullable);
+			if(java2.getName().startsWith("java.lang."))
+				return java2.getSimpleName();
+			return java2.getName();
 		}
 
-		public void setJava(String java) {
+		public void setJava(Class<?>[] java) {
 			this.java = java;
 		}
 
