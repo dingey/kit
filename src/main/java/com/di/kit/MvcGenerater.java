@@ -136,7 +136,13 @@ public class MvcGenerater {
 	private boolean war = false;
 	private boolean swaggerEntity=false;
 	private String tablePrefix;
-
+	private boolean primitive=true;
+	
+	public MvcGenerater setPrimitive(boolean primitive) {
+		this.primitive = primitive;
+		return this;
+	}
+	
 	public MvcGenerater setTablePrefix(String tablePrefix) {
 		this.tablePrefix = tablePrefix;
 		return this;
@@ -323,7 +329,7 @@ public class MvcGenerater {
 					if(c1.isPrimaryKey()&&jpaAnnotation) {
 						s.line("	@Id");
 					}
-					s.add("    private ").add(c1.getType().getJavaString(c1.isNullable())).add(" ");
+					s.add("    private ").add(c1.getType().getJavaString(!primitive||c1.isNullable())).add(" ");
 					s.add(lower).line(";");
 				}
 				if (!lombok) {
@@ -331,11 +337,11 @@ public class MvcGenerater {
 						String lower = StringUtil.underlineToLowerCamelCase(c1.getName());
 						String upper = StringUtil.underlineToUpperCamelCase(c1.getName());
 						if (!contain(entityBaseClass, lower)) {
-							s.newLine().add("    public ").add(c1.getType().getJavaString(c1.isNullable())).add(" get").add(upper)
+							s.newLine().add("    public ").add(c1.getType().getJavaString(!primitive||c1.isNullable())).add(" get").add(upper)
 									.line("() {");
 							s.add("        return ").add(lower).line(";");
 							s.line("    }").newLine();
-							s.add("    public void set").add(upper).add("(").add(c1.getType().getJavaString(c1.isNullable())).add(" ")
+							s.add("    public void set").add(upper).add("(").add(c1.getType().getJavaString(!primitive||c1.isNullable())).add(" ")
 									.add(lower).line(") {");
 							s.add("        this.").add(lower).add(" = ").add(lower).line(";").line("    }");
 						}
@@ -374,7 +380,7 @@ public class MvcGenerater {
 						if(c1.isPrimaryKey()&&jpaAnnotation) {
 							s.line("	@Id");
 						}
-						s.add("    private ").add(c1.getType().getJavaString(c1.isNullable())).add(" ");
+						s.add("    private ").add(c1.getType().getJavaString(!primitive||c1.isNullable())).add(" ");
 						s.add(fn).line(";");
 					}
 				}
@@ -383,11 +389,11 @@ public class MvcGenerater {
 						String lower = StringUtil.underlineToLowerCamelCase(c1.getName());
 						String upper = StringUtil.underlineToUpperCamelCase(c1.getName());
 						if (!contain(entityBaseClass, lower)) {
-							s.newLine().add("    public ").add(c1.getType().getJavaString(c1.isNullable())).add(" get").add(upper)
+							s.newLine().add("    public ").add(c1.getType().getJavaString(!primitive||c1.isNullable())).add(" get").add(upper)
 									.line("() {");
 							s.add("        return ").add(lower).line(";");
 							s.line("    }").newLine();
-							s.add("    public void set").add(upper).add("(").add(c1.getType().getJavaString(c1.isNullable())).add(" ")
+							s.add("    public void set").add(upper).add("(").add(c1.getType().getJavaString(!primitive||c1.isNullable())).add(" ")
 									.add(lower).line(") {");
 							s.add("        this.").add(lower).add(" = ").add(lower).line(";").line("    }");
 						}
