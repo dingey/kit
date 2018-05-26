@@ -12,6 +12,7 @@ public class XmlBuilderTest {
 	@Test
 	public void test() {
 		create();
+		parse();
 	}
 
 	public void create() {
@@ -19,6 +20,7 @@ public class XmlBuilderTest {
 		Node r = p.createRootNode("root");
 		r.text("aaa");
 		Node n1 = r.createNode().name("n1");
+		n1.addAttribute("a", "1");
 		n1.text("n1text");
 		r.append(n1);
 		Node n2 = r.createNode().name("n1");

@@ -173,7 +173,7 @@ public class XmlBuilder {
 					s.append(n.toString());
 				}
 			} else {
-				if (this.text != null && this.text.indexOf("<") != 1) {
+				if (this.text != null && (this.text.contains("<") || this.text.contains(">"))) {
 					s.append("<![CDATA[ ").append(this.text).append(" ]]>");
 				} else {
 					s.append(this.text);
@@ -194,7 +194,7 @@ public class XmlBuilder {
 			s.append("<").append(this.name);
 			if (this.attributes != null && !this.attributes.isEmpty()) {
 				for (String k : this.attributes.keySet()) {
-					s.append("  ").append(k).append("=\"").append(this.attribute(k)).append("\"");
+					s.append(" ").append(k).append("=\"").append(this.attribute(k)).append("\"");
 				}
 			}
 			s.append(">\n");
@@ -210,7 +210,8 @@ public class XmlBuilder {
 				}
 			} else {
 				s.append(blank).append("  ");
-				if (this.text != null && this.text.indexOf("<") != -1 && this.children().size() == 0) {
+				if (this.text != null && (this.text.contains("<") || this.text.contains(">"))
+						&& this.children().size() == 0) {
 					s.append("<![CDATA[ ").append(this.text).append(" ]]>");
 				} else {
 					s.append(this.text);
