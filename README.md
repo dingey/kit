@@ -34,7 +34,16 @@ j.setCamelCaseToUnderscores(true);
 Json.getJson().toObject(json);
 ```
 # xml
-adasdas
+```
+Xml.toObject(String xml,Class<T> cl);
+Xml.toXml(T o);
+
+XmlBuilder.parse(String xml);
+
+JAXB
+XmlUtil.toXml(T o);
+XmlUtil.fromXml(String xml, Class<T> target);
+```
 # httpclient
 http工具类
 ```
