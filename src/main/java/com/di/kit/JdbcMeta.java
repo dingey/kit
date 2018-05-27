@@ -44,14 +44,16 @@ public class JdbcMeta {
 				Driver driver1 = (Driver) Class.forName(driver).newInstance();
 				DriverManager.registerDriver(driver1);
 				conn = DriverManager.getConnection(url, username, password);
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
+			} catch (InstantiationException | IllegalAccessException
+					| ClassNotFoundException | SQLException e) {
 				e.printStackTrace();
 			}
 		}
 		return conn;
 	}
 
-	public static List<Table> getTables(String url, String username, String password, String... tables) {
+	public static List<Table> getTables(String url, String username,
+			String password, String... tables) {
 		JdbcMeta jm = new JdbcMeta().setConfig(url, username, password);
 		try {
 			if (tables == null) {
@@ -76,24 +78,30 @@ public class JdbcMeta {
 		Table table = new Table();
 		table.setName(tableName);
 		// 主键
-		ResultSet primaryKeyResultSet = getConn().getMetaData().getPrimaryKeys(null, null, tableName);
+		ResultSet primaryKeyResultSet = getConn().getMetaData()
+				.getPrimaryKeys(null, null, tableName);
 		Map<String, String> primaryKeyMap = new HashMap<>();
 		while (primaryKeyResultSet.next()) {
-			String primaryKeyColumnName = primaryKeyResultSet.getString("COLUMN_NAME");
+			String primaryKeyColumnName = primaryKeyResultSet
+					.getString("COLUMN_NAME");
 			primaryKeyMap.put(primaryKeyColumnName, primaryKeyColumnName);
 		}
 		// 外键
-		ResultSet foreignKeyResultSet = getConn().getMetaData().getImportedKeys(catalog, null, tableName);
+		ResultSet foreignKeyResultSet = getConn().getMetaData()
+				.getImportedKeys(catalog, null, tableName);
 		Map<String, ImportKey> foreignKeyMap = new HashMap<>();
 		while (foreignKeyResultSet.next()) {
 			ImportKey importKey = new ImportKey();
 			importKey.setName(foreignKeyResultSet.getString("FKCOLUMN_NAM"));
-			importKey.setPkTableName(foreignKeyResultSet.getString("PKTABLE_NAME"));
-			importKey.setPkColumnName(foreignKeyResultSet.getString("PKCOLUMN_NAME"));
+			importKey.setPkTableName(
+					foreignKeyResultSet.getString("PKTABLE_NAME"));
+			importKey.setPkColumnName(
+					foreignKeyResultSet.getString("PKCOLUMN_NAME"));
 			foreignKeyMap.put(importKey.getName(), importKey);
 		}
 		// 提取表内的字段的名字和类型
-		ResultSet columnSet = getConn().getMetaData().getColumns(null, "%", tableName, "%");
+		ResultSet columnSet = getConn().getMetaData().getColumns(null, "%",
+				tableName, "%");
 		List<Column> columns = new ArrayList<>();
 		List<Column> primaryColumns = new ArrayList<>();
 		List<Column> allColumns = new ArrayList<>();
@@ -126,7 +134,8 @@ public class JdbcMeta {
 		ResultSet tablesResultSet = null;
 		try {
 			catalog = getConn().getCatalog();
-			tablesResultSet = getConn().getMetaData().getTables(catalog, null, null, new String[] { "TABLE" });
+			tablesResultSet = getConn().getMetaData().getTables(catalog, null,
+					null, new String[]{"TABLE"});
 			while (tablesResultSet.next()) {
 				String tableName = tablesResultSet.getString("TABLE_NAME");
 				tables.add(getTable(tableName));
@@ -149,7 +158,8 @@ public class JdbcMeta {
 		String comment = "";
 		ResultSet rs = null;
 		try {
-			rs = getConn().createStatement().executeQuery("SHOW CREATE TABLE " + table);
+			rs = getConn().createStatement()
+					.executeQuery("SHOW CREATE TABLE " + table);
 			if (rs != null && rs.next()) {
 				String create = rs.getString(2);
 				int index = create.indexOf("COMMENT='");
@@ -333,25 +343,25 @@ public class JdbcMeta {
 	}
 
 	public static enum Type {
-		BOOL("bit",boolean.class,Boolean.class),
-		BYTE("tinyint",byte.class,Byte.class),		
-		SHORT("smallint",short.class,Short.class),		
-		INT("int", int.class,Integer.class),
-		LONG("bigint",long.class,Long.class),
-		DOUBLE("double", double.class,Double.class), 
-		FLOAT("float", float.class,Float.class),
-		CHAR("char", String.class), 
-		VARCHAR("varchar", String.class), 
-		DATE("date", java.sql.Date.class),
-		TIME("time", java.sql.Time.class),
-		TIME_STAMP("timestamp", java.sql.Timestamp.class), 
-		DATE_TIME("datetime", java.util.Date.class), 
+		BOOL("bit", boolean.class, Boolean.class), //
+		BYTE("tinyint", byte.class, Byte.class), //
+		SHORT("smallint", short.class, Short.class), //
+		INT("int", int.class, Integer.class), //
+		LONG("bigint", long.class, Long.class), //
+		DOUBLE("double", double.class, Double.class), //
+		FLOAT("float", float.class, Float.class), //
+		CHAR("char", String.class), //
+		VARCHAR("varchar", String.class), //
+		DATE("date", java.sql.Date.class), //
+		TIME("time", java.sql.Time.class), //
+		TIME_STAMP("timestamp", java.util.Date.class, java.sql.Timestamp.class), //
+		DATE_TIME("datetime", java.util.Date.class), //
 		DECIMAL("decimal", java.math.BigDecimal.class);
-		
+
 		private String sql;
 		private Class<?>[] java;
 
-		private Type(String sql, Class<?>...java) {
+		private Type(String sql, Class<?>... java) {
 			this.java = java;
 			this.sql = sql;
 		}
@@ -364,27 +374,27 @@ public class JdbcMeta {
 			this.sql = sql;
 		}
 
-		public Class<?> getJava(){
+		public Class<?> getJava() {
 			return getJava(null);
 		}
-		
+
 		public Class<?> getJava(Boolean nullable) {
-			if(nullable==null) {
-				nullable=false;
+			if (nullable == null) {
+				nullable = false;
 			}
-			for(Class<?> c:this.java) {
-				if(nullable&&!c.isPrimitive()) {
+			for (Class<?> c : this.java) {
+				if (nullable && !c.isPrimitive()) {
 					return c;
-				}else if(!nullable&&c.isPrimitive()) {
+				} else if (!nullable && c.isPrimitive()) {
 					return c;
 				}
 			}
 			return java[0];
 		}
-		
+
 		public String getJavaString(Boolean nullable) {
 			Class<?> java2 = getJava(nullable);
-			if(java2.getName().startsWith("java.lang."))
+			if (java2.getName().startsWith("java.lang."))
 				return java2.getSimpleName();
 			return java2.getName();
 		}
@@ -405,11 +415,12 @@ public class JdbcMeta {
 	}
 
 	public static enum DriverEnum {
-		MYSQL("com.mysql.jdbc.Driver", "jdbc:mysql"), MS_SQL("net.sourceforge.jtds.jdbc.Driver",
-				"jdbc:jtds:sqlserver"), MS_SQL1("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase"), ORACLE(
-						"oracle.jdbc.driver.OracleDriver",
-						"jdbc:oracle:thin"), SYBASE("com.sybase.jdbc2.jdbc.SybDriver",
-								"jdbc:sybase:Tds"), POSTGRESQL("org.postgresql.Driver", "jdbc:postgresql");
+		MYSQL("com.mysql.jdbc.Driver", "jdbc:mysql"), //
+		MS_SQL("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sqlserver"), //
+		MS_SQL1("net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase"), //
+		ORACLE("oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin"), //
+		SYBASE("com.sybase.jdbc2.jdbc.SybDriver", "jdbc:sybase:Tds"), //
+		POSTGRESQL("org.postgresql.Driver", "jdbc:postgresql");
 
 		private String name;
 		private String prefix;

@@ -1,9 +1,10 @@
 package com.di.kit;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -12,7 +13,11 @@ import java.util.Map;
 public interface Request {
 	Request execute();
 
+	String getContentType();
+
 	String returnContent();
+
+	String returnContent(String charset);
 
 	Request bodyForm(Map<Object, Object> form);
 
@@ -27,9 +32,9 @@ public interface Request {
 	static class GetRequest implements Request {
 		String url;
 		URLConnection conn;
-		private String result;
 		Map<Object, Object> form;
-		String reqStr;
+		byte[] readbytes;
+		String contentType;
 
 		private GetRequest(String url) {
 			this.url = url;
@@ -41,14 +46,17 @@ public interface Request {
 				URL u = new URL(url());
 				conn = u.openConnection();
 				conn.connect();
-				BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-				StringBuilder result = new StringBuilder();
-				String line;
-				while ((line = in.readLine()) != null) {
-					result.append(line);
+				BufferedInputStream in = new BufferedInputStream(
+						conn.getInputStream());
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				byte[] buf = new byte[128];
+				int readCount = 0;
+				while ((readCount = in.read(buf, 0, 100)) > 0) {
+					out.write(buf, 0, readCount);
 				}
-				this.result = result.toString();
 				in.close();
+				contentType = conn.getContentType();
+				readbytes = out.toByteArray();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -56,12 +64,33 @@ public interface Request {
 		}
 
 		@Override
+		public String getContentType() {
+			return contentType;
+		}
+
+		@Override
 		public String returnContent() {
-			return result;
+			try {
+				return new String(readbytes, "utf-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		public String returnContent(String charset) {
+			try {
+				return new String(readbytes, charset);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			return null;
 		}
 
 		private String url() {
-			if (this.url != null && !this.url.isEmpty() && form != null && !form.isEmpty()) {
+			if (this.url != null && !this.url.isEmpty() && form != null
+					&& !form.isEmpty()) {
 				StringBuilder s = new StringBuilder(this.url);
 				if (this.url.contains("?")) {
 					s.append("&");
@@ -101,10 +130,10 @@ public interface Request {
 	public static class PostRequest implements Request {
 		String url;
 		URLConnection conn;
-		private String result;
 		Map<Object, Object> form;
+		byte[] readbytes;
 		String reqStr;
-
+		String contentType;
 		private PostRequest(String url) {
 			this.url = url;
 		}
@@ -116,27 +145,49 @@ public interface Request {
 				conn = u.openConnection();
 				conn.setDoOutput(true);
 				conn.setDoInput(true);
-				PrintWriter out = new PrintWriter(conn.getOutputStream());
-				out.print(requestBody());
-				out.flush();
-				BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-				StringBuilder result = new StringBuilder();
-				String line;
-				while ((line = in.readLine()) != null) {
-					result.append(line);
+				PrintWriter writer = new PrintWriter(conn.getOutputStream());
+				writer.print(requestBody());
+				writer.flush();
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				BufferedInputStream in = new BufferedInputStream(
+						conn.getInputStream());
+				byte[] buf = new byte[128];
+				int readCount = 0;
+				while ((readCount = in.read(buf, 0, 100)) > 0) {
+					out.write(buf, 0, readCount);
 				}
-				this.result = result.toString();
-				out.close();
 				in.close();
-			} catch (IOException e) {
+				contentType = conn.getContentType();
+				readbytes = out.toByteArray();
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			return this;
 		}
 
 		@Override
+		public String getContentType() {
+			return contentType;
+		}
+
+		@Override
 		public String returnContent() {
-			return result;
+			try {
+				return new String(readbytes, "utf-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		public String returnContent(String charset) {
+			try {
+				return new String(readbytes, charset);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			return null;
 		}
 
 		public Request bodyForm(Map<Object, Object> form) {
@@ -160,8 +211,10 @@ public interface Request {
 		}
 
 		private String requestBody() {
-			if (this.url != null && !this.url.isEmpty() && form != null && !form.isEmpty()) {
-				StringBuilder s = new StringBuilder(this.reqStr == null ? "" : this.reqStr);
+			if (this.url != null && !this.url.isEmpty() && form != null
+					&& !form.isEmpty()) {
+				StringBuilder s = new StringBuilder(
+						this.reqStr == null ? "" : this.reqStr);
 				if (this.reqStr != null && !this.reqStr.isEmpty()) {
 					s.append("&");
 				}
@@ -208,11 +261,14 @@ public interface Request {
 	}
 
 	public static void main(String[] args) {
-		String get = Request.Get("http://localhost:8080/hi").execute().returnContent();
-		System.out.println(get);
+		Request get = Request.Get("http://localhost:8090/hi").execute();
+		System.out.println(get.getContentType());
+		System.out.println(get.returnContent());
 
-		String post = Request.Post("http://localhost:8080/hi").add("name", "alice").execute().returnContent();
-		System.out.println(post);
+		Request post = Request.Post("http://localhost:8090/hi")
+				.add("name", "alice").execute();
+		System.out.println(post.getContentType());
+		System.out.println(post.returnContent());
 	}
 
 }
