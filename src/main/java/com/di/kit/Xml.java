@@ -21,19 +21,26 @@ public class Xml {
 		if (o.getClass().isAnnotationPresent(Alias.class)) {
 			if (!o.getClass().getAnnotation(Alias.class).xml().isEmpty()) {
 				n = o.getClass().getAnnotation(Alias.class).xml();
-			} else if (!o.getClass().getAnnotation(Alias.class).value().isEmpty()) {
+			} else if (!o.getClass().getAnnotation(Alias.class).value()
+					.isEmpty()) {
 				n = o.getClass().getAnnotation(Alias.class).value();
 			}
 		}
 		Str str = new Str();
 		str.add("<").add(n).add(">");
-		if (o.getClass() == byte.class || o.getClass() == short.class || o.getClass() == int.class
-				|| o.getClass() == long.class || o.getClass() == double.class || o.getClass() == float.class
-				|| o.getClass() == java.lang.Byte.class || o.getClass() == java.lang.Short.class
-				|| o.getClass() == java.lang.Integer.class || o.getClass() == java.lang.Long.class
-				|| o.getClass() == java.lang.Double.class || o.getClass() == java.lang.Float.class
-				|| o.getClass() == boolean.class || o.getClass() == java.lang.Boolean.class
-				|| o.getClass() == java.lang.String.class || o.getClass() == java.lang.Character.class) {
+		if (o.getClass() == byte.class || o.getClass() == short.class
+				|| o.getClass() == int.class || o.getClass() == long.class
+				|| o.getClass() == double.class || o.getClass() == float.class
+				|| o.getClass() == java.lang.Byte.class
+				|| o.getClass() == java.lang.Short.class
+				|| o.getClass() == java.lang.Integer.class
+				|| o.getClass() == java.lang.Long.class
+				|| o.getClass() == java.lang.Double.class
+				|| o.getClass() == java.lang.Float.class
+				|| o.getClass() == boolean.class
+				|| o.getClass() == java.lang.Boolean.class
+				|| o.getClass() == java.lang.String.class
+				|| o.getClass() == java.lang.Character.class) {
 			if (String.valueOf(o).indexOf("<") != -1) {
 				str.add(start + " ").add(o).add(" " + end);
 			} else {
@@ -49,7 +56,8 @@ public class Xml {
 			}
 			str.add("</").add(n).add(">");
 			return str.toString();
-		} else if (o.getClass() == java.util.List.class || o.getClass() == java.util.ArrayList.class) {
+		} else if (o.getClass() == java.util.List.class
+				|| o.getClass() == java.util.ArrayList.class) {
 			str = new Str().add("<").add(n).add(">");
 			List<?> os = (List<?>) o;
 			for (Object o0 : os) {
@@ -57,10 +65,12 @@ public class Xml {
 			}
 			str.add("</").add(n).add(">");
 			return str.toString();
-		} else if (o.getClass() == java.util.Map.class || o.getClass() == java.util.LinkedHashMap.class) {
+		} else if (o.getClass() == java.util.Map.class
+				|| o.getClass() == java.util.LinkedHashMap.class) {
 			Map<?, ?> m0 = (Map<?, ?>) o;
 			for (Object key : m0.keySet()) {
-				str.add("<").add(key).add(">").add(toXml(m0.get(key))).add("</").add(key).add(">");
+				str.add("<").add(key).add(">").add(toXml(m0.get(key))).add("</")
+						.add(key).add(">");
 			}
 		} else if (o instanceof Object) {
 			try {
@@ -77,33 +87,47 @@ public class Xml {
 							ff.setAccessible(true);
 							String nn = ff.getName();
 							if (ff.isAnnotationPresent(Alias.class)) {
-								if (!ff.getAnnotation(Alias.class).xml().isEmpty()) {
+								if (!ff.getAnnotation(Alias.class).xml()
+										.isEmpty()) {
 									nn = ff.getAnnotation(Alias.class).xml();
-								} else if (!ff.getAnnotation(Alias.class).value().isEmpty()) {
+								} else if (!ff.getAnnotation(Alias.class)
+										.value().isEmpty()) {
 									nn = ff.getAnnotation(Alias.class).value();
 								}
 							}
-							str1.add(nn).add("=\"").add(ff.get(attr)).add("\" ");
+							str1.add(nn).add("=\"").add(ff.get(attr))
+									.add("\" ");
 						}
-						str.replaceFirst("<" + n + ">", "<" + n + " " + str1.deleteLastChar().toString() + ">");
+						str.replaceFirst("<" + n + ">", "<" + n + " "
+								+ str1.deleteLastChar().toString() + ">");
 						continue;
 					}
 					if (f.isAnnotationPresent(Alias.class)) {
 						if (!f.getAnnotation(Alias.class).xml().isEmpty()) {
 							n0 = f.getAnnotation(Alias.class).xml();
-						} else if (!f.getAnnotation(Alias.class).value().isEmpty()) {
+						} else if (!f.getAnnotation(Alias.class).value()
+								.isEmpty()) {
 							n0 = f.getAnnotation(Alias.class).value();
 						}
 					}
 					if (Modifier.isFinal(f.getModifiers())) {
 						continue;
-					} else if (f.getType() == byte.class || f.getType() == short.class || f.getType() == int.class
-							|| f.getType() == long.class || f.getType() == double.class || f.getType() == float.class
-							|| f.getType() == java.lang.Byte.class || f.getType() == java.lang.Short.class
-							|| f.getType() == java.lang.Integer.class || f.getType() == java.lang.Long.class
-							|| f.getType() == java.lang.Double.class || f.getType() == java.lang.Float.class
-							|| f.getType() == boolean.class || f.getType() == java.lang.Boolean.class
-							|| f.getType() == java.lang.String.class || f.getType() == java.lang.Character.class) {
+					} else if (f.getType() == byte.class
+							|| f.getType() == short.class
+							|| f.getType() == int.class
+							|| f.getType() == long.class
+							|| f.getType() == double.class
+							|| f.getType() == float.class
+							|| f.getType() == java.lang.Byte.class
+							|| f.getType() == java.lang.Short.class
+							|| f.getType() == java.lang.Integer.class
+							|| f.getType() == java.lang.Long.class
+							|| f.getType() == java.lang.Double.class
+							|| f.getType() == java.lang.Float.class
+							|| f.getType() == boolean.class
+							|| f.getType() == java.lang.Boolean.class
+							|| f.getType() == java.lang.String.class
+							|| f.getType() == java.lang.Character.class) {
 						str.add("<").add(n0).add(">");
 						if (String.valueOf(f.get(o)).indexOf("<") != -1) {
 							str.add(start + " ").add(f.get(o)).add(" " + end);
@@ -111,18 +135,21 @@ public class Xml {
 							str.add(f.get(o));
 						}
 						str.add("</").add(n0).add(">");
-					} else if (f.getType() == java.util.List.class || f.getType() == java.util.ArrayList.class) {
+					} else if (f.getType() == java.util.List.class
+							|| f.getType() == java.util.ArrayList.class) {
 						str.add("<").add(n0).add(">");
 						List<?> os = (List<?>) f.get(o);
 						for (Object o0 : os) {
 							str.add(toXml(o0));
 						}
 						str.add("</").add(n0).add(">");
-					} else if (f.getType() == java.util.Map.class || f.getType() == java.util.LinkedHashMap.class) {
+					} else if (f.getType() == java.util.Map.class
+							|| f.getType() == java.util.LinkedHashMap.class) {
 						Map<?, ?> m0 = (Map<?, ?>) f.get(o);
 						str.add("<").add(n0).add(">");
 						for (Object key : m0.keySet()) {
-							str.add("<").add(key).add(">").add(m0.get(key)).add("</").add(key).add(">");
+							str.add("<").add(key).add(">").add(m0.get(key))
+									.add("</").add(key).add(">");
 						}
 						str.add("</").add(n0).add(">");
 					} else if (f.getDeclaringClass() == Object.class) {
@@ -142,10 +169,12 @@ public class Xml {
 	@SuppressWarnings("unchecked")
 	public static <T> T toObject(String xml, Class<T> cl) {
 		T o = null;
-		if (cl == java.util.Collection.class || cl == java.util.List.class || cl == java.util.ArrayList.class) {
+		if (cl == java.util.Collection.class || cl == java.util.List.class
+				|| cl == java.util.ArrayList.class) {
 			List<Object> l = toList(xml);
 			return (T) l;
-		} else if (cl == java.util.Map.class || cl == java.util.LinkedHashMap.class) {
+		} else if (cl == java.util.Map.class
+				|| cl == java.util.LinkedHashMap.class) {
 			Map<String, Object> m = toMap(xml);
 			o = (T) m;
 		} else {
@@ -165,6 +194,7 @@ public class Xml {
 	}
 
 	public static Map<String, Object> toMap(String xml) {
+		xml = xml.trim();
 		if (xml.startsWith("<?xml")) {
 			xml = xml.substring(xml.indexOf("?>") + 2).trim();
 		}
@@ -173,15 +203,19 @@ public class Xml {
 		}
 		if (xml.startsWith(start)) {
 			xml = xml.substring(xml.indexOf(start) + 1).trim();
-			xml = xml.substring(xml.indexOf(end) + 1).trim();
+			xml = xml.substring(xml.lastIndexOf(end) + 1).trim();
 		}
 		Map<String, Object> m = new LinkedHashMap<>();
 		// m.put("attributes", getAttributes(xml));
 		// m.put("element name", getWrapperName(xml));
 		put(m, "element attributes", getAttributes(xml));
 		put(m, "element name", getWrapperName(xml));
-		if (getWrapperValue(xml).indexOf("<") == -1) {
-			m.put(getWrapperName(xml), getWrapperValue(xml));
+		String wrapperNameValue = getWrapperValue(xml).trim();
+		if (wrapperNameValue.indexOf("<") == -1
+				|| Character.isLetter(wrapperNameValue.charAt(0))) {
+			String wrapperName = getWrapperName(xml);
+			String wrapperValue = getWrapperValue(xml);
+			m.put(wrapperName, wrapperValue);
 			return m;
 		}
 		xml = getWrapperValue(xml);
@@ -190,7 +224,10 @@ public class Xml {
 			String name = getWrapperName(s);
 			if (getAttributes(s) != null) {
 				// m.put(name, toMap(s));
-				put(m, name, toMap(s));
+				put(m, name,
+						split.size() == 1
+								? toMap(getWrapperValue(s))
+								: toMap(s));
 				continue;
 			}
 			String value = getWrapperValue(s);
@@ -215,7 +252,8 @@ public class Xml {
 	private static void put(Map<String, Object> m, String k, Object v) {
 		if (m.containsKey(k)) {
 			Object val = m.get(k);
-			if (val.getClass() == ArrayList.class || val.getClass() == List.class) {
+			if (val.getClass() == ArrayList.class
+					|| val.getClass() == List.class) {
 				List<Object> os = (List<Object>) val;
 				os.add(v);
 				m.put(k, os);
@@ -234,7 +272,8 @@ public class Xml {
 		String n1 = getWrapperName(xml);
 		if (xml.indexOf("</" + n1 + ">") == -1) {
 			return false;
-		} else if (xml.substring(xml.indexOf("</" + n1 + ">")).indexOf("<" + n1 + ">") > -1) {
+		} else if (xml.substring(xml.indexOf("</" + n1 + ">"))
+				.indexOf("<" + n1 + ">") > -1) {
 			return true;
 		}
 		return false;
@@ -289,18 +328,32 @@ public class Xml {
 	}
 
 	private static String getWrapperName(String xml) {
-		return xml.substring(xml.indexOf("<") > -1 ? (xml.indexOf("<") + 1) : 0,
-				xml.indexOf(">") > -1 ? xml.indexOf(">") : xml.length()).split(" ")[0];
+		return xml
+				.substring(xml.indexOf("<") > -1 ? (xml.indexOf("<") + 1) : 0,
+						xml.indexOf(">") > -1 ? xml.indexOf(">") : xml.length())
+				.split(" ")[0];
 	}
 
 	private static String getWrapperValue(String xml) {
-		if (xml.startsWith(start)) {
-			xml = xml.substring(xml.indexOf(start) + 1).trim();
-			xml = xml.substring(xml.indexOf(end) + 1).trim();
+		// if (xml.startsWith(start)) {
+		// xml = xml.substring(xml.indexOf(start) + 1).trim();
+		// xml = xml.substring(xml.indexOf(end) + 1).trim();
+		// }
+		// int begin = xml.indexOf(">") > 0 ? (xml.indexOf(">") + 1) : 0;
+		// int end = xml.lastIndexOf("</") > 0
+		// ? xml.lastIndexOf("</")
+		// : xml.length();
+		// return xml.substring(begin, end);
+		char[] cs = xml.trim().toCharArray();
+		if (cs.length > 5 && cs[0] == '<' && cs[1] != '/' && cs[1] != '['
+				&& cs[cs.length - 1] == '>' && cs[cs.length - 2] != ']') {
+			int begin = xml.indexOf(">") > 0 ? (xml.indexOf(">") + 1) : 0;
+			int end = xml.lastIndexOf("</") > 0
+					? xml.lastIndexOf("</")
+					: xml.length();
+			xml = xml.substring(begin, end);
 		}
-		int begin = xml.indexOf(">") > 0 ? (xml.indexOf(">") + 1) : 0;
-		int end = xml.lastIndexOf("</") > 0 ? xml.lastIndexOf("</") : xml.length();
-		return xml.substring(begin, end);
+		return xml;
 	}
 
 	private static String replaceEscape(String xml) {
@@ -316,28 +369,28 @@ public class Xml {
 		List<Integer> ls = new ArrayList<Integer>();
 		while (i < cs.length) {
 			switch (cs[i]) {
-			case '<':
-				if (i == 0 || xml.indexOf(start, i - 1) != i) {
-					if (cs[i + 1] != '/') {
-						left++;
-					} else {
-						close++;
+				case '<' :
+					if (i == 0 || xml.indexOf(start, i - 1) != i) {
+						if (cs[i + 1] != '/') {
+							left++;
+						} else {
+							close++;
+						}
+					} else if (xml.indexOf(start, i - 1) == i) {
+						i = xml.indexOf(end, i) + 3;
+						continue;
 					}
-				} else if (xml.indexOf(start, i - 1) == i) {
-					i = xml.indexOf(end, i) + 3;
-					continue;
-				}
-				break;
-			case '>':
-				if (cs[i - 1] != ']' && cs[i - 2] != ']') {
-					right++;
-				}
-				if ((left + close) == right && left == close) {
-					ls.add(i);
-				}
-				break;
-			default:
-				break;
+					break;
+				case '>' :
+					if (cs[i - 1] != ']' && cs[i - 2] != ']') {
+						right++;
+					}
+					if ((left + close) == right && left == close) {
+						ls.add(i);
+					}
+					break;
+				default :
+					break;
 			}
 			i++;
 		}
@@ -345,7 +398,7 @@ public class Xml {
 		if (ls.size() == 0) {
 			ss.add(xml);
 		} else if (ls.size() == 1) {
-			ss.add(xml.substring(0, ls.get(0)));
+			ss.add(xml.substring(0, ls.get(0) + 1));
 			ss.add(xml.substring(ls.get(0) + 1));
 		} else if (ls.size() > 1) {
 			ss.add(xml.substring(0, ls.get(0) + 1));
@@ -357,7 +410,8 @@ public class Xml {
 	}
 
 	public static enum XmlEscape {
-		AND('&', "a"), LESS('<', "&lt;"), GREAT('>', "&gt;"), QUOT('"', "&quot;"), APOS('\'', "&apos;");
+		AND('&', "a"), LESS('<', "&lt;"), GREAT('>', "&gt;"), QUOT('"',
+				"&quot;"), APOS('\'', "&apos;");
 		private char ch;
 		private String value;
 
@@ -387,5 +441,11 @@ public class Xml {
 
 	public static void createFromXml(String xml, String packag) {
 		ClassCreate.createFromXml(xml, packag, "");
+	}
+
+	public static void main(String[] args) {
+		String s = "SELECT * FROM `user` WHERE `del_flag` <![CDATA[ >= ]]> 0 AND `id` = #{id}";
+		String value = getWrapperValue(s);
+		System.out.println(value);
 	}
 }
