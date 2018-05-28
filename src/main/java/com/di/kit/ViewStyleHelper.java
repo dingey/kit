@@ -12,7 +12,7 @@ import com.di.kit.MvcGenerater.ViewStyle;
  */
 public abstract class ViewStyleHelper implements ViewStyle {
 	String lowCamel(String underline) {
-		return StringUtil.underlineToLowerCamelCase(underline);
+		return StringUtil.snakeCase(underline);
 	}
 
 	LinkedHashMap<String, String> numEnum(String remark) {

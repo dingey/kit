@@ -31,12 +31,12 @@ public class ClassCreate {
 			name = m.get("element name").toString();
 		}
 		s.add("@Alias(\"").add(name).add("\")").newLine();
-		name = StringUtil.underlineToLowerCamelCase(name);
-		s.add("public static class ").add(StringUtil.firstCharUpper(name)).line(" {");
+		name = StringUtil.camelCase(name);
+		s.add("public static class ").add(StringUtil.firstUpper(name)).line(" {");
 		Str innerClass = new Str();
 		Str getset = new Str();
 		for (Object k : m.keySet()) {
-			String k0 = StringUtil.underlineToLowerCamelCase(k.toString());
+			String k0 = StringUtil.camelCase(k.toString());
 			Object v = m.get(k);
 			if (v == null || "element name".equals(k) || v.toString().isEmpty() || k0.isEmpty()) {
 				continue;
@@ -50,11 +50,11 @@ public class ClassCreate {
 			if (v.getClass() == java.util.Map.class || v.getClass() == java.util.HashMap.class) {
 				innerClass.line(createInnerClass((Map<?, ?>) v, k.toString()).toString());
 			}
-			getset.add("	public ").add(getFieldClassType(k0, v)).add(" get").add(StringUtil.firstCharUpper(k0))
+			getset.add("	public ").add(getFieldClassType(k0, v)).add(" get").add(StringUtil.firstUpper(k0))
 					.line("() {");
 			getset.add("		return ").add(k0).line(";");
 			getset.line("	}");
-			getset.add("	public void set").add(StringUtil.firstCharUpper(k0)).add("(").add(getFieldClassType(k0, v))
+			getset.add("	public void set").add(StringUtil.firstUpper(k0)).add("(").add(getFieldClassType(k0, v))
 					.add(" ").add(k0).add(") {").newLine();
 			getset.add("		this.").add(k0).add(" = ").add(k0).line(";");
 			getset.line("	}");
@@ -87,9 +87,9 @@ public class ClassCreate {
 			} else if (n.endsWith("List")) {
 				n = n.substring(0, n.length() - 4);
 			}
-			return "java.util.List<" + StringUtil.firstCharUpper(n) + ">";
+			return "java.util.List<" + StringUtil.firstUpper(n) + ">";
 		} else if (o.getClass() == java.util.Map.class || o.getClass() == java.util.HashMap.class) {
-			return StringUtil.firstCharUpper(k);
+			return StringUtil.firstUpper(k);
 		} else if (o.getClass() == java.lang.String.class) {
 			return "String";
 		} else {

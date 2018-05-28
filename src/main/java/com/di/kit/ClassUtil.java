@@ -20,10 +20,13 @@ import java.util.Map;
  */
 public class ClassUtil {
 	public static boolean isUserClass(Class<?> c) {
-		return !c.isPrimitive() && c != Byte.class && c != Short.class && c != Integer.class && c != Long.class
-				&& c != Double.class && c != Float.class && c != Character.class && c != String.class
-				&& c != Boolean.class && c != Date.class && c != java.sql.Date.class && !c.isInterface() && !c.isEnum()
-				&& (c instanceof Object) && c != Object.class && c != Class.class;
+		return !c.isPrimitive() && c != Byte.class && c != Short.class
+				&& c != Integer.class && c != Long.class && c != Double.class
+				&& c != Float.class && c != Character.class && c != String.class
+				&& c != Boolean.class && c != Date.class
+				&& c != java.sql.Date.class && !c.isInterface() && !c.isEnum()
+				&& (c instanceof Object) && c != Object.class
+				&& c != Class.class;
 	}
 
 	public static boolean isJdkClass(Class<?> clz) {
@@ -33,7 +36,8 @@ public class ClassUtil {
 	public static <T> Object invokeMethod(Method m, T o, Object... args) {
 		try {
 			return m.invoke(o, args);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch (IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -67,34 +71,49 @@ public class ClassUtil {
 			Field f = getDeclaredField(t.getClass(), fieldName);
 			f.setAccessible(true);
 			return f.get(t);
-		} catch (IllegalArgumentException | IllegalAccessException | SecurityException e) {
+		} catch (IllegalArgumentException | IllegalAccessException
+				| SecurityException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static <T> void setFieldValueBySetMethod(String fieldName, T t,
+			Object val) {
+		try {
+			Method m = null;
+			m = getDeclaredMethod(t.getClass(),
+					"set" + StringUtil.firstUpper(fieldName));
+			if (m != null)
+				m.invoke(t, val);
+		} catch (SecurityException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static <T> void setFieldValueBySetMethod(Field f, T t, Object val) {
+		setFieldValueBySetMethod(f.getName(), t, val);
+	}
+
+	public static <T> Object getFieldValueByGetMethod(String fieldName, T t) {
+		try {
+			Method m = getDeclaredMethod(t.getClass(),
+					"get" + StringUtil.firstUpper(fieldName));
+			if (m == null)
+				m = getDeclaredMethod(t.getClass(),
+						"is" + StringUtil.firstUpper(fieldName));
+			if (m != null)
+				return m.invoke(t);
+		} catch (SecurityException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 
 	public static <T> Object getFieldValueByGetMethod(Field f, T t) {
-		try {
-			Method m = null;
-			if (f.getType() == boolean.class || f.getType() == Boolean.class) {
-				m = getDeclaredMethod(t.getClass(), "is" + StringUtil.firstCharUpper(f.getName()));
-			} else {
-				m = getDeclaredMethod(t.getClass(), "get" + StringUtil.firstCharUpper(f.getName()));
-			}
-			return m.invoke(t);
-		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	public static <T> Object getFieldValueByGetMethod(String fieldName, T t) {
-		try {
-			return getFieldValueByGetMethod(getDeclaredField(t.getClass(), fieldName), t);
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		}
-		return null;
+		return getFieldValueByGetMethod(f.getName(), t);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -105,31 +124,42 @@ public class ClassUtil {
 				if (m.get(f.getName()) == null) {
 					continue;
 				}
-				if (f.getType() == boolean.class || f.getType() == java.lang.Boolean.class) {
+				if (f.getType() == boolean.class
+						|| f.getType() == java.lang.Boolean.class) {
 					f.set(o, Boolean.valueOf(m.get(f.getName()).toString()));
-				} else if (f.getType() == byte.class || f.getType() == java.lang.Byte.class) {
+				} else if (f.getType() == byte.class
+						|| f.getType() == java.lang.Byte.class) {
 					f.set(o, Byte.valueOf(m.get(f.getName()).toString()));
-				} else if (f.getType() == short.class || f.getType() == java.lang.Short.class) {
+				} else if (f.getType() == short.class
+						|| f.getType() == java.lang.Short.class) {
 					f.set(o, Short.valueOf(m.get(f.getName()).toString()));
-				} else if (f.getType() == int.class || f.getType() == java.lang.Integer.class) {
+				} else if (f.getType() == int.class
+						|| f.getType() == java.lang.Integer.class) {
 					f.set(o, Integer.valueOf(m.get(f.getName()).toString()));
-				} else if (f.getType() == long.class || f.getType() == java.lang.Long.class) {
+				} else if (f.getType() == long.class
+						|| f.getType() == java.lang.Long.class) {
 					f.set(o, Long.valueOf(m.get(f.getName()).toString()));
-				} else if (f.getType() == double.class || f.getType() == java.lang.Double.class) {
+				} else if (f.getType() == double.class
+						|| f.getType() == java.lang.Double.class) {
 					f.set(o, Double.valueOf(m.get(f.getName()).toString()));
-				} else if (f.getType() == float.class || f.getType() == java.lang.Float.class) {
+				} else if (f.getType() == float.class
+						|| f.getType() == java.lang.Float.class) {
 					f.set(o, Float.valueOf(m.get(f.getName()).toString()));
-				} else if (f.getType() == char.class || f.getType() == java.lang.Character.class) {
+				} else if (f.getType() == char.class
+						|| f.getType() == java.lang.Character.class) {
 					f.set(o, m.get(f.getName()));
 				} else if (f.getType() == java.lang.String.class) {
 					f.set(o, m.get(f.getName()).toString());
 				} else if (f.getType() == java.util.Date.class) {
-					if (m.get(f.getName()).getClass() == java.lang.String.class) {
+					if (m.get(f.getName())
+							.getClass() == java.lang.String.class) {
 						try {
-							f.set(o, new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(m.get(f.getName()).toString()));
+							f.set(o, new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
+									.parse(m.get(f.getName()).toString()));
 						} catch (ParseException e) {
 							try {
-								f.set(o, new SimpleDateFormat("yyyy-MM-dd").parse(m.get(f.getName()).toString()));
+								f.set(o, new SimpleDateFormat("yyyy-MM-dd")
+										.parse(m.get(f.getName()).toString()));
 							} catch (ParseException e1) {
 								e1.printStackTrace();
 							}
@@ -138,7 +168,8 @@ public class ClassUtil {
 					} else {
 						f.set(o, m.get(f.getName()));
 					}
-				} else if (f.getType() == java.util.List.class || f.getType() == java.util.ArrayList.class) {
+				} else if (f.getType() == java.util.List.class
+						|| f.getType() == java.util.ArrayList.class) {
 					Type type = f.getGenericType();
 					ParameterizedType pt = (ParameterizedType) type;
 					Type type2 = pt.getActualTypeArguments()[0];
@@ -155,13 +186,14 @@ public class ClassUtil {
 				} else if (f.getType() instanceof Object) {
 					Object fo;
 					fo = f.getType().newInstance();
-					Map<String, Object> m0 = (Map<String, Object>) m.get(f.getName());
+					Map<String, Object> m0 = (Map<String, Object>) m
+							.get(f.getName());
 					setObjectFieldsValue(m0, fo);
 					f.set(o, fo);
 				}
 			}
-		} catch (IllegalArgumentException | IllegalAccessException | InstantiationException
-				| ClassNotFoundException e) {
+		} catch (IllegalArgumentException | IllegalAccessException
+				| InstantiationException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
@@ -180,11 +212,14 @@ public class ClassUtil {
 	public static List<Field> getDeclaredFields(Class<?> t) {
 		Class<?> clazz = t;
 		List<Field> fields = new ArrayList<>();
-		for (; clazz != Object.class && clazz != Class.class && clazz != Field.class; clazz = clazz.getSuperclass()) {
+		for (; clazz != Object.class && clazz != Class.class
+				&& clazz != Field.class; clazz = clazz.getSuperclass()) {
 			try {
 				for (Field f : clazz.getDeclaredFields()) {
 					int modifiers = f.getModifiers();
-					if (!Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers) && !Modifier.isNative(modifiers)
+					if (!Modifier.isFinal(modifiers)
+							&& !Modifier.isStatic(modifiers)
+							&& !Modifier.isNative(modifiers)
 							&& !Modifier.isTransient(modifiers)) {
 						fields.add(f);
 					}
@@ -195,8 +230,10 @@ public class ClassUtil {
 		return fields;
 	}
 
-	public static <T> Method getDeclaredMethod(Class<T> t, String methodName, Class<?>... parameterTypes) {
-		for (Class<?> clazz = t; clazz != Object.class && clazz != Class.class; clazz = clazz.getSuperclass()) {
+	public static <T> Method getDeclaredMethod(Class<T> t, String methodName,
+			Class<?>... parameterTypes) {
+		for (Class<?> clazz = t; clazz != Object.class
+				&& clazz != Class.class; clazz = clazz.getSuperclass()) {
 			try {
 				return clazz.getDeclaredMethod(methodName, parameterTypes);
 			} catch (Exception e) {
@@ -207,7 +244,8 @@ public class ClassUtil {
 
 	public static <T> List<Method> getDeclaredMethods(Class<T> t) {
 		List<Method> methods = new ArrayList<>();
-		for (Class<?> clazz = t; clazz != Object.class && clazz != Class.class; clazz = clazz.getSuperclass()) {
+		for (Class<?> clazz = t; clazz != Object.class
+				&& clazz != Class.class; clazz = clazz.getSuperclass()) {
 			try {
 				for (Method m : clazz.getDeclaredMethods()) {
 					if (ModifierUtil.isCommon(m.getModifiers())) {
@@ -256,10 +294,35 @@ public class ClassUtil {
 	}
 
 	public static boolean isListField(Field f) {
-		return f.getType() == List.class || f.getType() == Collection.class || f.getType() == ArrayList.class;
+		return f.getType() == List.class || f.getType() == Collection.class
+				|| f.getType() == ArrayList.class;
 	}
 
 	public static Class<?> getFieldArrayType(Field f) {
 		return f.getType().getComponentType();
+	}
+
+	public static Class<?>[] getFieldGenericType(Field f) {
+		ParameterizedType pt = (ParameterizedType) f.getGenericType();
+		return (Class<?>[]) pt.getActualTypeArguments();
+	}
+
+	public static Class<?>[] getMethodReturnGenericType(Method method) {
+		Type type = method.getGenericReturnType();
+		Class<?> returnType = method.getReturnType();
+		if (type instanceof ParameterizedType) {
+			Type[] types = ((ParameterizedType) type).getActualTypeArguments();
+			return (Class[]) types;
+		} else if (returnType.isArray()) {
+			Class<?> type2 = returnType.getComponentType();
+			return new Class<?>[]{type2};
+		}
+		return null;
+	}
+
+	public static Class<?>[] getClassGenericType(Class<?> entity) {
+		ParameterizedType pt = (ParameterizedType) entity
+				.getGenericSuperclass();
+		return (Class<?>[]) pt.getActualTypeArguments();
 	}
 }

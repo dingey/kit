@@ -22,7 +22,7 @@ public class ViewStyleLayui extends ViewStyleHelper {
 			s.add("    <label class=\"layui-form-label\">").add(c.getRemark()).add("</label>").newLine();
 			s.line("    <div class=\"layui-input-block\">");
 			if (c.getType() == Type.VARCHAR || c.getType() == Type.CHAR) {
-				String n = StringUtil.underlineToLowerCamelCase(c.getName());
+				String n = StringUtil.camelCase(c.getName());
 				s.line("<input type=\"text\" name=\"" + n
 						+ "\" required  lay-verify=\"required\" placeholder=\"\" autocomplete=\"off\" class=\"layui-input\">");
 			} else if (c.getType() == Type.BYTE) {

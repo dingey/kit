@@ -10,23 +10,24 @@ import java.util.Set;
  * @author di
  */
 public class StringUtil {
-	public static final String lineSeparator = System.getProperty("line.separator", "\n");
+	public static final String lineSeparator = System
+			.getProperty("line.separator", "\n");
 
-	public static String firstCharLower(String s) {
+	public static String firstLower(String s) {
 		return s.substring(0, 1).toLowerCase() + s.substring(1);
 	}
 
-	public static String firstCharUpper(String s) {
+	public static String firstUpper(String s) {
 		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
 
-	public static String underlineToLowerCamelCase(String s) {
+	public static String camelCase(String s) {
 		if (s.indexOf("_") != -1) {
 			String[] ss = s.split("_");
 			StringBuilder sb = new StringBuilder(ss[0]);
 			if (ss.length > 1) {
 				for (int i = 1; i < ss.length; i++) {
-					sb.append(firstCharUpper(ss[i]));
+					sb.append(firstUpper(ss[i]));
 				}
 			}
 			return sb.toString();
@@ -35,32 +36,35 @@ public class StringUtil {
 		}
 	}
 
-	public static String underlineToUpperCamelCase(String s) {
-		return firstCharUpper(underlineToLowerCamelCase(s));
+	public static String upperCamelCase(String s) {
+		return firstUpper(camelCase(s));
 	}
 
-	public static String camelCaseToUnderline(String s) {
-		StringBuilder sb = new StringBuilder();
-		if (s.toCharArray().length > 1) {
-			sb.append(Character.toLowerCase(s.toCharArray()[0]));
-			for (int i = 1; i < s.toCharArray().length; i++) {
-				if (Character.isUpperCase(s.toCharArray()[i])) {
-					sb.append("_").append(Character.toLowerCase(s.toCharArray()[i]));
+	public static String snakeCase(String camelCase) {
+		if (camelCase != null && !camelCase.trim().isEmpty()) {
+			char[] cs = camelCase.toCharArray();
+			StringBuilder sb = new StringBuilder();
+			sb.append(Character.toLowerCase(cs[0]));
+			for (int i = 1; i < cs.length; i++) {
+				if (Character.isUpperCase(cs[i])) {
+					sb.append("_").append(Character.toLowerCase(cs[i]));
 				} else {
-					sb.append(s.toCharArray()[i]);
+					sb.append(camelCase.toCharArray()[i]);
 				}
 			}
-		}else{
-			sb.append(s.toLowerCase());
+			return sb.toString();
+		} else {
+			return camelCase;
 		}
-		return sb.toString();
 	}
 
 	public static boolean isBlank(Object... objects) {
 		Boolean result = false;
 		for (Object object : objects) {
-			if (object == null || "".equals(object.toString().trim()) || "null".equals(object.toString().trim())
-					|| "[null]".equals(object.toString().trim()) || "[]".equals(object.toString().trim())) {
+			if (object == null || "".equals(object.toString().trim())
+					|| "null".equals(object.toString().trim())
+					|| "[null]".equals(object.toString().trim())
+					|| "[]".equals(object.toString().trim())) {
 				result = true;
 				break;
 			}
@@ -78,7 +82,9 @@ public class StringUtil {
 			result += ((String) key + "=" + (String) map.get(key) + "&");
 		}
 
-		return isBlank(result) ? result : result.substring(0, result.length() - 1);
+		return isBlank(result)
+				? result
+				: result.substring(0, result.length() - 1);
 	}
 
 	public static Map<String, ? extends Object> getToMap(String args) {
@@ -104,7 +110,9 @@ public class StringUtil {
 				for (int i = 1; i < keyValue.length; i++) {
 					value += keyValue[i] + "=";
 				}
-				value = value.length() > 0 ? value.substring(0, value.length() - 1) : value;
+				value = value.length() > 0
+						? value.substring(0, value.length() - 1)
+						: value;
 				result.put(key, value);
 			}
 		}
@@ -121,7 +129,7 @@ public class StringUtil {
 		return s1;
 	}
 
-	public static String getDoubleTOString(Double str) {
+	public static String doubleString(Double str) {
 		String money = str.toString();
 		try {
 			Double.parseDouble(money);
@@ -132,9 +140,10 @@ public class StringUtil {
 		return money;
 	}
 
-	public static String strToUrlcode(String value, String encode) {
+	public static String urlEncode(String value, String encode) {
 		try {
-			value = java.net.URLEncoder.encode(value, encode == null ? "utf-8" : encode);
+			value = java.net.URLEncoder.encode(value,
+					encode == null ? "utf-8" : encode);
 			return value;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -142,9 +151,10 @@ public class StringUtil {
 		}
 	}
 
-	public static String urlcodeToStr(String value, String encode) {
+	public static String urlDecoder(String value, String encode) {
 		try {
-			value = java.net.URLDecoder.decode(value, encode == null ? "utf-8" : encode);
+			value = java.net.URLDecoder.decode(value,
+					encode == null ? "utf-8" : encode);
 			return value;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();

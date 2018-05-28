@@ -17,7 +17,7 @@ public class Xml {
 	private static String end = "]]>";
 
 	public static <T> String toXml(T o) {
-		String n = StringUtil.firstCharLower(o.getClass().getSimpleName());
+		String n = StringUtil.firstLower(o.getClass().getSimpleName());
 		if (o.getClass().isAnnotationPresent(Alias.class)) {
 			if (!o.getClass().getAnnotation(Alias.class).xml().isEmpty()) {
 				n = o.getClass().getAnnotation(Alias.class).xml();

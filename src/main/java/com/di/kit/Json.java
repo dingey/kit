@@ -286,7 +286,7 @@ public class Json {
 			for (String s : split(s0)) {
 				String k = s.substring(0, s.indexOf(":") - 1).replaceAll("\"", "").trim();
 				if (camelCaseToUnderscores) {
-					k = StringUtil.camelCaseToUnderline(k);
+					k = StringUtil.snakeCase(k);
 				}
 				String v = s.substring(s.indexOf(":") + 1).trim();
 				m.put(k, toObject(v));
