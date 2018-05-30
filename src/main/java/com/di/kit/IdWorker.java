@@ -13,7 +13,8 @@ public class IdWorker {
 	private final long sequenceBits = 12L;
 	private final long workerIdShift = sequenceBits;
 	private final long datacenterIdShift = sequenceBits + workerIdBits;
-	private final long timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits;
+	private final long timestampLeftShift = sequenceBits + workerIdBits
+			+ datacenterIdBits;
 	private final long sequenceMask = -1L ^ (-1L << sequenceBits);
 
 	private long workerId;
@@ -23,12 +24,14 @@ public class IdWorker {
 
 	public IdWorker(long workerId, long datacenterId) {
 		if (workerId > maxWorkerId || workerId < 0) {
-			throw new IllegalArgumentException(
-					String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
+			throw new IllegalArgumentException(String.format(
+					"worker Id can't be greater than %d or less than 0",
+					maxWorkerId));
 		}
 		if (datacenterId > maxDatacenterId || datacenterId < 0) {
-			throw new IllegalArgumentException(
-					String.format("datacenter Id can't be greater than %d or less than 0", maxDatacenterId));
+			throw new IllegalArgumentException(String.format(
+					"datacenter Id can't be greater than %d or less than 0",
+					maxDatacenterId));
 		}
 		this.workerId = workerId;
 		this.datacenterId = datacenterId;
@@ -38,7 +41,8 @@ public class IdWorker {
 		long timestamp = timeGen();
 		if (timestamp < lastTimestamp) {
 			throw new RuntimeException(String.format(
-					"Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+					"Clock moved backwards.  Refusing to generate id for %d milliseconds",
+					lastTimestamp - timestamp));
 		}
 		if (lastTimestamp == timestamp) {
 			sequence = (sequence + 1) & sequenceMask;
@@ -51,7 +55,8 @@ public class IdWorker {
 
 		lastTimestamp = timestamp;
 
-		return ((timestamp - twepoch) << timestampLeftShift) | (datacenterId << datacenterIdShift)
+		return ((timestamp - twepoch) << timestampLeftShift)
+				| (datacenterId << datacenterIdShift)
 				| (workerId << workerIdShift) | sequence;
 	}
 
@@ -78,5 +83,13 @@ public class IdWorker {
 
 	public static long nextId() {
 		return single().nextIdSync();
+	}
+
+	public static String nextHexId() {
+		return Long.toHexString(single().nextIdSync());
+	}
+
+	public static String nextId(int n) {
+		return Conversion.fromDecimal(single().nextIdSync(), n);
 	}
 }
