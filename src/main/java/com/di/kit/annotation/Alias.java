@@ -1,4 +1,4 @@
-package com.di.kit.data.annotation;
+package com.di.kit.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,8 +8,14 @@ import java.lang.annotation.Target;
 /**
  * @author di
  */
-@Target(ElementType.FIELD)
+@Target({ ElementType.FIELD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DataColumn {
-	String name() default "";
+public @interface Alias {
+	String value() default "";
+
+	String json() default "";
+
+	String xml() default "";
+
+	String csv() default "";
 }

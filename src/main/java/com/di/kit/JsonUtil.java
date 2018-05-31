@@ -11,7 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.di.kit.data.annotation.Alias;
+import com.di.kit.annotation.Alias;
 
 /**
  * @author di
