@@ -14,7 +14,7 @@ public class XmlUtil {
 	public static <T> String toXml(T t) {
 		StringWriter sw = new StringWriter();
 		try {
-			JAXBContext jaxbContext = JAXBContext.newInstance();
+			JAXBContext jaxbContext = JAXBContext.newInstance(t.getClass());
 			Marshaller marshaller = jaxbContext.createMarshaller();
 			marshaller.marshal(t, sw);
 		} catch (JAXBException e) {
