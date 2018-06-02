@@ -30,7 +30,8 @@ import javax.net.ssl.X509TrustManager;
  * @author di
  */
 public class ConnectionUtil {
-	public static String postMultipart(String requestUrl, Map<String, Object> params) {
+	public static String postMultipart(String requestUrl,
+			Map<String, Object> params) {
 		String res = null;
 		String BOUNDARY = "--boundary--";
 		try {
@@ -41,8 +42,10 @@ public class ConnectionUtil {
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
 			conn.setRequestProperty("Connection", "Keep-Alive");
-			conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-CN; rv:1.9.2.6)");
-			conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
+			conn.setRequestProperty("User-Agent",
+					"Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-CN; rv:1.9.2.6)");
+			conn.setRequestProperty("Content-Type",
+					"multipart/form-data; boundary=" + BOUNDARY);
 			StringBuffer sb = new StringBuffer();
 			if (params != null) {
 				for (String key : params.keySet()) {
@@ -54,24 +57,28 @@ public class ConnectionUtil {
 					if (v.getClass() == java.io.File.class) {
 						File file = (File) v;
 						String fileName = file.getName();
-						String contentType = ContentTypeEnum.getMimeByFileExt(fileName);
-						sb.append("Content-Disposition: form-data; name=\"" + key + "\"; filename=\"" + fileName
+						String contentType = ContentTypeEnum
+								.getMimeByFileExt(fileName);
+						sb.append("Content-Disposition: form-data; name=\""
+								+ key + "\"; filename=\"" + fileName
 								+ "\"\r\n");
 						sb.append("Content-Type:" + contentType + "\r\n\r\n");
-						DataInputStream in = new DataInputStream(new FileInputStream(file));
+						DataInputStream in = new DataInputStream(
+								new FileInputStream(file));
 						byte[] bufferOut = new byte[1024];
 						while (in.read(bufferOut) != -1) {
 							sb.append(new String(bufferOut));
 						}
 						in.close();
 					} else {
-						sb.append("Content-Disposition: form-data; name=\"" + key + "\"\r\n\r\n")
-								.append(String.valueOf(v));
+						sb.append("Content-Disposition: form-data; name=\""
+								+ key + "\"\r\n\r\n").append(String.valueOf(v));
 					}
 				}
 			}
 			sb.append("\r\n--" + BOUNDARY + "--\r\n");
-			conn.setRequestProperty("Content-Length", sb.toString().getBytes().length + "");
+			conn.setRequestProperty("Content-Length",
+					sb.toString().getBytes().length + "");
 			OutputStream out = conn.getOutputStream();
 			out.write(sb.toString().getBytes());
 			out.flush();
@@ -79,7 +86,8 @@ public class ConnectionUtil {
 
 			// 读取返回数据
 			StringBuffer strBuf = new StringBuffer();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			BufferedReader reader = new BufferedReader(
+					new InputStreamReader(conn.getInputStream()));
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				strBuf.append(line);
@@ -97,13 +105,16 @@ public class ConnectionUtil {
 		StringBuilder sb = new StringBuilder();
 		for (String key : args.keySet()) {
 			try {
-				sb.append(URLEncoder.encode(key, "utf-8")).append("=")
-						.append(URLEncoder.encode(args.get(key).toString(), "utf-8")).append("&");
+				sb.append(URLEncoder.encode(key, "utf-8")).append("=").append(
+						URLEncoder.encode(args.get(key).toString(), "utf-8"))
+						.append("&");
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 		}
-		String params = sb.toString().length() > 0 ? sb.toString().substring(0, sb.toString().length() - 1) : "";
+		String params = sb.toString().length() > 0
+				? sb.toString().substring(0, sb.toString().length() - 1)
+				: "";
 		if (url.startsWith("https")) {
 			return https(url, "get", params);
 		}
@@ -114,13 +125,16 @@ public class ConnectionUtil {
 		StringBuilder sb = new StringBuilder();
 		for (String key : args.keySet()) {
 			try {
-				sb.append(URLEncoder.encode(key, "utf-8")).append("=")
-						.append(URLEncoder.encode(args.get(key).toString(), "utf-8")).append("&");
+				sb.append(URLEncoder.encode(key, "utf-8")).append("=").append(
+						URLEncoder.encode(args.get(key).toString(), "utf-8"))
+						.append("&");
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 		}
-		String params = sb.toString().length() > 0 ? sb.toString().substring(0, sb.toString().length() - 1) : "";
+		String params = sb.toString().length() > 0
+				? sb.toString().substring(0, sb.toString().length() - 1)
+				: "";
 		if (url.startsWith("https")) {
 			return https(url, "post", params);
 		}
@@ -137,9 +151,11 @@ public class ConnectionUtil {
 			URLConnection conn = realUrl.openConnection();
 			conn.setRequestProperty("accept", "*/*");
 			conn.setRequestProperty("connection", "Keep-Alive");
-			conn.setRequestProperty("user-agent", "Mozilla/4.0(compatible;MSIE)");
+			conn.setRequestProperty("user-agent",
+					"Mozilla/4.0(compatible;MSIE)");
 			conn.connect();
-			in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			in = new BufferedReader(
+					new InputStreamReader(conn.getInputStream()));
 			String line;
 			while ((line = in.readLine()) != null) {
 				result += line;
@@ -167,13 +183,15 @@ public class ConnectionUtil {
 			URLConnection conn = realURL.openConnection();
 			conn.setRequestProperty("accept", "*/*");
 			conn.setRequestProperty("connection", "Keep-Alive");
-			conn.setRequestProperty("user-agent", "Mozilla/4.0(compatible;MSIE)");
+			conn.setRequestProperty("user-agent",
+					"Mozilla/4.0(compatible;MSIE)");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
 			out = new PrintWriter(conn.getOutputStream());
 			out.print(params);
 			out.flush();
-			br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			br = new BufferedReader(
+					new InputStreamReader(conn.getInputStream()));
 			String line;
 			while ((line = br.readLine()) != null) {
 				result += line;
@@ -195,19 +213,21 @@ public class ConnectionUtil {
 		return result;
 	}
 
-	public static String https(String requestUrl, String requestMethod, String paramsStr) {
+	public static String https(String requestUrl, String requestMethod,
+			String paramsStr) {
 		String res = null;
 		StringBuffer buffer = new StringBuffer();
 		try {
 			// 创建SSLContext对象，并使用我们指定的信任管理器初始化
-			TrustManager[] tm = { new MyX509TrustManager() };
+			TrustManager[] tm = {new MyX509TrustManager()};
 			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
 			sslContext.init(null, tm, new java.security.SecureRandom());
 			// 从上述SSLContext对象中得到SSLSocketFactory对象
 			SSLSocketFactory ssf = sslContext.getSocketFactory();
 
 			URL url = new URL(requestUrl);
-			HttpsURLConnection httpUrlConn = (HttpsURLConnection) url.openConnection();
+			HttpsURLConnection httpUrlConn = (HttpsURLConnection) url
+					.openConnection();
 			httpUrlConn.setSSLSocketFactory(ssf);
 
 			httpUrlConn.setDoOutput(true);
@@ -226,8 +246,10 @@ public class ConnectionUtil {
 			}
 			// 将返回的输入流转换成字符串
 			InputStream inputStream = httpUrlConn.getInputStream();
-			InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "utf-8");
-			BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+			InputStreamReader inputStreamReader = new InputStreamReader(
+					inputStream, "utf-8");
+			BufferedReader bufferedReader = new BufferedReader(
+					inputStreamReader);
 
 			String str = null;
 			while ((str = bufferedReader.readLine()) != null) {
@@ -251,8 +273,10 @@ public class ConnectionUtil {
 
 		MyX509TrustManager() throws Exception {
 			KeyStore ks = KeyStore.getInstance("JKS");
-			ks.load(new FileInputStream("trustedCerts"), "passphrase".toCharArray());
-			TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509", "SunJSSE");
+			ks.load(new FileInputStream("trustedCerts"),
+					"passphrase".toCharArray());
+			TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509",
+					"SunJSSE");
 			tmf.init(ks);
 			TrustManager tms[] = tmf.getTrustManagers();
 			for (int i = 0; i < tms.length; i++) {
@@ -265,7 +289,8 @@ public class ConnectionUtil {
 		}
 
 		@Override
-		public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+		public void checkClientTrusted(X509Certificate[] chain, String authType)
+				throws CertificateException {
 			try {
 				sunJSSEX509TrustManager.checkClientTrusted(chain, authType);
 			} catch (CertificateException excep) {
@@ -273,7 +298,8 @@ public class ConnectionUtil {
 		}
 
 		@Override
-		public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+		public void checkServerTrusted(X509Certificate[] arg0, String arg1)
+				throws CertificateException {
 			try {
 				sunJSSEX509TrustManager.checkServerTrusted(arg0, arg1);
 			} catch (CertificateException excep) {
@@ -287,8 +313,9 @@ public class ConnectionUtil {
 	}
 
 	public enum PostContentTypeEnum {
-		application("application/x-www-form-urlencoded"), multipart("multipart/form-data"), json(
-				"application/json"), xml("text/xml");
+		application("application/x-www-form-urlencoded"), multipart(
+				"multipart/form-data"), json(
+						"application/json"), xml("text/xml");
 
 		private PostContentTypeEnum(String value) {
 			this.value = value;
@@ -301,7 +328,8 @@ public class ConnectionUtil {
 		}
 	}
 
-	public static String post(String url, String request, PostContentTypeEnum postContentTypeEnum) {
+	public static String post(String url, String request,
+			PostContentTypeEnum postContentTypeEnum) {
 		PrintWriter out = null;
 		BufferedReader br = null;
 		String result = "";
@@ -310,24 +338,29 @@ public class ConnectionUtil {
 			URLConnection conn = realURL.openConnection();
 			conn.setRequestProperty("accept", "*/*");
 			conn.setRequestProperty("connection", "Keep-Alive");
-			conn.setRequestProperty("user-agent", "Mozilla/4.0(compatible;MSIE)");
+			conn.setRequestProperty("user-agent",
+					"Mozilla/4.0(compatible;MSIE)");
 			switch (postContentTypeEnum.getValue()) {
-			case "application/json":
-				conn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-				break;
-			case "text/xml":
-				conn.setRequestProperty("Content-Type", "text/xml;charset=utf-8");
-				break;
-			default:
-				conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
-				break;
+				case "application/json" :
+					conn.setRequestProperty("Content-Type",
+							"application/json;charset=utf-8");
+					break;
+				case "text/xml" :
+					conn.setRequestProperty("Content-Type",
+							"text/xml;charset=utf-8");
+					break;
+				default :
+					conn.setRequestProperty("Content-Type",
+							"application/x-www-form-urlencoded;charset=utf-8");
+					break;
 			}
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
 			out = new PrintWriter(conn.getOutputStream());
 			out.print(request);
 			out.flush();
-			br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			br = new BufferedReader(
+					new InputStreamReader(conn.getInputStream()));
 			String line;
 			while ((line = br.readLine()) != null) {
 				result += line;
@@ -349,31 +382,38 @@ public class ConnectionUtil {
 		return result;
 	}
 
-	public enum ContentTypeEnum {
-		BMP(".bmp", "application/x-bmp"), DOC(".doc", "application/msword"), GIF(".gif", "image/gif"), HTML(".html",
-				"text/html"), ICO(".ico", "image/x-icon"), IMG(".img", "application/x-img"), JAVA(".java",
-						"java/*"), JPEG(".jpeg", "image/jpeg"), JPG(".jpg", "application/x-jpg"), JSP(".jsp",
-								"text/html"), MP4(".mp4", "video/mpeg4"), MPEG(".mpeg", "video/mpg"), PNG(".png",
-										"application/x-png"), PPT(".ppt", "application/x-ppt"), RM(".rm",
-												"application/vnd.rn-realmedia"), SWF(".swf",
-														"application/x-shockwave-flash"), TIF(".tif",
-																"image/tiff"), WAV(".wav", "audio/wav"), WMA(".wma",
-																		"audio/x-ms-wma"), WMV(".wmv",
-																				"video/x-ms-wmv"), XHTML(".xhtml",
-																						"text/html"), XLS(".xls",
-																								"application/x-xls"), XML(
-																										".xml",
-																										"text/xml"), EXE(
-																												".exe",
-																												"application/x-msdownload"), HTM(
-																														".htm",
-																														"text/html"), JS(
-																																".js",
-																																"application/x-javascript"), MP3(
-																																		".mp3",
-																																		"audio/mp3"), CSS(
-																																				".css",
-																																				"text/css");
+	public static enum ContentType {
+
+	}
+	public static enum ContentTypeEnum {
+		BMP(".bmp", "application/x-bmp"), //
+		DOC(".doc", "application/msword"), //
+		GIF(".gif", "image/gif"), //
+		HTML(".html", "text/html"), //
+		ICO(".ico", "image/x-icon"), //
+		IMG(".img", "application/x-img"), //
+		JAVA(".java", "java/*"), //
+		JPEG(".jpeg", "image/jpeg"), //
+		JPG(".jpg", "application/x-jpg"), //
+		JSP(".jsp", "text/html"), //
+		MP4(".mp4", "video/mpeg4"), //
+		MPEG(".mpeg", "video/mpg"), //
+		PNG(".png", "application/x-png"), //
+		PPT(".ppt", "application/x-ppt"), //
+		RM(".rm", "application/vnd.rn-realmedia"), //
+		SWF(".swf", "application/x-shockwave-flash"), //
+		TIF(".tif", "image/tiff"), //
+		WAV(".wav", "audio/wav"), //
+		WMA(".wma", "audio/x-ms-wma"), //
+		WMV(".wmv", "video/x-ms-wmv"), //
+		XHTML(".xhtml", "text/html"), //
+		XLS(".xls", "application/x-xls"), //
+		XML(".xml", "text/xml"), //
+		EXE(".exe", "application/x-msdownload"), //
+		HTM(".htm", "text/html"), //
+		JS(".js", "application/x-javascript"), //
+		MP3(".mp3", "audio/mp3"), //
+		CSS(".css", "text/css");
 
 		String fileExt;
 		String mimeType;
