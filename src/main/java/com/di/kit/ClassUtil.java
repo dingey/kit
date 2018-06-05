@@ -249,6 +249,8 @@ public class ClassUtil {
 			try {
 				for (Method m : clazz.getDeclaredMethods()) {
 					if (ModifierUtil.isCommon(m.getModifiers())) {
+						if (!m.isAccessible())
+							m.setAccessible(true);
 						methods.add(m);
 					}
 				}

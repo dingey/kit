@@ -452,6 +452,8 @@ public class JsonUtil {
 							str.add("\"").add(key).add("\":").add(m0.get(key)).add(",");
 						}
 						str.delLastChar().add("},");
+					} else if (f.getType() == java.util.Date.class || f.getType() == java.util.LinkedHashMap.class) {
+						str.add("\"").add(n0).add("\":\"").add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(f.get(o))).add("\",");
 					} else if (f.getDeclaringClass() == Object.class) {
 						continue;
 					} else if (f.getType() instanceof Object) {
