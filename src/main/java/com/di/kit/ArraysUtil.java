@@ -23,6 +23,25 @@ public class ArraysUtil {
 		return temps;
 	}
 
+	public static <T> List<List<T>> split(List<T> list, int num) {
+		List<List<T>> temps = new ArrayList<>();
+		int length = list.size() / num + (list.size() % num == 0 ? 0 : 1);
+		if (list != null && list.size() > 0) {
+			for (int i = 0; i < num; i++) {
+				if ((i + 1) * length < list.size()) {
+					List<T> ts = list.subList(i * length, (i + 1) * length);
+					if (!ts.isEmpty())
+						temps.add(ts);
+				} else {
+					List<T> ts = list.subList(i * length, list.size());
+					if (!ts.isEmpty())
+						temps.add(ts);
+				}
+			}
+		}
+		return temps;
+	}
+
 	public static <T> T[] merge(T[] t1, T[] t2) {
 		T[] temp = Arrays.copyOf(t1, t1.length + t2.length);
 		System.arraycopy(t2, 0, temp, t1.length, t2.length);
