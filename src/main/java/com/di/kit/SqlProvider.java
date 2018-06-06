@@ -7,6 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,8 +46,7 @@ public class SqlProvider {
 						continue;
 					}
 				}
-				if (field.isAnnotationPresent(Transient.class)
-						|| field.isAnnotationPresent(IgnoreInsert.class)) {
+				if (field.isAnnotationPresent(Transient.class) || field.isAnnotationPresent(IgnoreInsert.class)) {
 					continue;
 				}
 				columns.add(StringUtil.snakeCase(field.getName()));
@@ -103,15 +103,14 @@ public class SqlProvider {
 						|| field.isAnnotationPresent(IgnoreUpdate.class)) {
 					continue;
 				}
-				sql.append("`").append(StringUtil.snakeCase(field.getName()))
-						.append("`=#{").append(field.getName()).append("},");
+				sql.append("`").append(StringUtil.snakeCase(field.getName())).append("`=#{").append(field.getName())
+						.append("},");
 			}
 		} catch (Exception e) {
 			new RuntimeException(sql.toString(), e);
 		}
 		sql.deleteCharAt(sql.length() - 1);
-		sql.append(" where ").append(StringUtil.snakeCase(id)).append(" =#{")
-				.append(id).append("}");
+		sql.append(" where ").append(StringUtil.snakeCase(id)).append(" =#{").append(id).append("}");
 		return sql.toString();
 	}
 
@@ -127,8 +126,7 @@ public class SqlProvider {
 					for (int i = 0; i < fields.size(); i++) {
 						Field field = fields.get(i);
 						if (field.isAnnotationPresent(Id.class)) {
-							sql.append(StringUtil.snakeCase(field.getName()))
-									.append("=#{").append(field.getName())
+							sql.append(StringUtil.snakeCase(field.getName())).append("=#{").append(field.getName())
 									.append("}");
 							break;
 						}
@@ -146,8 +144,7 @@ public class SqlProvider {
 			@Override
 			public String apply(Object t) {
 				String tableName = table(bean);
-				List<Field> fields = ClassUtil
-						.getDeclaredFields(bean.getClass());
+				List<Field> fields = ClassUtil.getDeclaredFields(bean.getClass());
 				StringBuilder sql = new StringBuilder();
 				sql.append(" UPDATE ").append(tableName).append(" SET ");
 				String delete = "", id = "";
@@ -162,9 +159,8 @@ public class SqlProvider {
 				} catch (Exception e) {
 					new RuntimeException(sql.toString(), e);
 				}
-				sql.append(delete).append("=1 WHERE ")
-						.append(StringUtil.snakeCase(id)).append("=#{")
-						.append(id).append("}");
+				sql.append(delete).append("=1 WHERE ").append(StringUtil.snakeCase(id)).append("=#{").append(id)
+						.append("}");
 				return sql.toString();
 			}
 		});
@@ -175,22 +171,18 @@ public class SqlProvider {
 			@Override
 			public String apply(Object t) {
 				String tableName = table(bean);
-				List<Field> fields = ClassUtil
-						.getDeclaredFields(bean.getClass());
+				List<Field> fields = ClassUtil.getDeclaredFields(bean.getClass());
 				StringBuilder sql = new StringBuilder();
-				sql.append("SELECT * FROM ").append(tableName)
-						.append(" WHERE ");
+				sql.append("SELECT * FROM ").append(tableName).append(" WHERE ");
 				try {
 					for (int i = 0; i < fields.size(); i++) {
 						Field field = fields.get(i);
 						if (field.isAnnotationPresent(Id.class)) {
-							sql.append(StringUtil.snakeCase(field.getName()))
-									.append("=#{").append(field.getName())
+							sql.append(StringUtil.snakeCase(field.getName())).append("=#{").append(field.getName())
 									.append("} and");
 						}
 					}
-					sql.delete(sql.toString().length() - 3,
-							sql.toString().length());
+					sql.delete(sql.toString().length() - 3, sql.toString().length());
 				} catch (Exception e) {
 					new RuntimeException(sql.toString(), e);
 				}
@@ -206,19 +198,17 @@ public class SqlProvider {
 				String tableName = table(bean);
 				List<Field> fields = ClassUtil.getDeclaredFields(bean);
 				StringBuilder sql = new StringBuilder();
-				sql.append("SELECT * FROM ").append(tableName)
-						.append(" WHERE ");
+				sql.append("SELECT * FROM ").append(tableName).append(" WHERE ");
 				try {
 					for (int i = 0; i < fields.size(); i++) {
 						Field field = fields.get(i);
 						if (field.isAnnotationPresent(Id.class)) {
-							sql.append(StringUtil.snakeCase(field.getName()))
-									.append("=#{arg1")//.append(field.getName())
-									.append("} and");
+							sql.append(StringUtil.snakeCase(field.getName())).append("=#{param1}");
+							// sql.append(field.getName()).append("}and");
+							break;
 						}
 					}
-					sql.delete(sql.toString().length() - 3,
-							sql.toString().length());
+					// sql.delete(sql.toString().length() - 3, sql.toString().length());
 				} catch (Exception e) {
 					new RuntimeException(sql.toString(), e);
 				}
@@ -251,11 +241,10 @@ public class SqlProvider {
 		});
 	}
 
-	public String listByIds(Class<?> entity, List<Serializable> ids) {
+	public String listByIds(Class<?> entity, Collection<Serializable> ids) {
 		StringBuilder s = new StringBuilder();
 		s.append("SELECT * FROM ").append(table(entity));
-		s.append(" WHERE ").append(StringUtil.snakeCase(id(entity).getName()))
-				.append(" IN ( ");
+		s.append(" WHERE ").append(StringUtil.snakeCase(id(entity).getName())).append(" IN ( ");
 		for (Serializable id : ids) {
 			s.append("'").append(id).append("',");
 		}
@@ -282,8 +271,7 @@ public class SqlProvider {
 		return id;
 	}
 
-	private static String getCachedSql(Object bean, String method,
-			Func<Object> func) {
+	private static String getCachedSql(Object bean, String method, Func<Object> func) {
 		String key = bean.getClass().getName() + "_" + method;
 		if (sqls.containsKey(key)) {
 			return sqls.get(key);
@@ -294,8 +282,7 @@ public class SqlProvider {
 		}
 	}
 
-	private static String getCachedSql(Class<?> bean, String method,
-			Func<Class<?>> func) {
+	private static String getCachedSql(Class<?> bean, String method, Func<Class<?>> func) {
 		String key = bean.getName() + "_" + method;
 		if (sqls.containsKey(key)) {
 			return sqls.get(key);
@@ -321,8 +308,7 @@ public class SqlProvider {
 	}
 
 	private static String table(Class<?> bean) {
-		if (bean.isAnnotationPresent(Table.class)
-				&& !bean.getAnnotation(Table.class).value().isEmpty()) {
+		if (bean.isAnnotationPresent(Table.class) && !bean.getAnnotation(Table.class).value().isEmpty()) {
 			return bean.getAnnotation(Table.class).value();
 		} else {
 			return StringUtil.snakeCase(bean.getSimpleName());
@@ -334,34 +320,34 @@ public class SqlProvider {
 		String apply(T t);
 	}
 
-	@Target({ElementType.TYPE})
+	@Target({ ElementType.TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface Table {
 		String value() default "";
 	}
 
-	@Target({ElementType.FIELD})
+	@Target({ ElementType.FIELD })
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface Id {
 		boolean autoGenerated() default false;
 	}
 
-	@Target({ElementType.FIELD})
+	@Target({ ElementType.FIELD })
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface Transient {
 	}
 
-	@Target({ElementType.FIELD})
+	@Target({ ElementType.FIELD })
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface DeleteMark {
 	}
 
-	@Target({ElementType.FIELD})
+	@Target({ ElementType.FIELD })
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface IgnoreInsert {
 	}
 
-	@Target({ElementType.FIELD})
+	@Target({ ElementType.FIELD })
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface IgnoreUpdate {
 	}
