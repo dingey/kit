@@ -453,13 +453,13 @@ public class MvcGenerater {
 			s.line("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\" >");
 			s.add("<mapper namespace=\"").add(mapperPackage).add(".").add(className).line("Mapper\">");
 			if (baseColumnList) {
-				s.line("  <sql id=\"Base_Column_List\" >");
-				s.add("    ");
+				s.line("	<sql id=\"Base_Column_List\" >");
+				s.add("		");
 				for (Column c : t.getAllColumns()) {
 					s.add("`").add(c.getName()).add("`,");
 				}
 				s.deleteLastChar();
-				s.line("  </sql>");
+				s.newLine().line("	</sql>");
 			}
 			s.add("	<insert id=\"insert\"");
 			if (persistence.isUseGeneratedKeys()) {
