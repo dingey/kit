@@ -8,10 +8,12 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.di.kit.JdbcMeta.Column;
 import com.di.kit.JdbcMeta.Table;
+import com.di.kit.JdbcMeta.Type;
 import com.di.kit.StringUtil;
 import com.di.kit.XmlBuilder.Node;
 
@@ -24,8 +26,8 @@ public class MvcGenerater {
 	 * 持久层
 	 */
 	public static enum PersistenceEnum {
-		HIBERNATE("hibernate"), JDBC("jdbc"), JDBC_MAPPER("jdbc_mapper"), JPA(
-				"jpa"), IBATIS("ibatis"), MYBATIS("mybatis");
+		HIBERNATE("hibernate"), JDBC("jdbc"), JDBC_MAPPER("jdbc_mapper"), JPA("jpa"), IBATIS("ibatis"), MYBATIS(
+				"mybatis");
 		PersistenceEnum(String name) {
 			this.name = name;
 		}
@@ -314,10 +316,8 @@ public class MvcGenerater {
 			}
 			if (entityBaseClass == null) {
 				s.line("import java.io.Serializable;");
-				s.line("/**").add(" * ").line(t.getComment())
-						.line(" * @author " + author);
-				s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm")
-						.format(new Date()));
+				s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
+				s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 				s.line(" */");
 				if (lombok) {
 					s.line("@Data");
@@ -328,29 +328,23 @@ public class MvcGenerater {
 				if (jpaAnnotation) {
 					s.add("@Table(name = \"").add(t.getName()).line("\")");
 				}
-				s.add("public class ").add(className)
-						.line(" implements Serializable {");
-				s.add("	private static final long serialVersionUID = ")
-						.add(IdWorker.nextId()).line("L;");
+				s.add("public class ").add(className).line(" implements Serializable {");
+				s.add("	private static final long serialVersionUID = ").add(IdWorker.nextId()).line("L;");
 				for (Column c1 : t.getAllColumns()) {
 					String lower = StringUtil.camelCase(c1.getName());
 					if (contain(entityBaseClass, lower))
 						continue;
 					if (!c1.getRemark().isEmpty()) {
 						if (swaggerEntity) {
-							s.add("    @ApiModelProperty(\"")
-									.add(c1.getRemark()).line("\")");
+							s.add("    @ApiModelProperty(\"").add(c1.getRemark()).line("\")");
 						} else {
-							s.line("    /**").add("	 * ").line(c1.getRemark())
-									.line("	 */");
+							s.line("    /**").add("	 * ").line(c1.getRemark()).line("	 */");
 						}
 					}
 					if (c1.isPrimaryKey() && jpaAnnotation) {
 						s.line("	@Id");
 					}
-					s.add("    private ").add(c1.getType()
-							.getJavaString(!primitive || c1.isNullable()))
-							.add(" ");
+					s.add("    private ").add(type(c1)).add(" ");
 					s.add(lower).line(";");
 				}
 				if (!lombok) {
@@ -358,27 +352,19 @@ public class MvcGenerater {
 						String lower = StringUtil.camelCase(c1.getName());
 						String upper = StringUtil.upperCamelCase(c1.getName());
 						if (!contain(entityBaseClass, lower)) {
-							s.newLine().add("    public ")
-									.add(c1.getType().getJavaString(
-											!primitive || c1.isNullable()))
-									.add(" get").add(upper).line("() {");
+							s.newLine().add("    public ").add(type(c1)).add(" get").add(upper).line("() {");
 							s.add("        return ").add(lower).line(";");
 							s.line("    }").newLine();
-							s.add("    public void set").add(upper).add("(")
-									.add(c1.getType().getJavaString(
-											!primitive || c1.isNullable()))
-									.add(" ").add(lower).line(") {");
-							s.add("        this.").add(lower).add(" = ")
-									.add(lower).line(";").line("    }");
+							s.add("    public void set").add(upper).add("(").add(type(c1)).add(" ").add(lower)
+									.line(") {");
+							s.add("        this.").add(lower).add(" = ").add(lower).line(";").line("    }");
 						}
 					}
 				}
 			} else {
 				s.add("import ").add(entityBaseClass.getName()).line(";");
-				s.line("/**").add(" * ").line(t.getComment())
-						.line(" * @author " + author);
-				s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm")
-						.format(new Date()));
+				s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
+				s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 				s.line(" */");
 				if (lombok) {
 					s.line("@Data");
@@ -389,34 +375,26 @@ public class MvcGenerater {
 				if (jpaAnnotation) {
 					s.add("@Table(name = \"").add(t.getName()).line("\")");
 				}
-				s.add("public class ").add(className).add(" extends ")
-						.add(entityBaseClass.getSimpleName());
+				s.add("public class ").add(className).add(" extends ").add(entityBaseClass.getSimpleName());
 				if (hasParametersType(entityBaseClass)) {
 					s.add("<").add(className).add(">");
 				}
 				s.line(" {");
-				s.add("	private static final long serialVersionUID = ")
-						.add(IdWorker.nextId()).line("L;");
+				s.add("	private static final long serialVersionUID = ").add(IdWorker.nextId()).line("L;");
 				for (Column c1 : t.getAllColumns()) {
-					String fn = StringUtil
-							.firstLower(StringUtil.camelCase(c1.getName()));
+					String fn = StringUtil.firstLower(StringUtil.camelCase(c1.getName()));
 					if (!contain(entityBaseClass, fn)) {
 						if (!c1.getRemark().isEmpty()) {
 							if (swaggerEntity) {
-								s.add("    @ApiModelProperty(\"")
-										.add(c1.getRemark()).line("\")");
+								s.add("    @ApiModelProperty(\"").add(c1.getRemark()).line("\")");
 							} else {
-								s.line("    /**").add("	 * ")
-										.line(c1.getRemark()).line("	 */");
+								s.line("    /**").add("	 * ").line(c1.getRemark()).line("	 */");
 							}
 						}
 						if (c1.isPrimaryKey() && jpaAnnotation) {
 							s.line("	@Id");
 						}
-						s.add("    private ")
-								.add(c1.getType().getJavaString(
-										!primitive || c1.isNullable()))
-								.add(" ");
+						s.add("    private ").add(type(c1)).add(" ");
 						s.add(fn).line(";");
 					}
 				}
@@ -425,18 +403,12 @@ public class MvcGenerater {
 						String lower = StringUtil.camelCase(c1.getName());
 						String upper = StringUtil.upperCamelCase(c1.getName());
 						if (!contain(entityBaseClass, lower)) {
-							s.newLine().add("    public ")
-									.add(c1.getType().getJavaString(
-											!primitive || c1.isNullable()))
-									.add(" get").add(upper).line("() {");
+							s.newLine().add("    public ").add(type(c1)).add(" get").add(upper).line("() {");
 							s.add("        return ").add(lower).line(";");
 							s.line("    }").newLine();
-							s.add("    public void set").add(upper).add("(")
-									.add(c1.getType().getJavaString(
-											!primitive || c1.isNullable()))
-									.add(" ").add(lower).line(") {");
-							s.add("        this.").add(lower).add(" = ")
-									.add(lower).line(";").line("    }");
+							s.add("    public void set").add(upper).add("(").add(type(c1)).add(" ").add(lower)
+									.line(") {");
+							s.add("        this.").add(lower).add(" = ").add(lower).line(";").line("    }");
 						}
 					}
 				}
@@ -474,16 +446,14 @@ public class MvcGenerater {
 			Str s = new Str();
 			String className = StringUtil.camelCase(replacePrefix(t.getName()));
 			className = StringUtil.firstUpper(className);
-			String keyCol = (t.getPrimaryKeys() != null
-					&& t.getPrimaryKeys().size() > 0)
-							? t.getPrimaryKeys().get(0).getName()
-							: "";
+			String keyCol = (t.getPrimaryKeys() != null && t.getPrimaryKeys().size() > 0)
+					? t.getPrimaryKeys().get(0).getName()
+					: "";
 			String keyProp = StringUtil.camelCase(keyCol);
 
 			s.line("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 			s.line("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\" >");
-			s.add("<mapper namespace=\"").add(mapperPackage).add(".")
-					.add(className).line("Mapper\">");
+			s.add("<mapper namespace=\"").add(mapperPackage).add(".").add(className).line("Mapper\">");
 			if (baseColumnList) {
 				s.line("	<sql id=\"Base_Column_List\" >");
 				s.add("		");
@@ -497,8 +467,7 @@ public class MvcGenerater {
 				s.add("	<insert id=\"insert\"");
 				if (persistence.isUseGeneratedKeys()) {
 					s.add(" useGeneratedKeys=\"true\" keyProperty=\"")
-							.add(StringUtil.firstLower(StringUtil.camelCase(
-									t.getPrimaryKeys().get(0).getName())))
+							.add(StringUtil.firstLower(StringUtil.camelCase(t.getPrimaryKeys().get(0).getName())))
 							.add("\"");
 				}
 				s.line(">");
@@ -509,8 +478,7 @@ public class MvcGenerater {
 				s.deleteLastChar();
 				s.line("		)values (");
 				for (Column c : t.getAllColumns()) {
-					String s0 = StringUtil
-							.firstLower(StringUtil.camelCase(c.getName()));
+					String s0 = StringUtil.firstLower(StringUtil.camelCase(c.getName()));
 					s.add("		#{").add(s0).add("},").newLine();
 				}
 				s.deleteLastChar();
@@ -519,8 +487,7 @@ public class MvcGenerater {
 				s.add("	<insert id=\"insertSelective\"");
 				if (persistence.isUseGeneratedKeys()) {
 					s.add(" useGeneratedKeys=\"true\" keyProperty=\"")
-							.add(StringUtil.firstLower(StringUtil.camelCase(
-									t.getPrimaryKeys().get(0).getName())))
+							.add(StringUtil.firstLower(StringUtil.camelCase(t.getPrimaryKeys().get(0).getName())))
 							.add("\"");
 				}
 				s.line(">");
@@ -528,25 +495,21 @@ public class MvcGenerater {
 				s.line("		<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\" >");
 				for (Column c : t.getAllColumns()) {
 					String pro = StringUtil.camelCase(c.getName());
-					s.add("			<if test=\"" + pro + " != null\" >")
-							.add(c.getName()).line(",</if>");
+					s.add("			<if test=\"" + pro + " != null\" >").add(c.getName()).line(",</if>");
 				}
 				s.line("		</trim>");
 				s.line("		<trim prefix=\"values (\" suffix=\")\" suffixOverrides=\",\" >");
 				for (Column c : t.getAllColumns()) {
 					String pro = StringUtil.camelCase(c.getName());
-					s.add("			<if test=\"" + pro + " != null\" >#{")
-							.add(pro).line("},</if>");
+					s.add("			<if test=\"" + pro + " != null\" >#{").add(pro).line("},</if>");
 				}
 				s.line("		</trim>").line("	</insert>");
 
 				s.line("    <update id=\"update\">");
 				s.add("		update `").add(t.getName()).line("` set ");
 				for (Column c : t.getColumns()) {
-					String s0 = StringUtil
-							.firstLower(StringUtil.camelCase(c.getName()));
-					s.add("		`").add(c.getName()).add("` = #{").add(s0)
-							.add("},").newLine();
+					String s0 = StringUtil.firstLower(StringUtil.camelCase(c.getName()));
+					s.add("		`").add(c.getName()).add("` = #{").add(s0).add("},").newLine();
 				}
 				s.deleteLastChar();
 				s.line("		where " + keyCol + " = #{" + keyProp + "}");
@@ -557,33 +520,28 @@ public class MvcGenerater {
 				s.line("		<set>");
 				for (Column c : t.getColumns()) {
 					String pro = StringUtil.camelCase(c.getName());
-					s.add("			<if test=\"" + pro + " != null\" >")
-							.add(c.getName()).add("=#{").add(pro)
+					s.add("			<if test=\"" + pro + " != null\" >").add(c.getName()).add("=#{").add(pro)
 							.line("},</if>");
 				}
-				s.line("		</set>")
-						.line("		where " + keyCol + "=#{" + keyProp + "}");
+				s.line("		</set>").line("		where " + keyCol + "=#{" + keyProp + "}");
 				s.line("	</update>");
 
 				s.line("    <delete id=\"delete\">");
 				s.add("		update `").add(t.getName()).line("` set");
 				s.line("		`del_flag` =0");
-				s.line("		where " + keyCol + " = #{" + keyProp + "}")
-						.line("	</delete>");
-				s.add("    <select id=\"get\" resultType=\"").add(entityPackage)
-						.add(".").add(className).line("\">");
+				s.line("		where " + keyCol + " = #{" + keyProp + "}").line("	</delete>");
+				s.add("    <select id=\"get\" resultType=\"").add(entityPackage).add(".").add(className).line("\">");
 				s.add("        select * from `").add(t.getName());
-				s.line("` where `del_flag` = 0 and " + keyCol + " = #{"
-						+ keyProp + "}").line("    </select>");
-				s.add("    <select id=\"findList\" resultType=\"")
-						.add(entityPackage).add(".").add(className).line("\">");
+				s.line("` where `del_flag` = 0 and " + keyCol + " = #{" + keyProp + "}").line("    </select>");
+				s.add("    <select id=\"findList\" resultType=\"").add(entityPackage).add(".").add(className)
+						.line("\">");
 				s.add("        select * from `").add(t.getName());
 				s.line("` where `del_flag` = 0 order by `created_at` desc");
 				s.line("    </select>");
 			}
 			s.line("</mapper>");
-			out(getPath().replaceFirst("java", "resources") + xmlPath
-					+ className + "Mapper.xml", s.toString(), replace);
+			out(getPath().replaceFirst("java", "resources") + xmlPath + className + "Mapper.xml", s.toString(),
+					replace);
 		}
 		return this;
 	}
@@ -601,12 +559,9 @@ public class MvcGenerater {
 			if (mapperBaseClass != null) {
 				s.add("import ").add(mapperBaseClass.getName()).line(";");
 			}
-			s.add("import ").add(entityPackage).add(".").add(className).add(";")
-					.newLine().newLine();
-			s.line("/**").add(" * ").line(t.getComment() + "Mapper接口")
-					.line(" * @author " + author);
-			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm")
-					.format(new Date()));
+			s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine().newLine();
+			s.line("/**").add(" * ").line(t.getComment() + "Mapper接口").line(" * @author " + author);
+			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 			s.line(" */");
 			s.add("public interface ").add(className).add("Mapper");
 			if (mapperBaseClass != null) {
@@ -616,8 +571,7 @@ public class MvcGenerater {
 				}
 			}
 			s.line(" {").newLine().add("}");
-			out(path + mapperPackage.replace(".", "/") + "/" + className
-					+ "Mapper.java", s.toString());
+			out(path + mapperPackage.replace(".", "/") + "/" + className + "Mapper.java", s.toString());
 		}
 		return this;
 	}
@@ -635,16 +589,11 @@ public class MvcGenerater {
 			if (serviceBaseClass != null) {
 				s.add("import ").add(serviceBaseClass.getName()).line(";");
 			}
-			s.add("import ").add(entityPackage).add(".").add(className).add(";")
-					.newLine();
-			if (hasParametersType(serviceBaseClass)
-					&& serviceBaseClass.getTypeParameters().length == 2)
-				s.add("import ").add(mapperPackage).add(".").add(className)
-						.add("Mapper;").newLine().newLine();
-			s.line("/**").add(" * ").line(t.getComment() + "service")
-					.line(" * @author " + author);
-			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm")
-					.format(new Date()));
+			s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine();
+			if (hasParametersType(serviceBaseClass) && serviceBaseClass.getTypeParameters().length == 2)
+				s.add("import ").add(mapperPackage).add(".").add(className).add("Mapper;").newLine().newLine();
+			s.line("/**").add(" * ").line(t.getComment() + "service").line(" * @author " + author);
+			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 			s.line(" */");
 			if (serviceBaseClass.isInterface()) {
 				s.add("public interface ");
@@ -654,31 +603,24 @@ public class MvcGenerater {
 			s.add(className).add("Service");
 			if (serviceBaseClass != null) {
 				s.add(" extends ").add(serviceBaseClass.getSimpleName());
-				if (hasParametersType(serviceBaseClass)
-						&& serviceBaseClass.getTypeParameters().length == 2) {
-					String name2 = serviceBaseClass.getTypeParameters()[0]
-							.getName();
-					String name = entityBaseClass.getTypeParameters()[0]
-							.getName();
+				if (hasParametersType(serviceBaseClass) && serviceBaseClass.getTypeParameters().length == 2) {
+					String name2 = serviceBaseClass.getTypeParameters()[0].getName();
+					String name = entityBaseClass.getTypeParameters()[0].getName();
 					if (name.equals(name2)) {
 						if (serviceBaseClass.getTypeParameters().length == 2) {
-							s.add("<").add(className).add(",").add(className)
-									.add("Mapper>");
+							s.add("<").add(className).add(",").add(className).add("Mapper>");
 						}
 					} else {
 						if (serviceBaseClass.getTypeParameters().length == 2) {
-							s.add("<").add(className).add("Mapper,")
-									.add(className).add(">");
+							s.add("<").add(className).add("Mapper,").add(className).add(">");
 						}
 					}
-				} else if (hasParametersType(serviceBaseClass)
-						&& serviceBaseClass.getTypeParameters().length == 1) {
+				} else if (hasParametersType(serviceBaseClass) && serviceBaseClass.getTypeParameters().length == 1) {
 					s.add("<").add(className).add(">");
 				}
 			}
 			s.line(" {").newLine().add("}");
-			out(path + servicePackage.replace(".", "/") + "/" + className
-					+ "Service.java", s.toString());
+			out(path + servicePackage.replace(".", "/") + "/" + className + "Service.java", s.toString());
 		}
 		return this;
 	}
@@ -704,41 +646,31 @@ public class MvcGenerater {
 			if (serviceInterface != null) {
 				s.add("import ").add(serviceInterface.getName()).line(";");
 			}
-			s.add("import ").add(entityPackage).add(".").add(className).add(";")
-					.newLine();
-			s.line("/**").add(" * ").line(t.getComment() + "service")
-					.line(" * @author " + author);
-			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm")
-					.format(new Date()));
+			s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine();
+			s.line("/**").add(" * ").line(t.getComment() + "service").line(" * @author " + author);
+			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 			s.line(" */");
 			s.add("public interface ").add(className).add("Service");
 			if (serviceInterface != null) {
 				s.add(" extends ").add(serviceInterface.getSimpleName());
-				if (hasParametersType(serviceInterface)
-						&& serviceInterface.getTypeParameters().length == 2) {
-					String name2 = serviceBaseClass.getTypeParameters()[0]
-							.getName();
-					String name = entityBaseClass.getTypeParameters()[0]
-							.getName();
+				if (hasParametersType(serviceInterface) && serviceInterface.getTypeParameters().length == 2) {
+					String name2 = serviceBaseClass.getTypeParameters()[0].getName();
+					String name = entityBaseClass.getTypeParameters()[0].getName();
 					if (name.equals(name2)) {
 						if (serviceBaseClass.getTypeParameters().length == 2) {
-							s.add("<").add(className).add(",").add(className)
-									.add("Mapper>");
+							s.add("<").add(className).add(",").add(className).add("Mapper>");
 						}
 					} else {
 						if (serviceBaseClass.getTypeParameters().length == 2) {
-							s.add("<").add(className).add("Mapper,")
-									.add(className).add(">");
+							s.add("<").add(className).add("Mapper,").add(className).add(">");
 						}
 					}
-				} else if (hasParametersType(serviceInterface)
-						&& serviceInterface.getTypeParameters().length == 1) {
+				} else if (hasParametersType(serviceInterface) && serviceInterface.getTypeParameters().length == 1) {
 					s.add("<").add(className).add(">");
 				}
 			}
 			s.line(" {").newLine().add("}");
-			out(path + serviceInterfacePackage.replace(".", "/") + "/"
-					+ className + "Service.java", s.toString());
+			out(path + serviceInterfacePackage.replace(".", "/") + "/" + className + "Service.java", s.toString());
 		}
 		return this;
 	}
@@ -762,77 +694,58 @@ public class MvcGenerater {
 			}
 			s.add("package ").add(serviceImplPackage).line(";").newLine();
 			if (serviceInterface != null) {
-				s.add("import ").add(serviceInterfacePackage).add(".")
-						.add(className).line("Service;");
+				s.add("import ").add(serviceInterfacePackage).add(".").add(className).line("Service;");
 			}
 			if (serviceImpl != null) {
 				s.add("import ").add(serviceImpl.getName()).line(";");
-				if (hasParametersType(serviceImpl)
-						&& serviceImpl.getTypeParameters().length == 2)
-					s.add("import ").add(mapperPackage).add(".").add(className)
-							.line("Mapper;");
+				if (hasParametersType(serviceImpl) && serviceImpl.getTypeParameters().length == 2)
+					s.add("import ").add(mapperPackage).add(".").add(className).line("Mapper;");
 			}
-			s.add("import ").add(entityPackage).add(".").add(className).add(";")
-					.newLine();
+			s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine();
 			s.line("import org.springframework.stereotype.Service;");
-			s.line("/**").add(" * ").line(t.getComment() + "service")
-					.line(" * @author " + author);
-			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm")
-					.format(new Date()));
+			s.line("/**").add(" * ").line(t.getComment() + "service").line(" * @author " + author);
+			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 			s.line(" */");
-			s.add("@Service(\"").add(StringUtil.firstLower(className))
-					.line("Service\")");
+			s.add("@Service(\"").add(StringUtil.firstLower(className)).line("Service\")");
 			s.add("public class ").add(className).add("ServiceImpl");
 			if (serviceImpl != null) {
 				s.add(" extends ").add(serviceImpl.getSimpleName());
-				if (hasParametersType(serviceImpl)
-						&& serviceImpl.getTypeParameters().length == 2) {
+				if (hasParametersType(serviceImpl) && serviceImpl.getTypeParameters().length == 2) {
 					String name2 = serviceImpl.getTypeParameters()[0].getName();
-					String name = entityBaseClass.getTypeParameters()[0]
-							.getName();
+					String name = entityBaseClass.getTypeParameters()[0].getName();
 					if (name.equals(name2)) {
 						if (serviceImpl.getTypeParameters().length == 2) {
-							s.add("<").add(className).add(",").add(className)
-									.add("Mapper>");
+							s.add("<").add(className).add(",").add(className).add("Mapper>");
 						}
 					} else {
 						if (serviceImpl.getTypeParameters().length == 2) {
-							s.add("<").add(className).add("Mapper,")
-									.add(className).add(">");
+							s.add("<").add(className).add("Mapper,").add(className).add(">");
 						}
 					}
-				} else if (hasParametersType(serviceImpl)
-						&& serviceImpl.getTypeParameters().length == 1) {
+				} else if (hasParametersType(serviceImpl) && serviceImpl.getTypeParameters().length == 1) {
 					s.add("<").add(className).add(">");
 				}
 			}
 			if (serviceInterface != null) {
 				s.add(" implements ").add(className).add("Service");
-				if (hasParametersType(serviceInterface)
-						&& serviceInterface.getTypeParameters().length == 2) {
-					String name2 = serviceInterface.getTypeParameters()[0]
-							.getName();
-					String name = entityBaseClass.getTypeParameters()[0]
-							.getName();
+				if (hasParametersType(serviceInterface) && serviceInterface.getTypeParameters().length == 2) {
+					String name2 = serviceInterface.getTypeParameters()[0].getName();
+					String name = entityBaseClass.getTypeParameters()[0].getName();
 					if (name.equals(name2)) {
 						if (serviceInterface.getTypeParameters().length == 2) {
-							s.add("<").add(className).add(",").add(className)
-									.add("Mapper>");
+							s.add("<").add(className).add(",").add(className).add("Mapper>");
 						}
 					} else {
 						if (serviceInterface.getTypeParameters().length == 2) {
-							s.add("<").add(className).add("Mapper,")
-									.add(className).add(">");
+							s.add("<").add(className).add("Mapper,").add(className).add(">");
 						}
 					}
-				} else if (hasParametersType(serviceInterface)
-						&& serviceInterface.getTypeParameters().length == 1) {
+				} else if (hasParametersType(serviceInterface) && serviceInterface.getTypeParameters().length == 1) {
 					// s.add("<").add(className).add(">");
 				}
 			}
 			s.line(" {").newLine().add("}");
-			out(path + serviceImplPackage.replace(".", "/") + "/" + className
-					+ "ServiceImpl.java", s.toString());
+			out(path + serviceImplPackage.replace(".", "/") + "/" + className + "ServiceImpl.java", s.toString());
 		}
 		return this;
 	}
@@ -856,17 +769,12 @@ public class MvcGenerater {
 			s.line("import org.springframework.ui.Model;");
 			s.line("import org.springframework.web.bind.annotation.RequestMapping;");
 			s.line("import org.springframework.web.bind.annotation.RequestParam;");
-			s.line("import org.springframework.web.bind.annotation.ResponseBody;")
-					.newLine();
+			s.line("import org.springframework.web.bind.annotation.ResponseBody;").newLine();
 			s.line("import com.github.pagehelper.PageInfo;");
-			s.add("import ").add(entityPackage).add(".").add(className).add(";")
-					.newLine();
-			s.add("import ").add(servicePackage).add(".").add(className)
-					.add("Service;").newLine().newLine();
-			s.line("/**").add(" * ").line(t.getComment() + "controller")
-					.line(" * @author " + author);
-			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm")
-					.format(new Date()));
+			s.add("import ").add(entityPackage).add(".").add(className).add(";").newLine();
+			s.add("import ").add(servicePackage).add(".").add(className).add("Service;").newLine().newLine();
+			s.line("/**").add(" * ").line(t.getComment() + "controller").line(" * @author " + author);
+			s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 			s.line(" */");
 			s.line("@Controller");
 			s.add("public class ").add(className).add("Controller");
@@ -875,40 +783,29 @@ public class MvcGenerater {
 			}
 			s.line(" {");
 			s.line("	@Autowired");
-			s.add("	").add(className).add("Service ")
-					.add(StringUtil.firstLower(className)).line("Service;")
-					.newLine();
-			s.add("	@RequestMapping(path = \"/")
-					.add(StringUtil.firstLower(className)).line("/list\")");
+			s.add("	").add(className).add("Service ").add(StringUtil.firstLower(className)).line("Service;").newLine();
+			s.add("	@RequestMapping(path = \"/").add(StringUtil.firstLower(className)).line("/list\")");
 			s.line("	public String list(@RequestParam(defaultValue = \"1\") int pageNum, @RequestParam(defaultValue = \"10\") int pageSize, Model model) {");
-			s.add("		PageInfo<").add(className).add("> pageInfo = ")
-					.add(lowClassName).add("Service.findPage(new ")
+			s.add("		PageInfo<").add(className).add("> pageInfo = ").add(lowClassName).add("Service.findPage(new ")
 					.add(className).line("(), pageNum, pageSize);");
 			s.line("		model.addAttribute(\"pageInfo\", pageInfo);");
 			s.add("		return \"/").add(lowClassName).line("/list\";");
 			s.line("	}").newLine();
-			s.add("	@RequestMapping(path = \"/").add(lowClassName)
-					.line("/edit\")");
+			s.add("	@RequestMapping(path = \"/").add(lowClassName).line("/edit\")");
 			s.line("	public String edit(long id, Model model) {");
-			s.add("		").add(className).add(" ").add(lowClassName).add(" = ")
-					.add(lowClassName).line("Service.get(id);");
-			s.add("		model.addAttribute(\"").add(lowClassName).add("\", ")
-					.add(lowClassName).line(");");
-			s.add("		return \"/").add(lowClassName).add("/edit\";")
-					.newLine();
+			s.add("		").add(className).add(" ").add(lowClassName).add(" = ").add(lowClassName)
+					.line("Service.get(id);");
+			s.add("		model.addAttribute(\"").add(lowClassName).add("\", ").add(lowClassName).line(");");
+			s.add("		return \"/").add(lowClassName).add("/edit\";").newLine();
 			s.line("	}").newLine();
 			s.line("	@ResponseBody");
-			s.add("	@RequestMapping(path = \"/").add(lowClassName)
-					.line("/save\")");
-			s.add("	public String save(").add(className).add(" ")
-					.add(lowClassName).line(") {");
-			s.add("		").add(lowClassName).add("Service.save(")
-					.add(lowClassName).line(");");
+			s.add("	@RequestMapping(path = \"/").add(lowClassName).line("/save\")");
+			s.add("	public String save(").add(className).add(" ").add(lowClassName).line(") {");
+			s.add("		").add(lowClassName).add("Service.save(").add(lowClassName).line(");");
 			s.line("		return \"{\\\"message\\\":\\\"success\\\"}\";");
 			s.line("	}");
 			s.add("}");
-			out(path + controlPackage.replace(".", "/") + "/" + className
-					+ "Controller.java", s.toString());
+			out(path + controlPackage.replace(".", "/") + "/" + className + "Controller.java", s.toString());
 		}
 		return this;
 	}
@@ -941,9 +838,7 @@ public class MvcGenerater {
 			s.line("                <tr>");
 			for (Column c : t.getAllColumns()) {
 				s.add("                    <th>")
-						.add((c.getRemark() == null || c.getRemark().isEmpty())
-								? c.getName()
-								: c.getRemark())
+						.add((c.getRemark() == null || c.getRemark().isEmpty()) ? c.getName() : c.getRemark())
 						.line("</th>");
 			}
 			s.line("                    <th>操作</th>");
@@ -953,19 +848,15 @@ public class MvcGenerater {
 			s.line("                    <#list pageInfo.list as p>");
 			s.line("                    <tr>");
 			for (Column c : t.getAllColumns()) {
-				String cn = StringUtil
-						.firstLower(StringUtil.camelCase(c.getName()));
+				String cn = StringUtil.firstLower(StringUtil.camelCase(c.getName()));
 				if (c.getType().getJava().equals("java.util.Date")) {
-					s.add("                        <td>${p.").add(cn)
-							.line("?string('yyyy-MM-dd HH:mm:ss')}</td>");
+					s.add("                        <td>${p.").add(cn).line("?string('yyyy-MM-dd HH:mm:ss')}</td>");
 				} else {
-					s.add("                        <td>${p.").add(cn)
-							.line("!}</td>");
+					s.add("                        <td>${p.").add(cn).line("!}</td>");
 				}
 			}
 			Column key = t.getPrimaryKeys().get(0);
-			String kn = StringUtil
-					.firstLower(StringUtil.camelCase(key.getName()));
+			String kn = StringUtil.firstLower(StringUtil.camelCase(key.getName()));
 			s.add("                        <td><a href=\"#\" class=\"btn btn-default btn-xs\" onclick=\"edit('${p.")
 					.add(kn).line("}')\">编辑</a></td>");
 			s.line("                    </tr>");
@@ -1014,10 +905,8 @@ public class MvcGenerater {
 			if (viewFooter != null && !viewFooter.isEmpty()) {
 				s.line(viewFooter);
 			}
-			createFile(
-					path.replaceFirst("java", "webapp") + viewPath + className);
-			out(path.replaceFirst("java", "webapp") + viewPath + className
-					+ "/list.ftl", s.toString());
+			createFile(path.replaceFirst("java", "webapp") + viewPath + className);
+			out(path.replaceFirst("java", "webapp") + viewPath + className + "/list.ftl", s.toString());
 			// edit
 			s = new Str();
 			if (viewHeader != null && !viewHeader.isEmpty()) {
@@ -1034,26 +923,19 @@ public class MvcGenerater {
 			s.line("        </div>");
 			s.line("        <div class=\"col-md-12\">");
 			s.line("            <form class=\"form-horizontal\">");
-			s.add("                <input type=\"hidden\" name=\"").add(kn)
-					.add("\" value=\"${").add(className).add(".").add(kn)
-					.line("!}\">");
+			s.add("                <input type=\"hidden\" name=\"").add(kn).add("\" value=\"${").add(className).add(".")
+					.add(kn).line("!}\">");
 			for (Column c : t.getColumns()) {
 				s.line("                <div class=\"form-group\">");
-				String cn = StringUtil
-						.firstLower(StringUtil.camelCase(c.getName()));
-				s.add("                    <label class=\"col-sm-2 control-label\" for=\"")
-						.add(cn).add("\">");
-				s.add((c.getRemark() == null || c.getRemark().isEmpty())
-						? kn
-						: c.getRemark()).line("</label>");
+				String cn = StringUtil.firstLower(StringUtil.camelCase(c.getName()));
+				s.add("                    <label class=\"col-sm-2 control-label\" for=\"").add(cn).add("\">");
+				s.add((c.getRemark() == null || c.getRemark().isEmpty()) ? kn : c.getRemark()).line("</label>");
 				s.line("                    <div class=\"col-sm-6\">");
-				s.add("                        <input id=\"").add(cn)
-						.add("\" name=\"").add(cn)
+				s.add("                        <input id=\"").add(cn).add("\" name=\"").add(cn)
 						.add("\" class=\"form-control\" type=\"text\"");
 				s.add(" value=\"${");
 				if (c.getType().getJava().equals("java.util.Date")) {
-					s.add("(").add(className).add(".").add(cn)
-							.add("?string(\"yyyy-MM-dd HH:mm:ss\"))!");
+					s.add("(").add(className).add(".").add(cn).add("?string(\"yyyy-MM-dd HH:mm:ss\"))!");
 				} else {
 					s.add("(").add(className).add(".").add(cn).add(")!");
 				}
@@ -1074,15 +956,11 @@ public class MvcGenerater {
 			s.line("        var b = true;");
 			s.line("        var msg = \"错误：\";");
 			for (Column c : t.getColumns()) {
-				String cn = StringUtil
-						.firstLower(StringUtil.camelCase(c.getName()));
+				String cn = StringUtil.firstLower(StringUtil.camelCase(c.getName()));
 				s.add("        if ($(\"#").add(cn).line("\").val() == \"\") {");
 				s.line("            b = false;");
 				s.add("            msg += \"")
-						.add((c.getRemark() == null || c.getRemark().isEmpty())
-								? kn
-								: c.getRemark())
-						.line("不能为空；\";");
+						.add((c.getRemark() == null || c.getRemark().isEmpty()) ? kn : c.getRemark()).line("不能为空；\";");
 				s.line("        }");
 			}
 			s.line("        if (b) {");
@@ -1100,11 +978,9 @@ public class MvcGenerater {
 				s.line(viewFooter);
 			}
 			if (war) {
-				out(path.replaceFirst("java", "webapp") + viewPath + className
-						+ "/edit.ftl", s.toString());
+				out(path.replaceFirst("java", "webapp") + viewPath + className + "/edit.ftl", s.toString());
 			} else {
-				out(path.replaceFirst("java", "resources") + viewPath
-						+ className + "/edit.ftl", s.toString());
+				out(path.replaceFirst("java", "resources") + viewPath + className + "/edit.ftl", s.toString());
 			}
 		}
 		return this;
@@ -1137,21 +1013,18 @@ public class MvcGenerater {
 		return PathUtil.getMavenSrcPath() + "main/java/";
 	}
 
-	public MvcGenerater createXmlReplaceable(String xmlPath,
-			boolean selective) {
+	public MvcGenerater createXmlReplaceable(String xmlPath, boolean selective) {
 		for (Table t : tables) {
 			String className = StringUtil.camelCase(replacePrefix(t.getName()));
 			className = StringUtil.firstUpper(className);
-			String pathname = path.replaceFirst("java", "resources") + xmlPath
-					+ className + "Mapper.xml";
+			String pathname = path.replaceFirst("java", "resources") + xmlPath + className + "Mapper.xml";
 			File f = new File(pathname);
 			if (f.exists()) {
 				String xml = FileUtil.readString(pathname, null);
 				XmlBuilder builder = new XmlBuilder(xml);
-				String keyCol = (t.getPrimaryKeys() != null
-						&& t.getPrimaryKeys().size() > 0)
-								? t.getPrimaryKeys().get(0).getName()
-								: "";
+				String keyCol = (t.getPrimaryKeys() != null && t.getPrimaryKeys().size() > 0)
+						? t.getPrimaryKeys().get(0).getName()
+						: "";
 				String keyProp = StringUtil.camelCase(keyCol);
 				Str s = new Str();
 
@@ -1171,8 +1044,7 @@ public class MvcGenerater {
 				}
 				s.delLastChar().add(") values (");
 				for (Column c : t.getAllColumns()) {
-					s.add("#{").add(StringUtil.camelCase(c.getName()))
-							.add("},");
+					s.add("#{").add(StringUtil.camelCase(c.getName())).add("},");
 				}
 				s.delLastChar().add(")");
 				insert.text(s.toString());
@@ -1192,15 +1064,13 @@ public class MvcGenerater {
 					s.add("<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\" >");
 					for (Column c : t.getAllColumns()) {
 						String pro = StringUtil.camelCase(c.getName());
-						s.add("<if test=\"" + pro + " != null\" >")
-								.add(c.getName()).add(",</if>");
+						s.add("<if test=\"" + pro + " != null\" >").add(c.getName()).add(",</if>");
 					}
 					s.add("</trim>");
 					s.add("<trim prefix=\"values (\" suffix=\")\" suffixOverrides=\",\" >");
 					for (Column c : t.getAllColumns()) {
 						String pro = StringUtil.camelCase(c.getName());
-						s.add("<if test=\"" + pro + " != null\" >#{").add(pro)
-								.add("},</if>");
+						s.add("<if test=\"" + pro + " != null\" >#{").add(pro).add("},</if>");
 					}
 					s.add("</trim>");
 					is.text(s.toString());
@@ -1216,8 +1086,7 @@ public class MvcGenerater {
 				}
 				s.empty("update ").add(t.getName()).add(" set ");
 				for (Column c : t.getColumns()) {
-					s.add(c.getName()).add("=#{")
-							.add(StringUtil.camelCase(c.getName())).add("},");
+					s.add(c.getName()).add("=#{").add(StringUtil.camelCase(c.getName())).add("},");
 				}
 				s.delLastChar().add(" where " + keyCol + "=#{" + keyProp + "}");
 				update.text(s.toString());
@@ -1234,12 +1103,9 @@ public class MvcGenerater {
 					s.add("<set>");
 					for (Column c : t.getColumns()) {
 						String pro = StringUtil.camelCase(c.getName());
-						s.add("<if test=\"" + pro + " != null\" >")
-								.add(c.getName()).add("=#{").add(pro)
-								.add("},</if>");
+						s.add("<if test=\"" + pro + " != null\" >").add(c.getName()).add("=#{").add(pro).add("},</if>");
 					}
-					s.add("</set>")
-							.add(" where " + keyCol + "=#{" + keyProp + "}");
+					s.add("</set>").add(" where " + keyCol + "=#{" + keyProp + "}");
 					us.text(s.toString());
 					builder.rootNode().children().add(us);
 				}
@@ -1251,27 +1117,23 @@ public class MvcGenerater {
 				} else {
 					builder.rootNode().children().remove(del);
 				}
-				del.text("update " + t.getName() + " set del=1 where " + keyCol
-						+ "=#{" + keyProp + "}");
+				del.text("update " + t.getName() + " set del=1 where " + keyCol + "=#{" + keyProp + "}");
 				builder.rootNode().children().add(del);
 
 				Node get = builder.getById("get");
 				if (get == null) {
 					get = builder.rootNode().createNode().name("select");
-					get.addAttribute("id", "get").addAttribute("resultType",
-							className);
+					get.addAttribute("id", "get").addAttribute("resultType", className);
 				} else {
 					builder.rootNode().children().remove(get);
 				}
-				get.text("select * from " + t.getName() + " where " + keyCol
-						+ "=#{" + keyProp + "}");
+				get.text("select * from " + t.getName() + " where " + keyCol + "=#{" + keyProp + "}");
 				builder.rootNode().children().add(get);
 
 				Node list = builder.getById("list");
 				if (list == null) {
 					list = builder.rootNode().createNode().name("select");
-					list.addAttribute("id", "list").addAttribute("resultType",
-							className);
+					list.addAttribute("id", "list").addAttribute("resultType", className);
 				} else {
 					builder.rootNode().children().remove(list);
 				}
@@ -1293,5 +1155,21 @@ public class MvcGenerater {
 		String edit(Table t);
 
 		String list(Table t);
+	}
+
+	private HashMap<Type, Class<?>> tyeAdaptor = new HashMap<>();
+
+	public MvcGenerater typeAdaptor(Type t, Class<?> java) {
+		tyeAdaptor.put(t, java);
+		return this;
+	}
+
+	private String type(Column c) {
+		Type type = c.getType();
+		if (tyeAdaptor.containsKey(type)) {
+			return tyeAdaptor.get(type).getName();
+		} else {
+			return type.getJavaString(!primitive || c.isNullable());
+		}
 	}
 }

@@ -343,11 +343,11 @@ public class JdbcMeta {
 	}
 
 	public static enum Type {
-		BOOL("bit", boolean.class, Boolean.class), //
-		BYTE("tinyint", byte.class, Byte.class), //
-		SHORT("smallint", short.class, Short.class), //
+		BIT("bit", boolean.class, Boolean.class), //
+		TINYINT("tinyint", byte.class, Byte.class), //
+		SMALLINT("smallint", short.class, Short.class), //
 		INT("int", int.class, Integer.class), //
-		LONG("bigint", long.class, Long.class), //
+		BIGINT("bigint", long.class, Long.class), //
 		DOUBLE("double", double.class, Double.class), //
 		FLOAT("float", float.class, Float.class), //
 		CHAR("char", String.class), //

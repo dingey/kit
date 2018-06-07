@@ -25,7 +25,7 @@ public class ViewStyleLayui extends ViewStyleHelper {
 				String n = StringUtil.camelCase(c.getName());
 				s.line("<input type=\"text\" name=\"" + n
 						+ "\" required  lay-verify=\"required\" placeholder=\"\" autocomplete=\"off\" class=\"layui-input\">");
-			} else if (c.getType() == Type.BYTE) {
+			} else if (c.getType() == Type.TINYINT) {
 				LinkedHashMap<String, String> enums = numEnum(c.getRemark());
 				if (enums.size() == 2) {
 					
