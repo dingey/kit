@@ -7,7 +7,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -241,7 +240,7 @@ public class SqlProvider {
 		});
 	}
 
-	public String listByIds(Class<?> entity, Collection<Serializable> ids) {
+	public String listByIds(Class<?> entity, Iterable<Serializable> ids) {
 		StringBuilder s = new StringBuilder();
 		s.append("SELECT * FROM ").append(table(entity));
 		s.append(" WHERE ").append(StringUtil.snakeCase(id(entity).getName())).append(" IN ( ");
@@ -252,7 +251,7 @@ public class SqlProvider {
 		return s.toString();
 	}
 
-	private Field id(Class<?> entity) {
+	public static Field id(Class<?> entity) {
 		Field id = null;
 		if (idFieldsMap.containsKey(entity)) {
 			id = idFieldsMap.get(entity);
