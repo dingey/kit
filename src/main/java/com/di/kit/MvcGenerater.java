@@ -2,6 +2,7 @@ package com.di.kit;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.TypeVariable;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -1157,9 +1158,9 @@ public class MvcGenerater {
 		String list(Table t);
 	}
 
-	private HashMap<Type, Class<?>> tyeAdaptor = new HashMap<>();
+	private HashMap<Type, Class<? extends Serializable>> tyeAdaptor = new HashMap<>();
 
-	public MvcGenerater typeAdaptor(Type t, Class<?> java) {
+	public MvcGenerater sqlTypeAdaptor(Type t, Class<? extends Serializable> java) {
 		tyeAdaptor.put(t, java);
 		return this;
 	}
@@ -1167,6 +1168,9 @@ public class MvcGenerater {
 	private String type(Column c) {
 		Type type = c.getType();
 		if (tyeAdaptor.containsKey(type)) {
+			Class<? extends Serializable> java = tyeAdaptor.get(type);
+			if (java.getName().startsWith("java.lang."))
+				return java.getSimpleName();
 			return tyeAdaptor.get(type).getName();
 		} else {
 			return type.getJavaString(!primitive || c.isNullable());
