@@ -297,6 +297,7 @@ public class SqlProvider {
 			return modelFieldsMap.get(beanClass.getName());
 		} else {
 			List<Field> fields = ClassUtil.getDeclaredFields(beanClass);
+			fields.forEach(f->{f.setAccessible(true);});
 			modelFieldsMap.put(beanClass.getName(), fields);
 			return fields;
 		}
