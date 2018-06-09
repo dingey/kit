@@ -1,5 +1,13 @@
 #  kit
 toolkit simple:xml,json,httpconnection etc.
+开始使用，引用
+```
+<dependency>
+  <groupId>com.github.dingey</groupId>
+  <artifactId>kit</artifactId>
+  <version>1.4</version>
+</dependency>
+```
 
 # json
 json字符串转Object
