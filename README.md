@@ -1,6 +1,7 @@
 #  kit
-toolkit simple:xml,json,httpconnection etc.
-开始使用，引用
+toolkit simple:xml,json,httpconnection etc。
+
+开始使用，引入依赖
 ```
 <dependency>
   <groupId>com.github.dingey</groupId>
