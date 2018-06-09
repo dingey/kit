@@ -346,17 +346,26 @@ public class JdbcMeta {
 		BIT("bit", boolean.class, Boolean.class), //
 		TINYINT("tinyint", byte.class, Byte.class), //
 		SMALLINT("smallint", short.class, Short.class), //
+		MEDIUMINT("mediumint",int.class, Integer.class),//
 		INT("int", int.class, Integer.class), //
+		INTEGER("integer",  Integer.class), //
 		BIGINT("bigint", long.class, Long.class), //
 		DOUBLE("double", double.class, Double.class), //
 		FLOAT("float", float.class, Float.class), //
 		CHAR("char", String.class), //
 		VARCHAR("varchar", String.class), //
+		TEXT("text",String.class),
 		DATE("date", java.sql.Date.class), //
 		TIME("time", java.sql.Time.class), //
 		TIME_STAMP("timestamp", java.util.Date.class, java.sql.Timestamp.class), //
 		DATE_TIME("datetime", java.util.Date.class), //
-		DECIMAL("decimal", java.math.BigDecimal.class);
+		DECIMAL("decimal", java.math.BigDecimal.class),
+		BINARY("binary",byte[].class),
+		VARBINARY("varbinary",byte[].class),
+		TINYBLOB("tinyblob",byte[].class),//255
+		BLOB("blob",byte[].class),//65K
+		MEDIUMBLOB("mediumblob",byte[].class),//16M
+		LONGBLOB("longblob",byte[].class);//4G
 
 		private String sql;
 		private Class<?>[] java;
