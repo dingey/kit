@@ -110,7 +110,7 @@ public class JdbcMeta {
 			c.setName(columnSet.getString("COLUMN_NAME"));
 			c.setType(Type.getBySql(columnSet.getString("TYPE_NAME")));
 			c.setNullable(columnSet.getInt("NULLABLE") != 1);
-			c.setRemark(columnSet.getString("REMARKS"));
+			c.setRemark(StringUtil.escape(columnSet.getString("REMARKS")));
 			c.setPrimaryKey(primaryKeyMap.get(c.getName()) != null);
 			c.setImportKey(foreignKeyMap.get(c.getName()));
 			c.setLength(columnSet.getInt("COLUMN_SIZE"));
@@ -184,7 +184,7 @@ public class JdbcMeta {
 			} catch (SQLException e) {
 			}
 		}
-		return comment;
+		return StringUtil.escape(comment);
 	}
 
 	public void close() {

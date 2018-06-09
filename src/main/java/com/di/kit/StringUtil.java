@@ -10,8 +10,7 @@ import java.util.Set;
  * @author di
  */
 public class StringUtil {
-	public static final String lineSeparator = System
-			.getProperty("line.separator", "\n");
+	public static final String lineSeparator = System.getProperty("line.separator", "\n");
 
 	public static String firstLower(String s) {
 		return s.substring(0, 1).toLowerCase() + s.substring(1);
@@ -61,10 +60,8 @@ public class StringUtil {
 	public static boolean isBlank(Object... objects) {
 		Boolean result = false;
 		for (Object object : objects) {
-			if (object == null || "".equals(object.toString().trim())
-					|| "null".equals(object.toString().trim())
-					|| "[null]".equals(object.toString().trim())
-					|| "[]".equals(object.toString().trim())) {
+			if (object == null || "".equals(object.toString().trim()) || "null".equals(object.toString().trim())
+					|| "[null]".equals(object.toString().trim()) || "[]".equals(object.toString().trim())) {
 				result = true;
 				break;
 			}
@@ -82,9 +79,7 @@ public class StringUtil {
 			result += ((String) key + "=" + (String) map.get(key) + "&");
 		}
 
-		return isBlank(result)
-				? result
-				: result.substring(0, result.length() - 1);
+		return isBlank(result) ? result : result.substring(0, result.length() - 1);
 	}
 
 	public static Map<String, ? extends Object> getToMap(String args) {
@@ -110,9 +105,7 @@ public class StringUtil {
 				for (int i = 1; i < keyValue.length; i++) {
 					value += keyValue[i] + "=";
 				}
-				value = value.length() > 0
-						? value.substring(0, value.length() - 1)
-						: value;
+				value = value.length() > 0 ? value.substring(0, value.length() - 1) : value;
 				result.put(key, value);
 			}
 		}
@@ -142,8 +135,7 @@ public class StringUtil {
 
 	public static String urlEncode(String value, String encode) {
 		try {
-			value = java.net.URLEncoder.encode(value,
-					encode == null ? "utf-8" : encode);
+			value = java.net.URLEncoder.encode(value, encode == null ? "utf-8" : encode);
 			return value;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -153,12 +145,19 @@ public class StringUtil {
 
 	public static String urlDecoder(String value, String encode) {
 		try {
-			value = java.net.URLDecoder.decode(value,
-					encode == null ? "utf-8" : encode);
+			value = java.net.URLDecoder.decode(value, encode == null ? "utf-8" : encode);
 			return value;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return null;
+		}
+	}
+
+	public static String escape(String s) {
+		if (s == null || s.isEmpty()) {
+			return s;
+		} else {
+			return s.trim().replace("\\", "\\\\").replace("\r", "\\r").replace("\n", "\\n");
 		}
 	}
 }
