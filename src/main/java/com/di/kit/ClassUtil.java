@@ -314,7 +314,11 @@ public class ClassUtil {
 		Class<?> returnType = method.getReturnType();
 		if (type instanceof ParameterizedType) {
 			Type[] types = ((ParameterizedType) type).getActualTypeArguments();
-			return (Class[]) types;
+			Class<?>[] cs=new Class[types.length];
+			for(int i=0;i<types.length;i++) {
+				cs[i]=(Class<?>) types[i];
+			}
+			return cs;
 		} else if (returnType.isArray()) {
 			Class<?> type2 = returnType.getComponentType();
 			return new Class<?>[]{type2};
