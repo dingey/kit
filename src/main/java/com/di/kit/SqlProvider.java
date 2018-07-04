@@ -131,9 +131,7 @@ public class SqlProvider {
                 throw new RuntimeException();
             } else {
                 for (String id : ids) {
-                    sql.append(StringUtil.snakeCase(id))
-                            .append("=#{").append(id)
-                            .append("} and ");
+                    sql.append(StringUtil.snakeCase(id)).append("=#{").append(id).append("} and ");
                 }
             }
             return sql.delete(sql.length() - 5, sql.length()).toString();
