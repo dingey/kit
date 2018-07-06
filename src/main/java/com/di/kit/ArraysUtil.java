@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * @author di
  */
+@SuppressWarnings("unused")
 public class ArraysUtil {
 	public static <T> List<List<T>> splitList(List<T> list, int limit) {
 		int i = 0;
@@ -26,7 +27,7 @@ public class ArraysUtil {
 	public static <T> List<List<T>> split(List<T> list, int num) {
 		List<List<T>> temps = new ArrayList<>();
 		int length = list.size() / num + (list.size() % num == 0 ? 0 : 1);
-		if (list != null && list.size() > 0) {
+		if (list.size() > 0) {
 			for (int i = 0; i < num; i++) {
 				if ((i + 1) * length < list.size()) {
 					List<T> ts = list.subList(i * length, (i + 1) * length);
