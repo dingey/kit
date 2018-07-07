@@ -1,10 +1,6 @@
 package com.di.kit;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.LinkedHashMap;
@@ -190,7 +186,7 @@ public interface Request {
         URLConnection conn;
         Map<Object, Object> form;
         byte[] readbytes;
-        String reqStr;
+        byte[] reqBytes;
         String contentType;
         String requestType;
         String accept;
@@ -212,9 +208,10 @@ public interface Request {
                 }
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
-                PrintWriter writer = new PrintWriter(conn.getOutputStream());
-                writer.print(requestBody());
-                writer.flush();
+                BufferedOutputStream outputStream=new BufferedOutputStream(conn.getOutputStream());
+                outputStream.write(requestBody());
+                outputStream.flush();
+                outputStream.close();
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
                 byte[] buf = new byte[128];
@@ -225,6 +222,7 @@ public interface Request {
                 in.close();
                 contentType = conn.getContentType();
                 readbytes = out.toByteArray();
+                out.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -270,21 +268,33 @@ public interface Request {
 
         @Override
         public Request body(String str) {
-            this.reqStr = str;
+            try {
+                this.reqBytes = str.getBytes("utf-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             return this;
         }
 
         @Override
         public Request json(String str) {
             this.requestType = "application/json";
-            this.reqStr = str;
+            try {
+                this.reqBytes = str.getBytes("utf-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             return this;
         }
 
         @Override
         public Request xml(String str) {
             this.requestType = "text/xml";
-            this.reqStr = str;
+            try {
+                this.reqBytes = str.getBytes("utf-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             return this;
         }
 
@@ -309,18 +319,19 @@ public interface Request {
             return this;
         }
 
-        private String requestBody() {
+        private byte[] requestBody() {
             if (this.url != null && !this.url.isEmpty() && form != null && !form.isEmpty()) {
-                StringBuilder s = new StringBuilder(this.reqStr == null ? "" : this.reqStr);
-                if (this.reqStr != null && !this.reqStr.isEmpty()) {
-                    s.append("&");
-                }
+                StringBuilder s = new StringBuilder();
                 for (Object k : form.keySet()) {
                     s.append(k).append("=").append(form.get(k)).append("&");
                 }
-                this.reqStr = s.toString();
+                try {
+                    this.reqBytes = s.toString().getBytes("utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
             }
-            return reqStr;
+            return reqBytes;
         }
     }
 
