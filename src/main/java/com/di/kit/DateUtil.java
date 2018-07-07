@@ -55,16 +55,9 @@ public class DateUtil {
      * 获取指定时间date几(秒、分、小时、天、周、月、年)后的时间
      *
      * @param date     指定时间
-     * @param dateType 时间类型
+     * @param dateType 时间类型 Calendar.SECOND 秒Calendar.MINUTE 分Calendar.HOUR_OF_DAY 小时Calendar.DAY_OF_MONTH 天Calendar.WEEK_OF_YEAR 周Calendar.MONTH 月Calendar.YEAR 年
      * @param amount   多少,可负
      * @return 时间
-     * @see Calendar.SECOND 秒type
-     * @see Calendar.MINUTE 分type
-     * @see Calendar.HOUR_OF_DAY 小时type
-     * @see Calendar.DAY_OF_MONTH 天type
-     * @see Calendar.WEEK_OF_YEAR 周type
-     * @see Calendar.MONTH 月type
-     * @see Calendar.YEAR 年type
      */
     public static Date add(Date date, int dateType, int amount) {
         Calendar calendar = Calendar.getInstance();
