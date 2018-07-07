@@ -8,8 +8,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public interface Request {
     Request execute();
 
@@ -25,19 +27,26 @@ public interface Request {
 
     Request body(String str);
 
+    Request json(String str);
+
+    Request xml(String str);
+
+    Request requestType(String str);
+
     Request add(String k, String v);
 
-    public static Request Get(String url) {
+    static Request Get(String url) {
         return new GetRequest(url);
     }
 
-    static class GetRequest implements Request {
+    class GetRequest implements Request {
         String url;
         String reqStr;
         URLConnection conn;
         Map<Object, Object> form;
         byte[] readbytes;
         String contentType;
+        String requestType;
 
         private GetRequest(String url) {
             this.url = url;
@@ -48,11 +57,14 @@ public interface Request {
             try {
                 URL u = new URL(url());
                 conn = u.openConnection();
+                if (this.requestType != null && !this.requestType.isEmpty()) {
+                    conn.setRequestProperty("Content-Type", requestType);
+                }
                 conn.connect();
                 BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 byte[] buf = new byte[128];
-                int readCount = 0;
+                int readCount;
                 while ((readCount = in.read(buf, 0, 100)) > 0) {
                     out.write(buf, 0, readCount);
                 }
@@ -95,7 +107,7 @@ public interface Request {
                 if (this.url.contains("?")) {
                     this.url += "&" + reqStr;
                 } else {
-                    this.url += reqStr;
+                    this.url += "?" + reqStr;
                 }
             } else if (this.url != null && !this.url.isEmpty() && form != null && !form.isEmpty()) {
                 StringBuilder s = new StringBuilder(this.url);
@@ -105,9 +117,9 @@ public interface Request {
                     s.append("?");
                 }
                 for (Object k : form.keySet()) {
-                    s.append(k).append("=").append(form.get(k)).append("&");
+                    s.append(k).append("=").append(StringUtil.urlEncode(form.get(k).toString(), "utf-8")).append("&");
                 }
-                this.url = this.toString();
+                this.url = s.toString();
             }
             return this.url;
         }
@@ -134,19 +146,42 @@ public interface Request {
         }
 
         @Override
+        public Request json(String str) {
+            this.requestType = "application/json";
+            this.reqStr = str;
+            return this;
+        }
+
+        @Override
+        public Request xml(String str) {
+            this.requestType = "text/xml";
+            this.reqStr = str;
+            return this;
+        }
+
+        @Override
+        public Request requestType(String requestType) {
+            this.requestType = requestType;
+            return this;
+        }
+
+        @Override
         public Request add(String k, String v) {
+            if(this.form==null)
+                this.form=new LinkedHashMap<>();
             this.form.put(k, v);
             return this;
         }
     }
 
-    public static class PostRequest implements Request {
+    class PostRequest implements Request {
         String url;
         URLConnection conn;
         Map<Object, Object> form;
         byte[] readbytes;
         String reqStr;
         String contentType;
+        String requestType;
 
         private PostRequest(String url) {
             this.url = url;
@@ -157,6 +192,9 @@ public interface Request {
             try {
                 URL u = new URL(url);
                 conn = u.openConnection();
+                if (this.requestType != null && !this.requestType.isEmpty()) {
+                    conn.setRequestProperty("Content-Type", requestType);
+                }
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
                 PrintWriter writer = new PrintWriter(conn.getOutputStream());
@@ -165,7 +203,7 @@ public interface Request {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
                 byte[] buf = new byte[128];
-                int readCount = 0;
+                int readCount;
                 while ((readCount = in.read(buf, 0, 100)) > 0) {
                     out.write(buf, 0, readCount);
                 }
@@ -222,6 +260,26 @@ public interface Request {
         }
 
         @Override
+        public Request json(String str) {
+            this.requestType = "application/json";
+            this.reqStr = str;
+            return this;
+        }
+
+        @Override
+        public Request xml(String str) {
+            this.requestType = "text/xml";
+            this.reqStr = str;
+            return this;
+        }
+
+        @Override
+        public Request requestType(String requestType) {
+            this.requestType = requestType;
+            return this;
+        }
+
+        @Override
         public Request add(String k, String v) {
             if (this.form == null) {
                 this.form = new HashMap<>();
@@ -243,15 +301,14 @@ public interface Request {
             }
             return reqStr;
         }
-
     }
 
-    public static interface Form {
+    interface Form {
         Form add(String name, String value);
 
         Map<Object, Object> build();
 
-        static class FormData extends HashMap<Object, Object> implements Form {
+        class FormData extends HashMap<Object, Object> implements Form {
             private static final long serialVersionUID = -4119390665446925457L;
 
             private FormData() {
@@ -269,24 +326,12 @@ public interface Request {
             }
         }
 
-        public static Form form() {
+        static Form form() {
             return new FormData();
         }
     }
 
-    public static Request Post(String url) {
+    static Request Post(String url) {
         return new PostRequest(url);
     }
-
-    public static void main(String[] args) {
-        Request get = Request.Get("http://localhost:8090/hi").body("").execute();
-        System.out.println(get.getContentType());
-        System.out.println(get.returnContent());
-
-        Request post = Request.Post("http://localhost:8090/hi").add("name", "alice").execute();
-        Request.Post("").body("<a>aa1</a>").execute();
-        System.out.println(post.getContentType());
-        System.out.println(post.returnContent());
-    }
-
 }
