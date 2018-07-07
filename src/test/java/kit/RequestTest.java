@@ -16,7 +16,7 @@ public class RequestTest {
         System.out.println(json.getContentType());
         System.out.println(json.returnContent());
 
-        Request xml = Request.Post("http://localhost:8090/xml").xml("<root><content>爱丽丝</content></root>").execute();
+        Request xml = Request.Post("http://localhost:8090/xml").xml("<log><content>爱丽丝</content></log>").accept("text/xml").execute();
         System.out.println(xml.getContentType());
         System.out.println(xml.returnContent());
     }

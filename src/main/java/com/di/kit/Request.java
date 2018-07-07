@@ -7,7 +7,6 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,6 +32,8 @@ public interface Request {
 
     Request requestType(String str);
 
+    Request accept(String str);
+
     Request add(String k, String v);
 
     static Request Get(String url) {
@@ -47,6 +48,7 @@ public interface Request {
         byte[] readbytes;
         String contentType;
         String requestType;
+        String accept;
 
         private GetRequest(String url) {
             this.url = url;
@@ -59,6 +61,9 @@ public interface Request {
                 conn = u.openConnection();
                 if (this.requestType != null && !this.requestType.isEmpty()) {
                     conn.setRequestProperty("Content-Type", requestType);
+                }
+                if (this.accept != null && !this.accept.isEmpty()) {
+                    conn.setRequestProperty("Accept", accept);
                 }
                 conn.connect();
                 BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
@@ -166,9 +171,15 @@ public interface Request {
         }
 
         @Override
+        public Request accept(String accept) {
+            this.accept = accept;
+            return this;
+        }
+
+        @Override
         public Request add(String k, String v) {
-            if(this.form==null)
-                this.form=new LinkedHashMap<>();
+            if (this.form == null)
+                this.form = new LinkedHashMap<>();
             this.form.put(k, v);
             return this;
         }
@@ -182,6 +193,7 @@ public interface Request {
         String reqStr;
         String contentType;
         String requestType;
+        String accept;
 
         private PostRequest(String url) {
             this.url = url;
@@ -194,6 +206,9 @@ public interface Request {
                 conn = u.openConnection();
                 if (this.requestType != null && !this.requestType.isEmpty()) {
                     conn.setRequestProperty("Content-Type", requestType);
+                }
+                if (this.accept != null && !this.accept.isEmpty()) {
+                    conn.setRequestProperty("Accept", accept);
                 }
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
@@ -280,9 +295,15 @@ public interface Request {
         }
 
         @Override
+        public Request accept(String accept) {
+            this.accept = accept;
+            return this;
+        }
+
+        @Override
         public Request add(String k, String v) {
             if (this.form == null) {
-                this.form = new HashMap<>();
+                this.form = new LinkedHashMap<>();
             }
             this.form.put(k, v);
             return this;
@@ -308,7 +329,7 @@ public interface Request {
 
         Map<Object, Object> build();
 
-        class FormData extends HashMap<Object, Object> implements Form {
+        class FormData extends LinkedHashMap<Object, Object> implements Form {
             private static final long serialVersionUID = -4119390665446925457L;
 
             private FormData() {
