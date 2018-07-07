@@ -1,11 +1,6 @@
 package com.di.kit;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,6 +11,8 @@ import java.util.*;
  */
 @SuppressWarnings("all")
 public class ClassUtil {
+    private static HashMap<Class, Constructor<?>> constructorMap = new HashMap<>();
+
     public static boolean isUserClass(Class<?> c) {
         return !c.isPrimitive() && c != Byte.class && c != Short.class && c != Integer.class && c != Long.class && c != Double.class && c != Float.class && c != Character.class && c != String.class && c != Boolean.class && c != Date.class && c != java.sql.Date.class && !c.isInterface() && !c.isEnum() && c != Object.class && c != Class.class;
     }
@@ -98,7 +95,18 @@ public class ClassUtil {
         return getFieldValueByGetMethod(f.getName(), t);
     }
 
+    public static <T> T getObjectInstance(Map<String, Object> value, Class<T> o) {
+        Object instance = instance(o);
+        if(instance!=null){
+            setObjectFieldsValue(value,instance);
+            return (T)instance;
+        }
+        return null;
+    }
+
     public static <T> void setObjectFieldsValue(Map<String, Object> m, T o) {
+        if (o == null)
+            throw new RuntimeException("参数o必须实例化，且不能为空");
         try {
             for (Field f : getDeclaredFields(o.getClass())) {
                 f.setAccessible(true);
@@ -265,6 +273,66 @@ public class ClassUtil {
 
     public static boolean isListField(Field f) {
         return f.getType() == List.class || f.getType() == Collection.class || f.getType() == ArrayList.class;
+    }
+
+    public static Object instance(Class<?> clazz) {
+        if (clazz.isPrimitive()) {
+            if (clazz == byte.class) {
+                return (byte) 0;
+            } else if (clazz == short.class) {
+                return (short) 0;
+            } else if (clazz == int.class) {
+                return 0;
+            } else if (clazz == long.class) {
+                return (long) 0;
+            } else if (clazz == double.class) {
+                return 0d;
+            } else if (clazz == float.class) {
+                return 0f;
+            } else if (clazz == boolean.class) {
+                return false;
+            } else if (clazz == char.class) {
+                return '\0';
+            }
+        } else if (clazz.isArray()) {
+            return null;
+        }
+        Constructor constructor = null;
+        if (constructorMap.containsKey(clazz)) {
+            constructor = constructorMap.get(clazz);
+            if (constructor == null)
+                return null;
+            //throw new RuntimeException("类" + clazz.getName() + "没有构造函数无法实例化。");
+        } else {
+            Constructor<?>[] constructors = clazz.getConstructors();
+            if (constructors == null || constructors.length == 0)
+                return null;
+            //throw new RuntimeException("类" + clazz.getName() + "没有构造函数无法实例化。");
+            constructor = constructors[0];
+            if (constructors.length > 1) {
+                for (int i = 1; i < constructors.length; i++) {
+                    if (constructor.getParameterCount() > constructors[i].getParameterCount())
+                        constructor = constructors[i];
+                }
+            }
+            constructorMap.put(clazz, constructor);
+        }
+        int count = constructor.getParameterCount();
+        try {
+            if (count == 0)
+                return constructor.newInstance(null);
+            if (count > 0) {
+                Class[] types = constructor.getParameterTypes();
+                Object[] params = new Object[count];
+                for (int i = 0; i < count; i++) {
+                    params[i] = instance(types[i]);
+                }
+                return constructor.newInstance(params);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 
     public static Class<?> getFieldArrayType(Field f) {
