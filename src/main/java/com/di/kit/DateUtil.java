@@ -253,14 +253,29 @@ public class DateUtil {
         return Integer.valueOf(format);
     }
 
+    /**
+     * 获取从1970年1月1日（UTC/GMT的午夜）开始所经过的毫秒数
+     *
+     * @return 毫秒
+     */
     public static long currentTimeMillis() {
         return System.currentTimeMillis();
     }
 
+    /**
+     * 获取从1970年1月1日（UTC/GMT的午夜）开始所经过的秒数
+     *
+     * @return 秒
+     */
     public static long currentTimeSeconds() {
         return System.currentTimeMillis() / 1000L;
     }
 
+    /**
+     * 获取纳秒
+     *
+     * @return 纳秒
+     */
     public static long nanoTime() {
         return System.nanoTime();
     }
@@ -304,5 +319,13 @@ public class DateUtil {
         if (date1.before(date2))
             return date1;
         return date2;
+    }
+
+    public static Date fromUnixtime(int unixTimestamp) {
+        return new Date(unixTimestamp * 1000);
+    }
+
+    public static String formatUnixtime(int unixTimestamp, String pattern) {
+        return format(fromUnixtime(unixTimestamp), pattern);
     }
 }
