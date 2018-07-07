@@ -8,6 +8,7 @@ import java.util.Date;
 /**
  * @author di
  */
+@SuppressWarnings("all")
 public class DateUtil {
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
@@ -51,6 +52,28 @@ public class DateUtil {
     }
 
     /**
+     * 获取指定时间date几(秒、分、小时、天、周、月、年)后的时间
+     *
+     * @param date     指定时间
+     * @param dateType 时间类型
+     * @param amount   多少,可负
+     * @return 时间
+     * @see Calendar.SECOND 秒type
+     * @see Calendar.MINUTE 分type
+     * @see Calendar.HOUR_OF_DAY 小时type
+     * @see Calendar.DAY_OF_MONTH 天type
+     * @see Calendar.WEEK_OF_YEAR 周type
+     * @see Calendar.MONTH 月type
+     * @see Calendar.YEAR 年type
+     */
+    public static Date add(Date date, int dateType, int amount) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(dateType, amount);
+        return calendar.getTime();
+    }
+
+    /**
      * 获取距当前时间几天后的时间
      *
      * @param days 几天
@@ -68,10 +91,7 @@ public class DateUtil {
      * @return 指定时间date几天后的时间
      */
     public static Date addDays(Date date, int days) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(Calendar.DAY_OF_MONTH, days);
-        return calendar.getTime();
+        return add(date, Calendar.DAY_OF_MONTH, days);
     }
 
     /**
@@ -92,10 +112,7 @@ public class DateUtil {
      * @return 指定时间date几周后的时间
      */
     public static Date addWeeks(Date date, int weeks) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(Calendar.WEEK_OF_YEAR, weeks);
-        return calendar.getTime();
+        return add(date, Calendar.WEEK_OF_YEAR, weeks);
     }
 
     /**
@@ -116,10 +133,7 @@ public class DateUtil {
      * @return 指定时间date几月
      */
     public static Date addMonths(Date date, int months) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(Calendar.MONTH, months);
-        return calendar.getTime();
+        return add(date, Calendar.MONTH, months);
     }
 
     public static Date addYears(int years) {
@@ -127,34 +141,7 @@ public class DateUtil {
     }
 
     public static Date addYears(Date date, int years) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(Calendar.YEAR, years);
-        return calendar.getTime();
-    }
-
-    public static Date previousYear() {
-        return addYears(-1);
-    }
-
-    public static Date nextYear() {
-        return addYears(1);
-    }
-
-    public static Date previousMonth() {
-        return addMonths(-1);
-    }
-
-    public static Date nextMonth() {
-        return addMonths(1);
-    }
-
-    public static Date previousDay() {
-        return addDays(-1);
-    }
-
-    public static Date nextDay() {
-        return addDays(1);
+        return add(date, Calendar.YEAR, years);
     }
 
     public static double daysRangeBySecond(Date date1, Date date2) {
@@ -174,7 +161,7 @@ public class DateUtil {
         int year2 = can2.get(Calendar.YEAR);
         // 天数
         int days = 0;
-        Calendar can = null;
+        Calendar can;
         // 如果can1 < can2
         // 减去小的时间在这一年已经过了的天数
         // 加上大的时间已过的天数
@@ -197,7 +184,7 @@ public class DateUtil {
     }
 
     public static Date addSeconds(int seconds) {
-        return new Date(new Date().getTime() + seconds * 1000);
+        return new Date(currentTimeMillis() + seconds * 1000);
     }
 
     public static Date addMinutes(int minutes) {
@@ -258,8 +245,7 @@ public class DateUtil {
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         calendar.set(Calendar.MILLISECOND, 999);
-        calendar.set(Calendar.DAY_OF_MONTH,
-                calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         return calendar.getTime();
     }
 
