@@ -1,9 +1,6 @@
 package kit;
 
 import java.util.Date;
-
-import org.junit.Test;
-
 import com.di.kit.ClassUtil;
 import com.di.kit.Json;
 
@@ -11,7 +8,7 @@ import com.di.kit.Json;
  * @author d
  */
 public class ClassTest {
-	@Test
+
 	public void test() {
 		System.out.println(int.class.isPrimitive());
 		System.out.println(Integer.class.isPrimitive());

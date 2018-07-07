@@ -1,6 +1,5 @@
 package kit;
 
-import org.junit.Test;
 
 import com.di.kit.IdGenerator;
 import com.di.kit.IdWorker;
@@ -9,10 +8,6 @@ import com.di.kit.IdWorker;
  * @author di
  */
 public class IdTest {
-
-	@Test
-	public void test() {
-	}
 
 	public static void main(String[] args) {
 		IdGenerator.nextId();

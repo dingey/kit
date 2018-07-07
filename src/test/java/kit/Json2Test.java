@@ -3,16 +3,13 @@ package kit;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Test;
-
 import com.di.kit.Json;
 
 /**
  * @author di
  */
 public class Json2Test {
-	@SuppressWarnings("unused")
-	@Test
+
 	public void test() {
 		Json j = new Json();
 		// String j1 = "[1,2]";

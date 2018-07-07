@@ -3,8 +3,7 @@ package com.di.kit;
 import java.util.Stack;
 
 public class Conversion {
-	private static char[] array = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-			.toCharArray();
+	private static char[] array = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
 	private static String numStr = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 	// 10进制转为其他进制，除留取余，逆序排列

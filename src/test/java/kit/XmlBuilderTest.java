@@ -1,7 +1,5 @@
 package kit;
 
-import org.junit.Test;
-
 import com.di.kit.XmlBuilder;
 import com.di.kit.XmlBuilder.Node;
 
@@ -9,11 +7,6 @@ import com.di.kit.XmlBuilder.Node;
  * @author di
  */
 public class XmlBuilderTest {
-	@Test
-	public void test() {
-		create();
-		parse();
-	}
 
 	public void create() {
 		XmlBuilder p = new XmlBuilder();
