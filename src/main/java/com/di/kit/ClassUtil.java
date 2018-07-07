@@ -97,16 +97,18 @@ public class ClassUtil {
 
     public static <T> T getObjectInstance(Map<String, Object> value, Class<T> o) {
         Object instance = instance(o);
-        if(instance!=null){
-            setObjectFieldsValue(value,instance);
-            return (T)instance;
+        if (instance != null) {
+            setObjectFieldsValue(value, instance);
+            return (T) instance;
         }
         return null;
     }
 
     public static <T> void setObjectFieldsValue(Map<String, Object> m, T o) {
+        if (m == null)
+            return;
         if (o == null)
-            throw new RuntimeException("参数o必须实例化，且不能为空");
+            throw new RuntimeException("The second parameter cannot be null.");
         try {
             for (Field f : getDeclaredFields(o.getClass())) {
                 f.setAccessible(true);
@@ -302,12 +304,10 @@ public class ClassUtil {
             constructor = constructorMap.get(clazz);
             if (constructor == null)
                 return null;
-            //throw new RuntimeException("类" + clazz.getName() + "没有构造函数无法实例化。");
         } else {
             Constructor<?>[] constructors = clazz.getConstructors();
             if (constructors == null || constructors.length == 0)
                 return null;
-            //throw new RuntimeException("类" + clazz.getName() + "没有构造函数无法实例化。");
             constructor = constructors[0];
             if (constructors.length > 1) {
                 for (int i = 1; i < constructors.length; i++) {
