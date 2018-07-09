@@ -22,6 +22,8 @@ public interface Request {
 
     Request body(String str);
 
+    Request body(byte[] reqBytes);
+
     Request json(String str);
 
     Request xml(String str);
@@ -147,6 +149,11 @@ public interface Request {
         }
 
         @Override
+        public Request body(byte[] reqBytes) {
+            throw new RuntimeException("GET方法不支持字节数组");
+        }
+
+        @Override
         public Request json(String str) {
             this.requestType = "application/json";
             this.reqStr = str;
@@ -208,7 +215,7 @@ public interface Request {
                 }
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
-                BufferedOutputStream outputStream=new BufferedOutputStream(conn.getOutputStream());
+                BufferedOutputStream outputStream = new BufferedOutputStream(conn.getOutputStream());
                 outputStream.write(requestBody());
                 outputStream.flush();
                 outputStream.close();
@@ -273,6 +280,12 @@ public interface Request {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
+            return this;
+        }
+
+        @Override
+        public Request body(byte[] reqBytes) {
+            this.reqBytes = reqBytes;
             return this;
         }
 
