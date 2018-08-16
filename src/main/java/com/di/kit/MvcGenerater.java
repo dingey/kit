@@ -296,6 +296,13 @@ public class MvcGenerater {
         return this.createEntity(entityPackage, false);
     }
 
+    private Class tableAnnotation;
+
+    public MvcGenerater setTableAnnotation(Class tableAnnotation) {
+        this.tableAnnotation = tableAnnotation;
+        return this;
+    }
+
     public MvcGenerater createEntity(String entityPackage, boolean replace) {
         this.entityPackage = entityPackage;
         for (Table t : tables) {
@@ -316,14 +323,17 @@ public class MvcGenerater {
             if (jpaAnnotation) {
                 s.line("import javax.persistence.Table;");
             }
-            if (entityBaseClass == null) {
-                s.line("import java.io.Serializable;");
-                if (tablePrefix != null) {
+            if (tablePrefix != null && tableAnnotation != null) {
+                if (tableAnnotation != null && tableAnnotation.isAnnotation()) {
+                    String name = tableAnnotation.getName();
+                    name = name.substring(0,name.indexOf(36))+"."+name.substring(name.indexOf(36)+1);
+                    s.line("import " + name + ";");
+                } else {
                     s.line("import com.di.kit.SqlProvider.Table;");
                 }
-                if(jpaAnnotation){
-                    s.line("import javax.persistence.Table;");
-                }
+            }
+            if (entityBaseClass == null) {
+                s.line("import java.io.Serializable;");
                 s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
                 s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
                 s.line(" */");
@@ -333,8 +343,11 @@ public class MvcGenerater {
                 if (swaggerEntity) {
                     s.add("@ApiModel(\"").add(t.getComment()).line("\")");
                 }
-                if (jpaAnnotation || tablePrefix != null) {
+                if (jpaAnnotation) {
                     s.add("@Table(name = \"").add(t.getName()).line("\")");
+                }
+                if (tablePrefix != null) {
+                    s.add("@Table(\"").add(t.getName()).line("\")");
                 }
                 s.add("public class ").add(className).line(" implements Serializable {");
                 s.add("	private static final long serialVersionUID = ").add(IdWorker.nextId()).line("L;");
@@ -371,12 +384,6 @@ public class MvcGenerater {
                 }
             } else {
                 s.add("import ").add(entityBaseClass.getName()).line(";");
-                if (tablePrefix != null) {
-                    s.line("import com.di.kit.SqlProvider.Table;");
-                }
-                if(jpaAnnotation){
-                    s.line("import javax.persistence.Table;");
-                }
                 s.line("/**").add(" * ").line(t.getComment()).line(" * @author " + author);
                 s.add(" * @date ").line(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
                 s.line(" */");
@@ -386,8 +393,11 @@ public class MvcGenerater {
                 if (swaggerEntity) {
                     s.add("@ApiModel(\"").add(t.getComment()).line("\")");
                 }
-                if (jpaAnnotation || tablePrefix != null) {
+                if (jpaAnnotation) {
                     s.add("@Table(name = \"").add(t.getName()).line("\")");
+                }
+                if (tablePrefix != null) {
+                    s.add("@Table(\"").add(t.getName()).line("\")");
                 }
                 s.add("public class ").add(className).add(" extends ").add(entityBaseClass.getSimpleName());
                 if (hasParametersType(entityBaseClass)) {
