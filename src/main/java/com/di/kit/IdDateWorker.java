@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class IdDateWorker {
-	static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 	private String prefix = "";
 	private String lastTime = "";
 	private Integer sequence = 0;
