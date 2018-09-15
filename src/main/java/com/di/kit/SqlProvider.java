@@ -211,13 +211,25 @@ public class SqlProvider {
     public String list(Object bean) {
         StringBuilder sql = new StringBuilder();
         sql.append("select * from ").append(table(bean)).append(" where 1=1 ");
+        String orderby = null;
         try {
             for (Field f : getCachedModelFields(bean.getClass())) {
-                if (f.get(bean) != null)
-                    sql.append(" and ").append(StringUtil.snakeCase(f.getName())).append("=#{").append(f.getName()).append("}");
+                if (f.get(bean) != null) {
+                    if (f.isAnnotationPresent(OrderBy.class)) {
+                        orderby = f.get(bean) + "";
+                        if (!orderby.contains("order by")) {
+                            orderby = " order by " + orderby;
+                        }
+                    } else {
+                        sql.append(" and ").append(StringUtil.snakeCase(f.getName())).append("=#{").append(f.getName()).append("}");
+                    }
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(sql.toString(), e);
+        }
+        if (orderby != null) {
+            sql.append(orderby);
         }
         return sql.toString();
     }
@@ -360,5 +372,10 @@ public class SqlProvider {
     @Target({ElementType.FIELD})
     @Retention(RetentionPolicy.RUNTIME)
     public @interface Version {
+    }
+
+    @Target({ElementType.FIELD})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface OrderBy {
     }
 }
