@@ -40,9 +40,7 @@ public class SqlProvider {
                         continue;
                     }
                 }
-                if (field.isAnnotationPresent(IgnoreInsert.class)) {
-                    continue;
-                } else if (field.isAnnotationPresent(Transient.class)) {
+                if (field.isAnnotationPresent(IgnoreInsert.class) || field.isAnnotationPresent(Transient.class) || field.isAnnotationPresent(OrderBy.class)) {
                     continue;
                 }
                 columns.add(StringUtil.snakeCase(field.getName()));
@@ -93,7 +91,7 @@ public class SqlProvider {
                 } else if (field.isAnnotationPresent(Version.class)) {
                     version = field.getName();
                     continue;
-                } else if (field.isAnnotationPresent(Transient.class) || field.isAnnotationPresent(IgnoreUpdate.class)) {
+                } else if (field.isAnnotationPresent(Transient.class) || field.isAnnotationPresent(IgnoreUpdate.class) || field.isAnnotationPresent(OrderBy.class)) {
                     continue;
                 }
                 sql.append("`").append(StringUtil.snakeCase(field.getName())).append("`=#{").append(field.getName()).append("},");
@@ -214,7 +212,7 @@ public class SqlProvider {
         String orderby = null;
         try {
             for (Field f : getCachedModelFields(bean.getClass())) {
-                if (f.get(bean) != null) {
+                if (f.get(bean) != null && !f.isAnnotationPresent(Transient.class)) {
                     if (f.isAnnotationPresent(OrderBy.class)) {
                         orderby = f.get(bean) + "";
                         if (!orderby.contains("order by")) {
@@ -239,7 +237,7 @@ public class SqlProvider {
         sql.append("select count(0) from ").append(table(bean)).append(" where 1=1 ");
         try {
             for (Field f : getCachedModelFields(bean.getClass())) {
-                if (f.get(bean) != null)
+                if (f.get(bean) != null && !f.isAnnotationPresent(Transient.class))
                     sql.append(" and ").append(StringUtil.snakeCase(f.getName())).append("=#{").append(f.getName()).append("}");
             }
         } catch (Exception e) {
