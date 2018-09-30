@@ -365,4 +365,13 @@ public class ClassUtil {
         ParameterizedType pt = (ParameterizedType) entity.getGenericSuperclass();
         return (Class<?>[]) pt.getActualTypeArguments();
     }
+
+    public static Class currentRunClass() {
+        String className = Thread.currentThread().getStackTrace()[2].getClassName();
+        try {
+            return ClassUtil.class.getClassLoader().loadClass(className);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
