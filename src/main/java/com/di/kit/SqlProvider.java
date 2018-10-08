@@ -318,11 +318,11 @@ public class SqlProvider {
         }
     }
 
-    private static String table(Object bean) {
+    public static String table(Object bean) {
         return table(bean.getClass());
     }
 
-    private static String table(Class<?> bean) {
+    public static String table(Class<?> bean) {
         if (bean.isAnnotationPresent(Table.class) && !bean.getAnnotation(Table.class).value().isEmpty()) {
             return bean.getAnnotation(Table.class).value();
         } else {
