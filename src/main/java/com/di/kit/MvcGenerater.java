@@ -296,9 +296,9 @@ public class MvcGenerater {
         return this.createEntity(entityPackage, false);
     }
 
-    private Class tableAnnotation;
+    private Class<?> tableAnnotation;
 
-    public MvcGenerater setTableAnnotation(Class tableAnnotation) {
+    public MvcGenerater setTableAnnotation(Class<?> tableAnnotation) {
         this.tableAnnotation = tableAnnotation;
         return this;
     }
