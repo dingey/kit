@@ -16,9 +16,8 @@ public class Encryption {
 		return Base64.getEncoder().encodeToString(s.getBytes());
 	}
 
-	public String md5(String s) {
-		char hexDigits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-				'A', 'B', 'C', 'D', 'E', 'F'};
+	public static String md5(String s) {
+		char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 		try {
 			byte[] btInput = s.getBytes();
 			// 获得MD5摘要算法的 MessageDigest 对象
@@ -38,9 +37,8 @@ public class Encryption {
 			}
 			return new String(str);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		return null;
 	}
 
 	private static String sha(String shakey, String inStr) {
@@ -58,9 +56,8 @@ public class Encryption {
 			}
 			return hexValue.toString();
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		return "";
 	}
 
 	public static String sha256(String s) {
