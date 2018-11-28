@@ -63,14 +63,6 @@ public interface Request {
 	Request body(Map<Object, Object> form);
 
 	/**
-	 * 设置表单形式的请求
-	 * 
-	 * @param str 请求字符
-	 * @return 请求对象
-	 */
-	Request body(Form form);
-
-	/**
 	 * 设置字符内容的请求
 	 * 
 	 * @param str 请求字符
@@ -101,6 +93,14 @@ public interface Request {
 	 * @return 请求对象
 	 */
 	Request xml(String str);
+
+	/**
+	 * 设置xml的请求
+	 * 
+	 * @param str 请求内容
+	 * @return 请求对象
+	 */
+	Request form(Multipart part);
 
 	/**
 	 * 设置格式
@@ -136,6 +136,30 @@ public interface Request {
 	 */
 	Request loadKey(InputStream stream, String key);
 
+	/**
+	 * 新增cookie参数
+	 * 
+	 * @param k key
+	 * @param value value
+	 * @return 请求对象
+	 */
+	Request addCookie(String k, String value);
+
+	/**
+	 * 新增head参数
+	 * 
+	 * @param name name
+	 * @param value value
+	 * @return 请求对象
+	 */
+	Request addHead(String name, String value);
+
+	/**
+	 * 创建GET请求
+	 * 
+	 * @param url 路径
+	 * @return 请求对象
+	 */
 	static Request Get(String url) {
 		return new GetRequest(url);
 	}
@@ -150,9 +174,28 @@ public interface Request {
 		String requestType;
 		String accept;
 		SSLSocketFactory sf;
+		Map<String, String> heads;
+		StringBuilder cookie;
 
 		public GetRequest(String url) {
 			this.url = url;
+		}
+
+		void init(URLConnection con) {
+			if (this.requestType != null && !this.requestType.isEmpty()) {
+				conn.setRequestProperty("Content-Type", requestType);
+			}
+			if (this.accept != null && !this.accept.isEmpty()) {
+				conn.setRequestProperty("Accept", accept);
+			}
+			if (cookie != null) {
+				conn.setRequestProperty("Cookie", cookie.toString());
+			}
+			if (heads != null && !heads.isEmpty()) {
+				for (String k : heads.keySet()) {
+					conn.setRequestProperty(k, heads.get(k));
+				}
+			}
 		}
 
 		@Override
@@ -166,12 +209,7 @@ public interface Request {
 				} else {
 					conn = u.openConnection();
 				}
-				if (this.requestType != null && !this.requestType.isEmpty()) {
-					conn.setRequestProperty("Content-Type", requestType);
-				}
-				if (this.accept != null && !this.accept.isEmpty()) {
-					conn.setRequestProperty("Accept", accept);
-				}
+				init(conn);
 				conn.connect();
 				BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -184,7 +222,7 @@ public interface Request {
 				contentType = conn.getContentType();
 				readbytes = out.toByteArray();
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 			return this;
 		}
@@ -199,9 +237,8 @@ public interface Request {
 			try {
 				return new String(readbytes, "utf-8");
 			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
-			return null;
 		}
 
 		@Override
@@ -209,9 +246,8 @@ public interface Request {
 			try {
 				return new String(readbytes, charset);
 			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
-			return null;
 		}
 
 		private String url() {
@@ -244,11 +280,6 @@ public interface Request {
 				this.form.putAll(form);
 			}
 			return this;
-		}
-
-		@Override
-		public Request body(Form form) {
-			return body(form.build());
 		}
 
 		@Override
@@ -326,6 +357,29 @@ public interface Request {
 			}
 			return this;
 		}
+
+		@Override
+		public Request addCookie(String k, String value) {
+			if (cookie == null) {
+				cookie = new StringBuilder();
+			}
+			cookie.append(k).append("=").append(value).append(";");
+			return this;
+		}
+
+		@Override
+		public Request addHead(String name, String value) {
+			if (heads == null) {
+				heads = new LinkedHashMap<>();
+			}
+			heads.put(name, value);
+			return this;
+		}
+
+		@Override
+		public Request form(Multipart part) {
+			throw new UnsupportedOperationException("不支持的类型");
+		}
 	}
 
 	class PostRequest extends GetRequest {
@@ -346,12 +400,7 @@ public interface Request {
 				} else {
 					conn = u.openConnection();
 				}
-				if (this.requestType != null && !this.requestType.isEmpty()) {
-					conn.setRequestProperty("Content-Type", requestType);
-				}
-				if (this.accept != null && !this.accept.isEmpty()) {
-					conn.setRequestProperty("Accept", accept);
-				}
+				init(conn);
 				conn.setDoOutput(true);
 				conn.setDoInput(true);
 				BufferedOutputStream outputStream = new BufferedOutputStream(conn.getOutputStream());
@@ -370,7 +419,7 @@ public interface Request {
 				readbytes = out.toByteArray();
 				out.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 			return this;
 		}
@@ -386,7 +435,7 @@ public interface Request {
 			try {
 				this.reqBytes = str.getBytes("utf-8");
 			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 			return this;
 		}
@@ -439,37 +488,129 @@ public interface Request {
 			return readbytes;
 		}
 
-	}
-
-	interface Form {
-		Form add(String name, String value);
-
-		Map<Object, Object> build();
-
-		class FormData extends LinkedHashMap<Object, Object> implements Form {
-			private static final long serialVersionUID = -4119390665446925457L;
-
-			private FormData() {
-			}
-
-			@Override
-			public Form add(String name, String value) {
-				this.put(name, value);
-				return this;
-			}
-
-			@Override
-			public Map<Object, Object> build() {
-				return this;
-			}
-		}
-
-		static Form form() {
-			return new FormData();
+		@Override
+		public Request form(Multipart part) {
+			this.reqBytes = part.toBytes();
+			this.requestType = "multipart/form-data; boundary=" + part.getBoundary();
+			return this;
 		}
 	}
 
+	/**
+	 * 创建POST请求
+	 * 
+	 * @param url 路径
+	 * @return 请求对象
+	 */
 	static Request Post(String url) {
 		return new PostRequest(url);
+	}
+
+	static class Multipart {
+		String boundary;
+
+		ByteArrayOutputStream out;
+
+		public Multipart() throws UnsupportedEncodingException {
+			boundary = "----WebKitFormBoundary";
+			out = new ByteArrayOutputStream();
+		}
+
+		public Multipart add(String name, String value) {
+			write("\r\n--" + boundary + "\r\n");
+			write("Content-Disposition: form-data; name=\"" + name + "\"\r\n");
+			write("\r\n");
+			write(value);
+			return this;
+		}
+
+		public Multipart add(String name, File file) {
+			FileInputStream fs = null;
+			try {
+				fs = new FileInputStream(file);
+				this.add(name, file.getName(), parseExt(file.getName()), fs);
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException(e);
+			} finally {
+				try {
+					fs.close();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			return this;
+		}
+
+		public Multipart add(String name, String fileName, String contentType, InputStream in) {
+			write("\r\n--" + boundary + "\r\n");
+			write("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + fileName + "\"\r\n");
+			write("Content-Type: " + contentType + "\r\n\r\n");
+			byte[] bs = new byte[128];
+			try {
+				while (in.read(bs) != -1) {
+					out.write(bs);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			return this;
+		}
+
+		public byte[] toBytes() {
+			try {
+				out.write(("\r\n--" + boundary + "--").getBytes("UTF-8"));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			return out.toByteArray();
+		}
+
+		public String getBoundary() {
+			return boundary;
+		}
+
+		void write(String s) {
+			try {
+				out.write(s.getBytes("UTF-8"));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		String parseExt(String filename) {
+			if (filename.endsWith("jfif") || filename.endsWith(".jpe") || filename.endsWith(".jpeg") || filename.endsWith(".jpg")) {
+				return "image/jpeg";
+			} else if (filename.endsWith(".bmp")) {
+				return "application/x-bmp";
+			} else if (filename.endsWith(".png")) {
+				return "image/png";
+			} else if (filename.endsWith(".gif")) {
+				return "image/gif";
+			} else if (filename.endsWith(".avi")) {
+				return "video/avi";
+			} else if (filename.endsWith(".wmv")) {
+				return "video/x-ms-wmv";
+			} else if (filename.endsWith(".mp3")) {
+				return "audio/mp3";
+			} else if (filename.endsWith(".wma")) {
+				return "audio/x-ms-wma";
+			} else if (filename.endsWith(".wav")) {
+				return "audio/wav";
+			} else if (filename.endsWith(".mp4") || filename.endsWith(".m4e")) {
+				return "video/mpeg4";
+			} else if (filename.endsWith(".xml") || filename.endsWith(".xsl") || filename.endsWith(".xsd") || filename.endsWith(".xslt") || filename.endsWith(".svg")
+					|| filename.endsWith(".math") || filename.endsWith(".biz") || filename.endsWith(".dtd") || filename.endsWith(".vxml") || filename.endsWith(".wsdl")) {
+				return "text/xml";
+			} else if (filename.endsWith(".html") || filename.endsWith(".htm") || filename.endsWith(".xhtml") || filename.endsWith(".jsp")) {
+				return "text/html";
+			} else if (filename.endsWith(".css")) {
+				return "text/css";
+			} else if (filename.endsWith(".js")) {
+				return "application/x-javascript";
+			} else if (filename.endsWith(".txt")) {
+				return "text/plain";
+			}
+			return "application/octet-stream";
+		}
 	}
 }

@@ -4,25 +4,31 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 
 /**
  * @author d
  */
 public class XmlUtil {
 	private static DocumentBuilderFactory factory;
-	
+
 	public static <T> String toXml(T t) {
 		StringWriter sw = new StringWriter();
 		try {
@@ -37,15 +43,18 @@ public class XmlUtil {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T fromXml(String xml, Class<T> target) {
-		T t = null;
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(target);
 			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-			t = (T) unmarshaller.unmarshal(new StringReader(xml));
-		} catch (JAXBException e) {
-			e.printStackTrace();
+			SAXParserFactory spf = SAXParserFactory.newInstance();
+			spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+			spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+			spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			Source xmlSource = new SAXSource(spf.newSAXParser().getXMLReader(), new InputSource(new StringReader(xml)));
+			return (T) unmarshaller.unmarshal(xmlSource);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
-		return t;
 	}
 
 	public static Map<String, String> fromXml(String xml) {
@@ -74,20 +83,17 @@ public class XmlUtil {
 		if (factory == null) {
 			factory = DocumentBuilderFactory.newInstance();
 			try {
-				String FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
-				factory.setFeature(FEATURE, true);
-				FEATURE = "http://xml.org/sax/features/external-general-entities";
-				factory.setFeature(FEATURE, false);
-				FEATURE = "http://xml.org/sax/features/external-parameter-entities";
-				factory.setFeature(FEATURE, false);
-				FEATURE = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
-				factory.setFeature(FEATURE, false);
+				factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+				factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+				factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+				factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+				factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 				factory.setXIncludeAware(false);
 				factory.setExpandEntityReferences(false);
 			} catch (Exception e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
 		return factory;
-	}	
+	}
 }
