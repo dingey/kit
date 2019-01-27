@@ -117,16 +117,14 @@ public class Json {
 	public <T> String toJson(T o) {
 		if (o == null) {
 			return null;
-		} else if (o.getClass() == byte.class || o.getClass() == short.class || o.getClass() == int.class
-				|| o.getClass() == long.class || o.getClass() == double.class || o.getClass() == float.class
-				|| o.getClass() == java.lang.Byte.class || o.getClass() == java.lang.Short.class
-				|| o.getClass() == java.lang.Integer.class || o.getClass() == java.lang.Long.class
-				|| o.getClass() == java.lang.Double.class || o.getClass() == java.lang.Float.class
-				|| o.getClass() == boolean.class || o.getClass() == java.lang.Boolean.class
-				|| o.getClass() == java.lang.String.class || o.getClass() == java.lang.Character.class) {
+		} else if (o.getClass() == byte.class || o.getClass() == short.class || o.getClass() == int.class || o.getClass() == long.class || o.getClass() == double.class
+				|| o.getClass() == float.class || o.getClass() == java.lang.Byte.class || o.getClass() == java.lang.Short.class || o.getClass() == java.lang.Integer.class
+				|| o.getClass() == java.lang.Long.class || o.getClass() == java.lang.Double.class || o.getClass() == java.lang.Float.class || o.getClass() == boolean.class
+				|| o.getClass() == java.lang.Boolean.class) {
 			return String.valueOf(o);
-		} else if (o.getClass() == Date.class || o.getClass() == java.sql.Date.class
-				|| o.getClass() == java.sql.Time.class) {
+		} else if (o.getClass() == java.lang.String.class || o.getClass() == java.lang.Character.class) {
+			return "\"" + String.valueOf(o) + "\"";
+		} else if (o.getClass() == Date.class || o.getClass() == java.sql.Date.class || o.getClass() == java.sql.Time.class) {
 			return getDateFormat().format(o);
 		} else if (o.getClass().isArray()) {
 			Str str = new Str().add("[");
@@ -150,6 +148,13 @@ public class Json {
 				}
 			}
 			return str.delLastChar().add("]").toString();
+		} else if (o.getClass() == java.util.Map.class || o.getClass() == java.util.LinkedHashMap.class) {
+			Map<?, ?> m0 = (Map<?, ?>) o;
+			Str str = new Str().add("{");
+			for (Object key : m0.keySet()) {
+				str.add("\"").add(key).add("\":").add(toJson(m0.get(key))).add(",");
+			}
+			return str.delLastChar().add("}").toString();
 		} else if ((o instanceof Object) && o.getClass() != Object.class && o.getClass() != Class.class) {
 			Str str = new Str().add("{");
 			try {
@@ -187,14 +192,14 @@ public class Json {
 		o = (T) toObjectVal(toObject(json), c);
 		return o;
 	}
-	
+
 	public <T> List<T> toObjects(String json, Class<T> c) {
 		if (json == null && !c.isPrimitive()) {
 			return null;
 		} else if ((json == null || json.isEmpty()) && c.isPrimitive()) {
 			throw new IllegalArgumentException("json is null or empty that can't be transform to primitive Class.");
 		}
-		List<T> list=new ArrayList<>();
+		List<T> list = new ArrayList<>();
 		json = json.trim();
 		toObjectVal(toObject(json), List.class);
 		return list;
@@ -272,7 +277,9 @@ public class Json {
 				}
 				return o;
 			}
-		} catch(ClassCastException e1){return null;}catch (Exception e) {
+		} catch (ClassCastException e1) {
+			return null;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return val;
@@ -289,7 +296,11 @@ public class Json {
 					k = StringUtil.snakeCase(k);
 				}
 				String v = s.substring(s.indexOf(":") + 1).trim();
-				m.put(k, toObject(v));
+				if (v.startsWith("\"") && v.endsWith("\"")) {
+					m.put(k, v.substring(1, v.length() - 1));
+				} else {
+					m.put(k, toObject(v));
+				}
 			}
 			return m;
 		} else if (json.startsWith("[")) {
@@ -305,7 +316,18 @@ public class Json {
 				}
 			}
 			return ls;
+		} else {
+			if (json.contains(".")) {
+				return Double.valueOf(json);
+			} else if (json.equalsIgnoreCase("true") || json.equalsIgnoreCase("false")) {
+				return Boolean.valueOf(json);
+			} else if (json.length() < 12) {
+				return Integer.valueOf(json);
+			} else if (json.length() < 20) {
+				return Long.valueOf(json);
+			} else {
+				return json.replaceAll("\"", "");
+			}
 		}
-		return json.replaceAll("\"", "");
 	}
 }
