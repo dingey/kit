@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class Json {
 	SimpleDateFormat sdf;
-	boolean camelCaseToUnderscores = false;
+	boolean snakeCase = false;
 	static Json json;
 
 	public Json setDateFormat(String pattern) {
@@ -32,8 +32,8 @@ public class Json {
 		return sdf;
 	}
 
-	public Json setCamelCaseToUnderscores(boolean camelCaseToUnderscores) {
-		this.camelCaseToUnderscores = camelCaseToUnderscores;
+	public Json snakeCase(boolean snakeCase) {
+		this.snakeCase = snakeCase;
 		return this;
 	}
 
@@ -292,7 +292,7 @@ public class Json {
 			String s0 = json.substring(json.indexOf("{") + 1, json.lastIndexOf("}")).trim();
 			for (String s : split(s0)) {
 				String k = s.substring(0, s.indexOf(":") - 1).replaceAll("\"", "").trim();
-				if (camelCaseToUnderscores) {
+				if (snakeCase) {
 					k = StringUtil.snakeCase(k);
 				}
 				String v = s.substring(s.indexOf(":") + 1).trim();
