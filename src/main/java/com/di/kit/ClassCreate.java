@@ -108,7 +108,7 @@ public class ClassCreate {
 
 	public static void createFromJson(String json, String packag, String path) {
 		@SuppressWarnings("unchecked")
-		Map<String, Object> map = JsonUtil.toObject(json, Map.class);
+		Map<String, Object> map = Json.fromJson(json, Map.class);
 		createClass(map, packag, path, "root");
 	}
 }
