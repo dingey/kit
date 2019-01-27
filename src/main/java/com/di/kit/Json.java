@@ -105,7 +105,12 @@ public class Json {
 		}
 		return ss;
 	}
-
+	
+	@SuppressWarnings("unchecked")
+	public static Map<String,Object> fromJson(String json) {
+		return getJson().toObject(json,Map.class);
+	}
+	
 	public static <T> T fromJson(String json, Class<T> c) {
 		return getJson().toObject(json, c);
 	}
