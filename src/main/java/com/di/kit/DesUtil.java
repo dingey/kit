@@ -67,6 +67,7 @@ public class DesUtil {
      * 密码解密
      *
      * @param data 数据
+     * @param key  秘钥
      * @return 加密后的数据
      */
     public final static String decrypt(String data, String key) {

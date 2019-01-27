@@ -73,7 +73,7 @@ public interface Request {
 	/**
 	 * 设置字节数组的请求
 	 * 
-	 * @param str 请求字节
+	 * @param reqBytes 请求字节
 	 * @return 请求对象
 	 */
 	Request body(byte[] reqBytes);
@@ -97,7 +97,7 @@ public interface Request {
 	/**
 	 * 设置xml的请求
 	 * 
-	 * @param str 请求内容
+	 * @param part 请求内容
 	 * @return 请求对象
 	 */
 	Request form(Multipart part);

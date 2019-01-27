@@ -21,8 +21,7 @@ public class LocationUtil {
      * @param lat1 纬度
      * @param lng2 经度
      * @param lat2 纬度
-     * @return
-     * @author ershuai
+     * @return 浮点值千米
      */
     public static double getDistance(double lng1, double lat1, double lng2, double lat2) {
         double radLat1 = rad(lat1);

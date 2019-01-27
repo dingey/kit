@@ -8,14 +8,15 @@ import java.util.List;
  * @author d
  */
 public class FilterUtil {
-	 /**
+    /**
      * 获取数组1和数组2对象的交集部分
      *
-     * @param list1
-     * @param list2
+     * @param list1  数组1
+     * @param list2  数组2
      * @param props1 list1包装的用于比较的对象属性名集合
      * @param props2 list2包装的用于比较的对象属性名集合
-     * @param <T>
+     * @param <T>    类型1
+     * @param <E>    类型2
      * @return 数组1值与数组2相等的部分
      */
     public static <T, E> List<T> intersection(List<T> list1, List<E> list2, List<String> props1, List<String> props2) {
@@ -55,11 +56,11 @@ public class FilterUtil {
     /**
      * 相同对象数组的交集
      *
-     * @param list1
-     * @param list2
-     * @param props
-     * @param <T>
-     * @return
+     * @param list1  数组1
+     * @param list2  数组2
+     * @param props 属性
+     * @param <T>   类型
+     * @return 数组
      */
     public static <T> List<T> intersection(List<T> list1, List<T> list2, String... props) {
         return intersection(list1, list2, props, props);
@@ -68,12 +69,13 @@ public class FilterUtil {
     /**
      * 获取差集,数组1减去与数组2交集部分
      *
-     * @param list1
-     * @param list2
+     * @param list1  数组1
+     * @param list2  数组2
      * @param props1 list1包装的用于比较的对象属性名集合
      * @param props2 list2包装的用于比较的对象属性名集合
-     * @param <T>
-     * @return
+     * @param <T>    类型1
+     * @param <E>    类型2
+     * @return 数组
      */
     public static <T, E> List<T> differenceSet(List<T> list1, List<E> list2, List<String> props1, List<String> props2) {
         List<T> tmps = new ArrayList<>();
@@ -110,12 +112,13 @@ public class FilterUtil {
     /**
      * 不同对象数组的差集
      *
-     * @param list1
-     * @param list2
+     * @param list1  数组1
+     * @param list2  数组2
      * @param props1 list1包装的用于比较的对象属性名集合
      * @param props2 list2包装的用于比较的对象属性名集合
-     * @param <T>
-     * @return
+     * @param <T>    类型1
+     * @param <E>    类型2
+     * @return 数组
      */
     public static <T, E> List<T> differenceSet(List<T> list1, List<E> list2, String[] props1, String[] props2) {
         return differenceSet(list1, list2, Arrays.asList(props1), Arrays.asList(props2));
@@ -124,11 +127,12 @@ public class FilterUtil {
     /**
      * 相同对象数组的差集
      *
-     * @param list1
-     * @param list2
-     * @param props
-     * @param <T>
-     * @return
+     *
+     * @param list1  数组1
+     * @param list2  数组2
+     * @param props 属性
+     * @param <T>   类型
+     * @return 数组
      */
     public static <T> List<T> differenceSet(List<T> list1, List<T> list2, List<String> props) {
         return differenceSet(list1, list2, props, props);
@@ -137,11 +141,11 @@ public class FilterUtil {
     /**
      * 相同对象数组的差集
      *
-     * @param list1
-     * @param list2
-     * @param props
-     * @param <T>
-     * @return
+     * @param list1  数组1
+     * @param list2  数组2
+     * @param props 属性
+     * @param <T>   类型
+     * @return 数组
      */
     public static <T> List<T> differenceSet(List<T> list1, List<T> list2, String... props) {
         return differenceSet(list1, list2, props, props);
