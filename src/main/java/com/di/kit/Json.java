@@ -321,13 +321,13 @@ public class Json {
 				return Double.valueOf(json);
 			} else if (json.equalsIgnoreCase("true") || json.equalsIgnoreCase("false")) {
 				return Boolean.valueOf(json);
+			} else if(json.startsWith("\"")){
+				return json.replaceAll("\"", "");
 			} else if (json.length() < 12) {
 				return Integer.valueOf(json);
 			} else if (json.length() < 20) {
 				return Long.valueOf(json);
-			} else {
-				return json.replaceAll("\"", "");
-			}
+			} 
 		}
 	}
 }
