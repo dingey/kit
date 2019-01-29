@@ -327,7 +327,9 @@ public class Json {
 				return Integer.valueOf(json);
 			} else if (json.length() < 20) {
 				return Long.valueOf(json);
-			} 
+			} else {
+				return json;
+			}
 		}
 	}
 }
