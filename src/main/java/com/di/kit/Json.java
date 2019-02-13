@@ -125,23 +125,14 @@ public class Json {
 		} else if (o.getClass() == byte.class || o.getClass() == short.class || o.getClass() == int.class || o.getClass() == long.class || o.getClass() == double.class
 				|| o.getClass() == float.class || o.getClass() == java.lang.Byte.class || o.getClass() == java.lang.Short.class || o.getClass() == java.lang.Integer.class
 				|| o.getClass() == java.lang.Long.class || o.getClass() == java.lang.Double.class || o.getClass() == java.lang.Float.class || o.getClass() == boolean.class
-				|| o.getClass() == java.lang.Boolean.class) {
+				|| o.getClass() == java.lang.Boolean.class || o.getClass() == java.math.BigDecimal.class || o.getClass() == java.math.BigInteger.class) {
 			return String.valueOf(o);
 		} else if (o.getClass() == java.lang.String.class || o.getClass() == java.lang.Character.class) {
 			return  String.valueOf(o);
 		} else if (o.getClass() == Date.class || o.getClass() == java.sql.Date.class || o.getClass() == java.sql.Time.class) {
 			return getDateFormat().format(o);
-		} else if (o.getClass().isArray()) {
-			Str str = new Str().add("[");
-			Object[] os = (Object[]) o;
-			for (Object o0 : os) {
-				if (o0.getClass() == String.class || o0.getClass() == Date.class) {
-					str.add("\"").add(toJson(o0)).add("\",");
-				} else {
-					str.add(toJson(o0)).add(",");
-				}
-			}
-			return str.delLastChar().add("]").toString();
+		} else if (o.getClass().isArray()) {			
+			return toArrayString(o);
 		} else if (o.getClass() == java.util.List.class || o.getClass() == java.util.ArrayList.class) {
 			Str str = new Str().add("[");
 			List<?> os = (List<?>) o;
@@ -164,7 +155,7 @@ public class Json {
 			Str str = new Str().add("{");
 			try {
 				for (Field f : ClassUtil.getDeclaredFields(o.getClass())) {
-					f.setAccessible(true);
+					if(!f.isAccessible()) f.setAccessible(true);
 					if (f.get(o) == null) {
 						continue;
 					}
@@ -242,19 +233,7 @@ public class Json {
 			} else if (c.isArray() && val != null) {
 				List<Object> ss = (List<Object>) val;
 				Class<?> type = c.getComponentType();
-				if (type == String.class) {
-					String[] os = new String[ss.size()];
-					for (int i = 0; i < os.length; i++) {
-						os[i] = toObject(String.valueOf(ss.get(i)), String.class);
-					}
-					return os;
-				} else {
-					Object[] os = new Object[ss.size()];
-					for (int i = 0; i < os.length; i++) {
-						os[i] = toObject(String.valueOf(ss.get(i)), type);
-					}
-					return os;
-				}
+				return toArray(type, ss);
 			} else if (c == List.class || c == ArrayList.class) {
 				return val;
 			} else if (c == Map.class || c == HashMap.class || c == LinkedHashMap.class) {
@@ -279,19 +258,7 @@ public class Json {
 					} else if (v != null && f.getType().isArray()) {
 						Class<?> t = f.getType().getComponentType();
 						List<?> vs = (List<?>) v;
-						if (t == String.class) {
-							String[] os = new String[vs.size()];
-							for (int i = 0; i < vs.size(); i++) {
-								os[i] = (String) toObjectVal(vs.get(i), t);
-							}
-							f.set(o, os);
-						} else {
-							Object[] os = new Object[vs.size()];
-							for (int i = 0; i < vs.size(); i++) {
-								os[i] = toObjectVal(vs.get(i), t);
-							}
-							f.set(o, os);
-						}
+						f.set(o, toArray(t, vs));
 					} else {
 						f.set(o, toObjectVal(v, f.getType()));
 					}
@@ -304,6 +271,160 @@ public class Json {
 			e.printStackTrace();
 		}
 		return val;
+	}
+	
+	private String toArrayString(Object o) {
+		Str str = new Str().add("[");
+		if(o.getClass().getComponentType()==byte.class) {
+			for (Object o0 : (byte[])o) {			
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==short.class) {
+			for (Object o0 : (short[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==int.class) {
+			for (Object o0 : (int[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==long.class) {
+			for (Object o0 : (long[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==double.class) {
+			for (Object o0 : (double[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==float.class) {
+			for (Object o0 : (float[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==boolean.class) {
+			for (Object o0 : (boolean[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==Byte.class) {
+			for (Object o0 : (Byte[])o) {			
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==Short.class) {
+			for (Object o0 : (Short[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==Integer.class) {
+			for (Object o0 : (Integer[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==Long.class) {
+			for (Object o0 : (Long[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==Double.class) {
+			for (Object o0 : (Double[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==Float.class) {
+			for (Object o0 : (Float[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==Boolean.class) {
+			for (Object o0 : (Boolean[])o) {
+				str.add(toJson(o0)).add(",");
+			}
+		} else if(o.getClass().getComponentType()==String.class) {
+			for (Object o0 : (String[])o) {
+				str.add("\"").add(toJson(o0)).add("\",");
+			}
+		}
+		return str.delLastChar().add("]").toString();
+	}
+	
+	private Object toArray(Class<?> t,List<?> vs) {
+		if (t == String.class) {
+			String[] os = new String[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (String) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else if(t==byte.class){
+			byte[]os=new byte[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (byte) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else if(t==Byte.class){
+			Byte[]os=new Byte[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (Byte) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else if(t==short.class){
+			short[]os=new short[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (short) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		}  else if(t==Short.class){
+			Short[]os=new Short[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (Short) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else if(t==int.class){
+			int[]os=new int[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (int) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else if(t==Integer.class){
+			Integer[]os=new Integer[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (Integer) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else if(t==double.class){
+			double[]os=new double[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (double) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else if(t==Double.class){
+			Double[]os=new Double[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (Double) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else if(t==float.class){
+			float[]os=new float[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (float) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else if(t==Float.class){
+			Float[]os=new Float[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (Float) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else if(t==boolean.class){
+			boolean[]os=new boolean[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (boolean) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else if(t==Boolean.class){
+			Boolean[]os=new Boolean[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = (Boolean) toObjectVal(vs.get(i), t);
+			}
+			return os;
+		} else {
+			Object[] os = new Object[vs.size()];
+			for (int i = 0; i < vs.size(); i++) {
+				os[i] = toObjectVal(vs.get(i), t);
+			}
+			return os;
+		}		
 	}
 	
 	public Object toObject(String json) {

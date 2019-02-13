@@ -21,7 +21,7 @@ public class Json2Test {
 		// String j2 = "[[1],[1]]";
 		// Object o2 = j.toObject(j2);
 		// j.toObject(j2, List.class);
-		String j3 = "{\"id\":9,\"n\":\"alice\",\"create\":\"2017-11-21 13:56:20\",\"ns\":[\"a\"],\"cs\":[{\"n\":\"a\",\"ns\":[\"a\"]}]}";
+		String j3 = "{\"id\":9,\"n\":\"alice\",\"is\":[1],\"create\":\"2017-11-21 13:56:20\",\"ns\":[\"a\"],\"cs\":[{\"n\":\"a\",\"ns\":[\"a\"]}]}";
 		Man o3 = j.toObject(j3, Man.class);
 		System.out.println(j.toJson(o3));
 		String j4 = "{\"cs\":[{\"n\":\"a\"}]}";
@@ -32,7 +32,7 @@ public class Json2Test {
 	public static class Man {
 		Integer id;
 		String n;
-		int[] is;
+		Integer[] is;
 		String[] ns;
 		List<String> nl;
 		Date create;
