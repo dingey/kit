@@ -31,11 +31,16 @@ public class HttpClient {
 	 * @return 服务器响应内容
 	 */
 	public static String get(String url) {
+		HttpURLConnection con = null;
 		try {
-			HttpURLConnection con = connect(url, null, null);
+			con = connect(url, null, null);
 			return new String(readFromConnection(con), con.getContentEncoding());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} finally {
+			if (con != null) {
+				con.disconnect();
+			}
 		}
 	}
 
