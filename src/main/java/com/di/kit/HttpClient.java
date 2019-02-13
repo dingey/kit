@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -44,14 +45,23 @@ public class HttpClient {
 	 * @param url 地址
 	 * @param part multipart表单对象
 	 * @return 服务器响应内容
-	 * @return
+	 * @return 服务器响应内容
 	 */
 	public static String post(String url, Multipart part) {
+		HttpURLConnection con = null;
 		try {
-			HttpURLConnection con = connect(url, part.toBytes("utf-8"), null);
+			Map<String, String> head = new HashMap<>();
+			byte[] bytes = part.toBytes();
+			head.put("Content-Length", String.valueOf(bytes.length));
+			head.put("Content-Type", "multipart/form-data; boundary=" + part.boundary());
+			con = connect(url, bytes, "POST", head, null);
 			return new String(readFromConnection(con), "utf-8");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} finally {
+			if (con != null) {
+				con.disconnect();
+			}
 		}
 	}
 
@@ -63,11 +73,16 @@ public class HttpClient {
 	 * @return 服务器响应内容
 	 */
 	public static String post(String url, String data) {
+		HttpURLConnection con = null;
 		try {
-			HttpURLConnection con = connect(url, data.getBytes("utf-8"), null);
+			con = connect(url, data.getBytes("utf-8"), null);
 			return new String(readFromConnection(con), "utf-8");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} finally {
+			if (con != null) {
+				con.disconnect();
+			}
 		}
 	}
 
@@ -159,7 +174,7 @@ public class HttpClient {
 				out.write(bytes);
 			}
 		}
-		// conn.disconnect();
+		conn.disconnect();
 		return out.toByteArray();
 	}
 
