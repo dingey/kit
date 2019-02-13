@@ -491,7 +491,7 @@ public interface Request {
 		@Override
 		public Request form(Multipart part) {
 			this.reqBytes = part.toBytes();
-			this.requestType = "multipart/form-data; boundary=" + part.getBoundary();
+			this.requestType = "multipart/form-data; boundary=" + part.boundary();
 			return this;
 		}
 	}
@@ -506,111 +506,4 @@ public interface Request {
 		return new PostRequest(url);
 	}
 
-	static class Multipart {
-		String boundary;
-
-		ByteArrayOutputStream out;
-
-		public Multipart() throws UnsupportedEncodingException {
-			boundary = "----WebKitFormBoundary";
-			out = new ByteArrayOutputStream();
-		}
-
-		public Multipart add(String name, String value) {
-			write("\r\n--" + boundary + "\r\n");
-			write("Content-Disposition: form-data; name=\"" + name + "\"\r\n");
-			write("\r\n");
-			write(value);
-			return this;
-		}
-
-		public Multipart add(String name, File file) {
-			FileInputStream fs = null;
-			try {
-				fs = new FileInputStream(file);
-				this.add(name, file.getName(), parseExt(file.getName()), fs);
-			} catch (FileNotFoundException e) {
-				throw new RuntimeException(e);
-			} finally {
-				try {
-					fs.close();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			return this;
-		}
-
-		public Multipart add(String name, String fileName, String contentType, InputStream in) {
-			write("\r\n--" + boundary + "\r\n");
-			write("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + fileName + "\"\r\n");
-			write("Content-Type: " + contentType + "\r\n\r\n");
-			byte[] bs = new byte[128];
-			try {
-				while (in.read(bs) != -1) {
-					out.write(bs);
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			return this;
-		}
-
-		public byte[] toBytes() {
-			try {
-				out.write(("\r\n--" + boundary + "--").getBytes("UTF-8"));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			return out.toByteArray();
-		}
-
-		public String getBoundary() {
-			return boundary;
-		}
-
-		void write(String s) {
-			try {
-				out.write(s.getBytes("UTF-8"));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		String parseExt(String filename) {
-			if (filename.endsWith("jfif") || filename.endsWith(".jpe") || filename.endsWith(".jpeg") || filename.endsWith(".jpg")) {
-				return "image/jpeg";
-			} else if (filename.endsWith(".bmp")) {
-				return "application/x-bmp";
-			} else if (filename.endsWith(".png")) {
-				return "image/png";
-			} else if (filename.endsWith(".gif")) {
-				return "image/gif";
-			} else if (filename.endsWith(".avi")) {
-				return "video/avi";
-			} else if (filename.endsWith(".wmv")) {
-				return "video/x-ms-wmv";
-			} else if (filename.endsWith(".mp3")) {
-				return "audio/mp3";
-			} else if (filename.endsWith(".wma")) {
-				return "audio/x-ms-wma";
-			} else if (filename.endsWith(".wav")) {
-				return "audio/wav";
-			} else if (filename.endsWith(".mp4") || filename.endsWith(".m4e")) {
-				return "video/mpeg4";
-			} else if (filename.endsWith(".xml") || filename.endsWith(".xsl") || filename.endsWith(".xsd") || filename.endsWith(".xslt") || filename.endsWith(".svg")
-					|| filename.endsWith(".math") || filename.endsWith(".biz") || filename.endsWith(".dtd") || filename.endsWith(".vxml") || filename.endsWith(".wsdl")) {
-				return "text/xml";
-			} else if (filename.endsWith(".html") || filename.endsWith(".htm") || filename.endsWith(".xhtml") || filename.endsWith(".jsp")) {
-				return "text/html";
-			} else if (filename.endsWith(".css")) {
-				return "text/css";
-			} else if (filename.endsWith(".js")) {
-				return "application/x-javascript";
-			} else if (filename.endsWith(".txt")) {
-				return "text/plain";
-			}
-			return "application/octet-stream";
-		}
-	}
 }
