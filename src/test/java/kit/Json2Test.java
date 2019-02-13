@@ -3,7 +3,6 @@ package kit;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Test;
 
 import com.di.kit.Json;
 
@@ -12,7 +11,6 @@ import com.di.kit.Json;
  */
 public class Json2Test {
 
-	@Test
 	public void test() {
 		Json j = new Json();
 		// String j1 = "[1,2]";
