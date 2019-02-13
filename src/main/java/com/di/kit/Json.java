@@ -105,12 +105,12 @@ public class Json {
 		}
 		return ss;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public static Map<String,Object> fromJson(String json) {
-		return getJson().toObject(json,Map.class);
+	public static Map<String, Object> fromJson(String json) {
+		return getJson().toObject(json, Map.class);
 	}
-	
+
 	public static <T> T fromJson(String json, Class<T> c) {
 		return getJson().toObject(json, c);
 	}
@@ -128,7 +128,7 @@ public class Json {
 				|| o.getClass() == java.lang.Boolean.class) {
 			return String.valueOf(o);
 		} else if (o.getClass() == java.lang.String.class || o.getClass() == java.lang.Character.class) {
-			return "\"" + String.valueOf(o) + "\"";
+			return  String.valueOf(o);
 		} else if (o.getClass() == Date.class || o.getClass() == java.sql.Date.class || o.getClass() == java.sql.Time.class) {
 			return getDateFormat().format(o);
 		} else if (o.getClass().isArray()) {
@@ -276,6 +276,22 @@ public class Json {
 							ts.add(toObjectVal(ov, (Class<?>) t));
 						}
 						f.set(o, ts);
+					} else if (v != null && f.getType().isArray()) {
+						Class<?> t = f.getType().getComponentType();
+						List<?> vs = (List<?>) v;
+						if (t == String.class) {
+							String[] os = new String[vs.size()];
+							for (int i = 0; i < vs.size(); i++) {
+								os[i] = (String) toObjectVal(vs.get(i), t);
+							}
+							f.set(o, os);
+						} else {
+							Object[] os = new Object[vs.size()];
+							for (int i = 0; i < vs.size(); i++) {
+								os[i] = toObjectVal(vs.get(i), t);
+							}
+							f.set(o, os);
+						}
 					} else {
 						f.set(o, toObjectVal(v, f.getType()));
 					}
@@ -289,7 +305,7 @@ public class Json {
 		}
 		return val;
 	}
-
+	
 	public Object toObject(String json) {
 		json = json.trim();
 		if (json.startsWith("{")) {

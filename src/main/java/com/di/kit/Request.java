@@ -160,7 +160,7 @@ public interface Request {
 	 * @param url 路径
 	 * @return 请求对象
 	 */
-	static Request Get(String url) {
+	static Request get(String url) {
 		return new GetRequest(url);
 	}
 
@@ -502,7 +502,7 @@ public interface Request {
 	 * @param url 路径
 	 * @return 请求对象
 	 */
-	static Request Post(String url) {
+	static Request post(String url) {
 		return new PostRequest(url);
 	}
 

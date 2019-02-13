@@ -10,17 +10,24 @@ public class InstanceTest {
         private int i;
         private int[] is;
 
-        private A() {
-        }
-
         public A(Integer i, List<Integer> is,String a) {
             this.i = i;
         }
+
+		public int getI() {
+			return i;
+		}
+
+		public int[] getIs() {
+			return is;
+		}
     }
 
     public static void main(String[] args) throws Exception {
         A aa = new A(0, null,null);
         A a = (A) ClassUtil.instance(A.class);
         ClassUtil.setObjectFieldsValue(new HashMap<>(),null);
+        System.out.println(aa);
+        System.out.println(a);
     }
 }

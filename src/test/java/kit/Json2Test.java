@@ -3,6 +3,8 @@ package kit;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.Test;
+
 import com.di.kit.Json;
 
 /**
@@ -10,6 +12,7 @@ import com.di.kit.Json;
  */
 public class Json2Test {
 
+	@Test
 	public void test() {
 		Json j = new Json();
 		// String j1 = "[1,2]";
@@ -18,11 +21,12 @@ public class Json2Test {
 		// String j2 = "[[1],[1]]";
 		// Object o2 = j.toObject(j2);
 		// j.toObject(j2, List.class);
-		String j3 = "{\"id\":9,\"n\":\"alice\",\"create\":2017-11-21 13:56:20,\"ns\":[\"a\"],\"cs\":[{\"n\":\"a\",\"ns\":[\"a\"]}]}";
+		String j3 = "{\"id\":9,\"n\":\"alice\",\"create\":\"2017-11-21 13:56:20\",\"ns\":[\"a\"],\"cs\":[{\"n\":\"a\",\"ns\":[\"a\"]}]}";
 		Man o3 = j.toObject(j3, Man.class);
 		System.out.println(j.toJson(o3));
 		String j4 = "{\"cs\":[{\"n\":\"a\"}]}";
 		Man o4 = j.toObject(j4, Man.class);
+		System.out.println(j.toJson(o4));
 	}
 
 	public static class Man {
