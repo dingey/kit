@@ -34,7 +34,7 @@ public class HttpClient {
         HttpURLConnection con = null;
         try {
             con = connect(url, null, null);
-            return new String(readFromConnection(con), con.getContentEncoding());
+            return new String(readFromConnection(con), "utf-8");
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {

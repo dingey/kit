@@ -11,7 +11,7 @@ import com.di.kit.Json;
  */
 public class Json2Test {
 
-	public void test() {
+	public static void main(String[]args) {
 		Json j = new Json();
 		// String j1 = "[1,2]";
 		// Object[] object = j.toObject(j1, Object[].class);
@@ -19,12 +19,14 @@ public class Json2Test {
 		// String j2 = "[[1],[1]]";
 		// Object o2 = j.toObject(j2);
 		// j.toObject(j2, List.class);
-		String j3 = "{\"id\":9,\"n\":\"alice\",\"is\":[1],\"create\":\"2017-11-21 13:56:20\",\"ns\":[\"a\"],\"cs\":[{\"n\":\"a\",\"ns\":[\"a\"]}]}";
-		Man o3 = j.toObject(j3, Man.class);
-		System.out.println(j.toJson(o3));
-		String j4 = "{\"cs\":[{\"n\":\"a\"}]}";
-		Man o4 = j.toObject(j4, Man.class);
-		System.out.println(j.toJson(o4));
+//		String j3 = "{\"id\":9,\"n\":\"alice\",\"is\":[1],\"create\":\"2017-11-21 13:56:20\",\"ns\":[\"a\"],\"cs\":[{\"n\":\"a\",\"ns\":[\"a\"]}]}";
+//		Man o3 = j.toObject(j3, Man.class);
+//		System.out.println(j.toJson(o3));
+//		String j4 = "{\"cs\":[{\"n\":\"a\"}]}";
+//		Man o4 = j.toObject(j4, Man.class);
+		String j5 = "[{\"id\":1,\"is\":[1]}]";
+		List<Man> o5 = j.toObjects(j5, Man.class);
+		System.out.println(j.toJson(o5));
 	}
 
 	public static class Man {
