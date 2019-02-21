@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * @author di
  */
-@SuppressWarnings({"unused","unchecked"})
+@SuppressWarnings({"unchecked"})
 public class Json {
     private SimpleDateFormat sdf;
     private boolean snakeCase = false;
@@ -107,7 +107,6 @@ public class Json {
         return ss;
     }
 
-    @SuppressWarnings("unchecked")
     public static Map<String, Object> fromJson(String json) {
         return getJson().toObject(json, Map.class);
     }
@@ -177,7 +176,6 @@ public class Json {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T toObject(String json, Class<T> c) {
         if (json == null && !c.isPrimitive()) {
             return null;
@@ -202,7 +200,6 @@ public class Json {
         return list;
     }
 
-    @SuppressWarnings("unchecked")
     private Object toObjectVal(Object val, Class<?> c) {
         try {
             if (val == null) {
