@@ -293,7 +293,7 @@ public class JdbcMeta {
         }
 
         public String getRemark() {
-            return remark;
+            return remark == null ? "" : remark;
         }
 
         public void setRemark(String remark) {
@@ -341,6 +341,7 @@ public class JdbcMeta {
         BIGINT("bigint", long.class, Long.class), //
         DOUBLE("double", double.class, Double.class), //
         FLOAT("float", float.class, Float.class), //
+        NUMBER("number", java.math.BigDecimal.class),
         CHAR("char", String.class), //
         VARCHAR("varchar", String.class), //
         TEXT("text", String.class),
