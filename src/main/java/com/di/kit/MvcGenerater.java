@@ -118,6 +118,25 @@ public class MvcGenerater {
     public MvcGenerater(String url, String username, String password) {
         this.jdbcMeta = new JdbcMeta().setConfig(url, username, password);
         path = getPath();
+        if (url.startsWith("jdbc:oracle")) {
+            delimit = "\"";
+        } else if (url.startsWith("jdbc:mysql")) {
+            delimit = "`";
+        } else {
+            delimit = "";
+        }
+    }
+
+    private String delimit;
+    private boolean delimitable;
+
+    private MvcGenerater setDelimit(boolean delimitable) {
+        this.delimitable = delimitable;
+        return this;
+    }
+
+    private String getDelimit() {
+        return delimitable ? delimit : "";
     }
 
     private JdbcMeta jdbcMeta;
@@ -307,7 +326,7 @@ public class MvcGenerater {
         this.entityPackage = entityPackage;
         for (Table t : tables) {
             Str s = new Str();
-            String className = StringUtil.camelCase(replacePrefix(t.getName()));
+            String className = StringUtil.camelCase(replacePrefix(t.getName()).toLowerCase());
             className = StringUtil.firstUpper(className);
             if (licenses != null && !licenses.isEmpty() && entityLicenses) {
                 s.line(licenses);
@@ -326,7 +345,7 @@ public class MvcGenerater {
             if (tablePrefix != null && tableAnnotation != null) {
                 if (tableAnnotation != null && tableAnnotation.isAnnotation()) {
                     String name = tableAnnotation.getName();
-                    name = name.substring(0,name.indexOf(36))+"."+name.substring(name.indexOf(36)+1);
+                    name = name.substring(0, name.indexOf(36)) + "." + name.substring(name.indexOf(36) + 1);
                     s.line("import " + name + ";");
                 } else {
                     s.line("import com.di.kit.SqlProvider.Table;");
@@ -352,7 +371,7 @@ public class MvcGenerater {
                 s.add("public class ").add(className).line(" implements Serializable {");
                 s.add("	private static final long serialVersionUID = ").add(IdWorker.nextId()).line("L;");
                 for (Column c1 : t.getAllColumns()) {
-                    String lower = StringUtil.camelCase(c1.getName());
+                    String lower = StringUtil.camelCase(c1.getName().toLowerCase());
                     if (contain(entityBaseClass, lower))
                         continue;
                     if (!c1.getRemark().isEmpty()) {
@@ -370,8 +389,8 @@ public class MvcGenerater {
                 }
                 if (!lombok) {
                     for (Column c1 : t.getAllColumns()) {
-                        String lower = StringUtil.camelCase(c1.getName());
-                        String upper = StringUtil.upperCamelCase(c1.getName());
+                        String lower = StringUtil.camelCase(c1.getName().toLowerCase());
+                        String upper = StringUtil.upperCamelCase(c1.getName().toLowerCase());
                         if (!contain(entityBaseClass, lower)) {
                             s.newLine().add("    public ").add(type(c1)).add(" get").add(upper).line("() {");
                             s.add("        return ").add(lower).line(";");
@@ -406,7 +425,7 @@ public class MvcGenerater {
                 s.line(" {");
                 s.add("	private static final long serialVersionUID = ").add(IdWorker.nextId()).line("L;");
                 for (Column c1 : t.getAllColumns()) {
-                    String fn = StringUtil.firstLower(StringUtil.camelCase(c1.getName()));
+                    String fn = StringUtil.firstLower(StringUtil.camelCase(c1.getName().toLowerCase()));
                     if (!contain(entityBaseClass, fn)) {
                         if (!c1.getRemark().isEmpty()) {
                             if (swaggerEntity) {
@@ -424,8 +443,8 @@ public class MvcGenerater {
                 }
                 if (!lombok) {
                     for (Column c1 : t.getAllColumns()) {
-                        String lower = StringUtil.camelCase(c1.getName());
-                        String upper = StringUtil.upperCamelCase(c1.getName());
+                        String lower = StringUtil.camelCase(c1.getName().toLowerCase());
+                        String upper = StringUtil.upperCamelCase(c1.getName().toLowerCase());
                         if (!contain(entityBaseClass, lower)) {
                             s.newLine().add("    public ").add(type(c1)).add(" get").add(upper).line("() {");
                             s.add("        return ").add(lower).line(";");
@@ -465,15 +484,22 @@ public class MvcGenerater {
         return this.createXml(xmlPath, false);
     }
 
+    private String deleteColumn;
+
+    public MvcGenerater setDeleteColumn(String deleteColumn) {
+        this.deleteColumn = deleteColumn;
+        return this;
+    }
+
     public MvcGenerater createXml(String xmlPath, boolean replace) {
         for (Table t : tables) {
             Str s = new Str();
-            String className = StringUtil.camelCase(replacePrefix(t.getName()));
+            String className = StringUtil.camelCase(replacePrefix(t.getName()).toLowerCase());
             className = StringUtil.firstUpper(className);
             String keyCol = (t.getPrimaryKeys() != null && t.getPrimaryKeys().size() > 0)
                     ? t.getPrimaryKeys().get(0).getName()
                     : "";
-            String keyProp = StringUtil.camelCase(keyCol);
+            String keyProp = StringUtil.camelCase(keyCol.toLowerCase());
 
             s.line("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
             s.line("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\" >");
@@ -482,27 +508,27 @@ public class MvcGenerater {
                 s.line("	<sql id=\"Base_Column_List\" >");
                 s.add("		");
                 for (Column c : t.getAllColumns()) {
-                    s.add("`").add(c.getName()).add("`,");
+                    s.add(getDelimit()).add(c.getName()).add(getDelimit()).add(", ");
                 }
-                s.deleteLastChar();
+                s.deleteLastChar().deleteLastChar();
                 s.newLine().line("	</sql>");
             }
             if (generateCrud) {
                 s.add("	<insert id=\"insert\"");
                 if (persistence.isUseGeneratedKeys()) {
                     s.add(" useGeneratedKeys=\"true\" keyProperty=\"")
-                            .add(StringUtil.firstLower(StringUtil.camelCase(t.getPrimaryKeys().get(0).getName())))
+                            .add(StringUtil.firstLower(StringUtil.camelCase(t.getPrimaryKeys().get(0).getName().toLowerCase())))
                             .add("\"");
                 }
                 s.line(">");
-                s.add("		insert into `").add(t.getName()).line("` (");
+                s.add("		insert into ").add(getDelimit()).add(t.getName()).add(getDelimit()).line(" (");
                 for (Column c : t.getAllColumns()) {
-                    s.add("		`").add(c.getName()).add("`,").newLine();
+                    s.add("		").add(getDelimit()).add(c.getName()).add(getDelimit()).add(",").newLine();
                 }
                 s.deleteLastChar();
                 s.line("		)values (");
                 for (Column c : t.getAllColumns()) {
-                    String s0 = StringUtil.firstLower(StringUtil.camelCase(c.getName()));
+                    String s0 = StringUtil.firstLower(StringUtil.camelCase(c.getName().toLowerCase()));
                     s.add("		#{").add(s0).add("},").newLine();
                 }
                 s.deleteLastChar();
@@ -511,29 +537,29 @@ public class MvcGenerater {
                 s.add("	<insert id=\"insertSelective\"");
                 if (persistence.isUseGeneratedKeys()) {
                     s.add(" useGeneratedKeys=\"true\" keyProperty=\"")
-                            .add(StringUtil.firstLower(StringUtil.camelCase(t.getPrimaryKeys().get(0).getName())))
+                            .add(StringUtil.firstLower(StringUtil.camelCase(t.getPrimaryKeys().get(0).getName().toLowerCase())))
                             .add("\"");
                 }
                 s.line(">");
-                s.add("		insert into `").add(t.getName()).line("` (");
+                s.add("		insert into ").add(getDelimit()).add(t.getName()).add(getDelimit()).line(" (");
                 s.line("		<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\" >");
                 for (Column c : t.getAllColumns()) {
-                    String pro = StringUtil.camelCase(c.getName());
+                    String pro = StringUtil.camelCase(c.getName().toLowerCase());
                     s.add("			<if test=\"" + pro + " != null\" >").add(c.getName()).line(",</if>");
                 }
                 s.line("		</trim>");
                 s.line("		<trim prefix=\"values (\" suffix=\")\" suffixOverrides=\",\" >");
                 for (Column c : t.getAllColumns()) {
-                    String pro = StringUtil.camelCase(c.getName());
+                    String pro = StringUtil.camelCase(c.getName().toLowerCase());
                     s.add("			<if test=\"" + pro + " != null\" >#{").add(pro).line("},</if>");
                 }
                 s.line("		</trim>").line("	</insert>");
 
                 s.line("    <update id=\"update\">");
-                s.add("		update `").add(t.getName()).line("` set ");
+                s.add("		update ").add(getDelimit()).add(t.getName()).add(getDelimit()).line(" set ");
                 for (Column c : t.getColumns()) {
-                    String s0 = StringUtil.firstLower(StringUtil.camelCase(c.getName()));
-                    s.add("		`").add(c.getName()).add("` = #{").add(s0).add("},").newLine();
+                    String s0 = StringUtil.firstLower(StringUtil.camelCase(c.getName().toLowerCase()));
+                    s.add("		").add(getDelimit()).add(c.getName()).add(getDelimit()).add(" = #{").add(s0).add("},").newLine();
                 }
                 s.deleteLastChar();
                 s.line("		where " + keyCol + " = #{" + keyProp + "}");
@@ -543,24 +569,39 @@ public class MvcGenerater {
                 s.add("		update ").line(t.getName());
                 s.line("		<set>");
                 for (Column c : t.getColumns()) {
-                    String pro = StringUtil.camelCase(c.getName());
-                    s.add("			<if test=\"" + pro + " != null\" >").add(c.getName()).add("=#{").add(pro)
+                    String pro = StringUtil.camelCase(c.getName().toLowerCase());
+                    s.add("			<if test=\"" + pro + " != null\" >").add(c.getName()).add(" = #{").add(pro)
                             .line("},</if>");
                 }
                 s.line("		</set>").line("		where " + keyCol + "=#{" + keyProp + "}");
                 s.line("	</update>");
 
-                s.line("    <delete id=\"delete\">");
-                s.add("		update `").add(t.getName()).line("` set");
-                s.line("		`del_flag` =0");
-                s.line("		where " + keyCol + " = #{" + keyProp + "}").line("	</delete>");
+                if (deleteColumn != null && !deleteColumn.isEmpty()) {
+                    s.line("    <delete id=\"delete\">");
+                    s.add("		update ").add(getDelimit()).add(t.getName()).add(getDelimit()).line(" set");
+                    s.line("		" + getDelimit() + deleteColumn + getDelimit() + " =1");
+                    s.line("		where " + keyCol + " = #{" + keyProp + "}").line("	</delete>");
+                } else {
+                    s.line("    <delete id=\"delete\">");
+                    s.add("		delete from ").add(getDelimit()).add(t.getName()).add(getDelimit());
+                    s.line(" where " + keyCol + " = #{" + keyProp + "}").line("	</delete>");
+                }
                 s.add("    <select id=\"get\" resultType=\"").add(entityPackage).add(".").add(className).line("\">");
-                s.add("        select * from `").add(t.getName());
-                s.line("` where `del_flag` = 0 and " + keyCol + " = #{" + keyProp + "}").line("    </select>");
-                s.add("    <select id=\"findList\" resultType=\"").add(entityPackage).add(".").add(className)
+                if(baseColumnList){
+                    s.line("        select ").line("        <include refid=\"Base_Column_List\" />").add("        from ");
+                } else {
+                    s.add("        select * from ");
+                }
+                s.add(getDelimit()).add(t.getName()).add(getDelimit());
+                s.line(" where " + keyCol + " = #{" + keyProp + "}").line("    </select>");
+                s.add("    <select id=\"list\" resultType=\"").add(entityPackage).add(".").add(className)
                         .line("\">");
-                s.add("        select * from `").add(t.getName());
-                s.line("` where `del_flag` = 0 order by `created_at` desc");
+                if(baseColumnList){
+                    s.line("        select ").line("        <include refid=\"Base_Column_List\" />").add("        from ");
+                } else {
+                    s.add("        select * from ");
+                }
+                s.add(getDelimit()).add(t.getName()).line(getDelimit());
                 s.line("    </select>");
             }
             s.line("</mapper>");
@@ -574,7 +615,7 @@ public class MvcGenerater {
         this.mapperPackage = mapperPackage;
         for (Table t : tables) {
             Str s = new Str();
-            String className = StringUtil.camelCase(replacePrefix(t.getName()));
+            String className = StringUtil.camelCase(replacePrefix(t.getName()).toLowerCase());
             className = StringUtil.firstUpper(className);
             if (licenses != null && !licenses.isEmpty() && mapperLicenses) {
                 s.line(licenses);
