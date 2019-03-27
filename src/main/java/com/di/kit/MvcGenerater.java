@@ -1,22 +1,18 @@
 package com.di.kit;
 
+import com.di.kit.JdbcMeta.Column;
+import com.di.kit.JdbcMeta.Table;
+import com.di.kit.JdbcMeta.Type;
+import com.di.kit.XmlBuilder.Node;
+
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.TypeVariable;
-import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import com.di.kit.JdbcMeta.Column;
-import com.di.kit.JdbcMeta.Table;
-import com.di.kit.JdbcMeta.Type;
-import com.di.kit.StringUtil;
-import com.di.kit.XmlBuilder.Node;
 
 /**
  * @author d
@@ -491,6 +487,13 @@ public class MvcGenerater {
         return this;
     }
 
+    private boolean resultMap = false;
+
+    public MvcGenerater setResultMap(boolean resultMap) {
+        this.resultMap = resultMap;
+        return this;
+    }
+
     public MvcGenerater createXml(String xmlPath, boolean replace) {
         for (Table t : tables) {
             Str s = new Str();
@@ -504,6 +507,13 @@ public class MvcGenerater {
             s.line("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
             s.line("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\" >");
             s.add("<mapper namespace=\"").add(mapperPackage).add(".").add(className).line("Mapper\">");
+            if (resultMap) {
+                s.add("    <resultMap id=\"BaseResultMap\" type=\"").add(entityPackage).add(".").add(className).line("\">");
+                for (Column c : t.getAllColumns()) {
+                    s.add("        <id column=\"").add(c.getName()).add("\" jdbcType=\"").add(c.getType().getSql()).add("\" property=\"").add(StringUtil.camelCase(c.getName().toLowerCase())).line("\"/>");
+                }
+                s.line("    </resultMap>");
+            }
             if (baseColumnList) {
                 s.line("	<sql id=\"Base_Column_List\" >");
                 s.add("		");
@@ -586,17 +596,26 @@ public class MvcGenerater {
                     s.add("		delete from ").add(getDelimit()).add(t.getName()).add(getDelimit());
                     s.line(" where " + keyCol + " = #{" + keyProp + "}").line("	</delete>");
                 }
-                s.add("    <select id=\"get\" resultType=\"").add(entityPackage).add(".").add(className).line("\">");
-                if(baseColumnList){
+                s.add("    <select id=\"get\"");
+                if (resultMap) {
+                    s.line(" resultMap=\"BaseResultMap\">");
+                } else {
+                    s.add(" resultType=\"").add(entityPackage).add(".").add(className).line("\">");
+                }
+                if (baseColumnList) {
                     s.line("        select ").line("        <include refid=\"Base_Column_List\" />").add("        from ");
                 } else {
                     s.add("        select * from ");
                 }
                 s.add(getDelimit()).add(t.getName()).add(getDelimit());
                 s.line(" where " + keyCol + " = #{" + keyProp + "}").line("    </select>");
-                s.add("    <select id=\"list\" resultType=\"").add(entityPackage).add(".").add(className)
-                        .line("\">");
-                if(baseColumnList){
+                s.add("    <select id=\"list\"");
+                if (resultMap) {
+                    s.line(" resultMap=\"BaseResultMap\">");
+                } else {
+                    s.add(" resultType=\"").add(entityPackage).add(".").add(className).line("\">");
+                }
+                if (baseColumnList) {
                     s.line("        select ").line("        <include refid=\"Base_Column_List\" />").add("        from ");
                 } else {
                     s.add("        select * from ");
