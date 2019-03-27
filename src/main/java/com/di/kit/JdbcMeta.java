@@ -341,7 +341,7 @@ public class JdbcMeta {
         BIGINT("bigint", long.class, Long.class), //
         DOUBLE("double", double.class, Double.class), //
         FLOAT("float", float.class, Float.class), //
-        NUMBER("number", java.math.BigDecimal.class),
+        NUMBER("decimal", java.math.BigDecimal.class),
         CHAR("char", String.class), //
         VARCHAR("varchar", String.class), //
         TEXT("text", String.class),
@@ -366,7 +366,7 @@ public class JdbcMeta {
         }
 
         public String getSql() {
-            return sql;
+            return sql.toUpperCase();
         }
 
         public void setSql(String sql) {
@@ -408,6 +408,9 @@ public class JdbcMeta {
                 if (t.getSql().equalsIgnoreCase(sql)) {
                     return t;
                 }
+            }
+            if ("NUMBER".equalsIgnoreCase(sql)) {
+                return Type.BIGINT;
             }
             return Type.VARCHAR;
         }
