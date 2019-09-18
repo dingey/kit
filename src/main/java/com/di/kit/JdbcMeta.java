@@ -6,10 +6,7 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author d
@@ -40,10 +37,14 @@ public class JdbcMeta {
             if (driver == null || driver.isEmpty()) {
                 driver = DriverEnum.getByURL(url).name;
             }
+            Properties props = new Properties();
+            props.put("user", username);
+            props.put("password", password);
+            props.put("remarksReporting", "true");
             try {
                 Driver driver1 = (Driver) Class.forName(driver).newInstance();
                 DriverManager.registerDriver(driver1);
-                conn = DriverManager.getConnection(url, username, password);
+                conn = DriverManager.getConnection(url, props);
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
                 e.printStackTrace();
             }
