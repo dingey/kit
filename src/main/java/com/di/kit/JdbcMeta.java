@@ -1,12 +1,9 @@
 package com.di.kit;
 
 import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * @author d
@@ -24,16 +21,6 @@ public class JdbcMeta {
 
     private Connection getConn() throws SQLException {
         if (conn == null || conn.isClosed()) {
-            Property property = new Property("jdbc.properties");
-            if (url == null || url.isEmpty()) {
-                url = property.get("jdbc.url");
-            }
-            if (username == null || username.isEmpty()) {
-                username = property.get("jdbc.username");
-            }
-            if (password == null || password.isEmpty()) {
-                password = property.get("jdbc.password");
-            }
             if (driver == null || driver.isEmpty()) {
                 driver = DriverEnum.getByURL(url).name;
             }
@@ -76,6 +63,7 @@ public class JdbcMeta {
         String catalog = getConn().getCatalog();
         Table table = new Table();
         table.setName(tableName);
+
         // 主键
         ResultSet primaryKeyResultSet = getConn().getMetaData().getPrimaryKeys(null, null, tableName);
         Map<String, String> primaryKeyMap = new HashMap<>();
@@ -149,19 +137,27 @@ public class JdbcMeta {
         String comment = "";
         ResultSet rs = null;
         try {
-            rs = getConn().createStatement().executeQuery("SHOW CREATE TABLE " + table);
+            String sql = "SHOW CREATE TABLE " + table;
+            if (driver.startsWith("oracle")) {
+                sql = "select * from all_tab_comments where TABLE_NAME='" + table+"'";
+            }
+            rs = getConn().createStatement().executeQuery(sql);
             if (rs != null && rs.next()) {
                 String create = rs.getString(2);
-                int index = create.indexOf("COMMENT='");
-                if (index < 0) {
-                    return "";
-                }
-                comment = create.substring(index + 9);
-                comment = comment.substring(0, comment.length() - 1);
-                try {
-                    comment = new String(comment.getBytes("utf-8"));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                if (driver.startsWith("oracle")) {
+                    comment = rs.getString(4);
+                } else {
+                    int index = create.indexOf("COMMENT='");
+                    if (index < 0) {
+                        return "";
+                    }
+                    comment = create.substring(index + 9);
+                    comment = comment.substring(0, comment.length() - 1);
+                    try {
+                        comment = new String(comment.getBytes("utf-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -347,9 +343,9 @@ public class JdbcMeta {
         VARCHAR("varchar", String.class), //
         TEXT("text", String.class),
         DATE("date", java.sql.Date.class), //
-        TIME("time", java.sql.Time.class), //
-        TIME_STAMP("timestamp", java.util.Date.class, java.sql.Timestamp.class), //
-        DATE_TIME("datetime", java.util.Date.class), //
+        TIME("time", Time.class), //
+        TIME_STAMP("timestamp", Date.class, Timestamp.class), //
+        DATE_TIME("datetime", Date.class), //
         DECIMAL("decimal", java.math.BigDecimal.class),
         BINARY("binary", byte[].class),
         VARBINARY("varbinary", byte[].class),
